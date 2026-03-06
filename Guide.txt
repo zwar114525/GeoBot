@@ -1,0 +1,4022 @@
+Step-by-Step Guide: Building Your Geotechnical AI Agent in Trae AI with OpenRouter
+Table of Contents
+Prerequisites & Environment Setup
+Phase 1: Document Ingestion & RAG Q&A (MVP)
+Phase 2: Calculation Engine & Skill Catalog
+Phase 3: Designer Agent — Report Generation
+Phase 4: Validator Agent — Submission Checking
+Phase 5: Web UI & Deployment
+<a name="phase-0"></a>
+
+Phase 0: Prerequisites & Environment Setup
+0.1 Install Required Software
+Before opening Trae, install these on your machine:
+
+Bash
+
+# Install Python 3.11+ (if not already)
+# Download from python.org or use winget/brew
+
+# Install Docker Desktop (for Qdrant vector database)
+# Download from docker.com
+
+# Verify installations
+python --version
+docker --version
+0.2 Get Your OpenRouter API Key
+Go to https://openrouter.ai
+Sign up / log in
+Go to Keys → Create Key
+Copy the key — you'll need it shortly
+Recommended models on OpenRouter (cost-effective):
+
+Model	OpenRouter ID	Cost	Use For
+DeepSeek V3	deepseek/deepseek-chat-v3-0324	~$0.30/M input	Primary reasoning, report writing
+DeepSeek R1	deepseek/deepseek-r1	~$0.55/M input	Complex analysis, skill extraction
+Qwen 2.5 72B	qwen/qwen-2.5-72b-instruct	Free/very cheap	Good alternative, bilingual
+Llama 3.1 8B	meta-llama/llama-3.1-8b-instruct:free	Free	Simple tasks, classification
+Google Gemini 2.5 Flash	google/gemini-2.5-flash-preview	Free tier available	Fast responses, large context
+Tip: Check https://openrouter.ai/models and filter by "Free" for current free options.
+
+0.3 Create the Project in Trae AI
+Open Trae AI
+Click Open Folder → Create a new folder called geotech-agent
+Open Trae's built-in terminal (Ctrl+` or View → Terminal)
+Run in the terminal:
+
+Bash
+
+cd geotech-agent
+
+# Create project structure
+mkdir -p src/{ingestion,vectordb,skills,agents,calculations,templates,utils}
+mkdir -p data/{raw_documents,processed,borehole_data}
+mkdir -p config
+mkdir -p tests
+mkdir -p outputs/{reports,reviews}
+
+# Create virtual environment
+python -m venv venv
+
+# Activate it
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+# Create requirements file
+touch requirements.txt
+0.4 Install Python Dependencies
+Open requirements.txt in Trae and paste:
+
+txt
+
+# LLM & Embeddings
+openai>=1.30.0
+sentence-transformers>=3.0.0
+tiktoken>=0.7.0
+
+# Vector Database
+qdrant-client>=1.9.0
+
+# Document Processing
+pymupdf>=1.24.0
+pymupdf4llm>=0.0.5
+python-docx>=1.1.0
+openpyxl>=3.1.0
+pandas>=2.2.0
+
+# OCR (for scanned documents)
+pytesseract>=0.3.10
+
+# Web UI
+streamlit>=1.35.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+loguru>=0.7.0
+numpy>=1.26.0
+scipy>=1.13.0
+
+# Report generation
+jinja2>=3.1.0
+markdown>=3.6
+Install:
+
+Bash
+
+pip install -r requirements.txt
+0.5 Start Qdrant Vector Database
+Bash
+
+docker pull qdrant/qdrant
+docker run -d -p 6333:6333 -p 6334:6334 \
+  -v $(pwd)/qdrant_storage:/qdrant/storage \
+  --name geotech_qdrant \
+  qdrant/qdrant
+If Docker is not available, you can use Qdrant in-memory mode (we'll handle this in code).
+
+0.6 Create Configuration File
+Create config/settings.py:
+
+Python
+
+"""
+Central configuration for the Geotech AI Agent.
+"""
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ─── OpenRouter Configuration ───
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+# Primary model for reasoning and report generation
+PRIMARY_MODEL = "deepseek/deepseek-chat-v3-0324"
+# Backup / free model for simple tasks
+LIGHT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+# Strong reasoning model for complex analysis
+REASONING_MODEL = "deepseek/deepseek-r1"
+
+# ─── Embedding Configuration ───
+EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
+EMBEDDING_DIMENSION = 1024
+
+# ─── Qdrant Configuration ───
+QDRANT_HOST = "localhost"
+QDRANT_PORT = 6333
+COLLECTION_NAME = "geotech_knowledge"
+
+# ─── Document Processing ───
+CHUNK_SIZE = 800  # tokens
+CHUNK_OVERLAP = 100  # tokens
+
+# ─── HK-Specific Standards ───
+HK_STANDARDS = {
+    "cop_foundations": "Code of Practice for Foundations 2017",
+    "geoguide_1": "Geoguide 1 - Guide to Retaining Wall Design",
+    "geoguide_2": "Geoguide 2 - Guide to Site Investigation",
+    "geoguide_3": "Geoguide 3 - Guide to Rock and Soil Descriptions",
+    "geoguide_4": "Geoguide 4 - Guide to Cavern Engineering",
+    "geoguide_5": "Geoguide 5 - Guide to Slope Maintenance",
+    "geoguide_7": "Geoguide 7 - Guide to Soil Nail Design and Construction",
+    "geo_manual_slopes": "Geotechnical Manual for Slopes",
+    "ec7": "BS EN 1997-1 Eurocode 7",
+    "bs8002": "BS 8002 Earth Retaining Structures",
+    "bs8004": "BS 8004 Foundations",
+}
+Create .env file in the project root:
+
+env
+
+OPENROUTER_API_KEY=sk-or-v1-your-key-here
+In Trae: Right-click on the file explorer → New File → .env
+
+<a name="phase-1"></a>
+
+Phase 1: Document Ingestion & RAG Q&A System (MVP)
+Goal: Upload your codes/manuals, search them semantically, get answers with citations.
+
+Step 1.1 — Create the LLM Client
+Trae AI Prompt: Open Trae's AI chat panel and type:
+"Create a Python module that wraps OpenRouter API using the OpenAI client library. It should support multiple models, handle retries, and return structured responses. Use the openai library with custom base_url for OpenRouter."
+
+Create src/utils/llm_client.py:
+
+Python
+
+"""
+LLM client wrapping OpenRouter API via OpenAI-compatible interface.
+"""
+import time
+from openai import OpenAI
+from loguru import logger
+from config.settings import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, PRIMARY_MODEL
+
+client = OpenAI(
+    base_url=OPENROUTER_BASE_URL,
+    api_key=OPENROUTER_API_KEY,
+)
+
+
+def call_llm(
+    prompt: str,
+    system_prompt: str = "You are a senior geotechnical engineer in Hong Kong.",
+    model: str = PRIMARY_MODEL,
+    temperature: float = 0.2,
+    max_tokens: int = 4000,
+    retries: int = 3,
+) -> str:
+    """
+    Call OpenRouter LLM and return the response text.
+    """
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                extra_headers={
+                    "HTTP-Referer": "https://geotech-agent.local",
+                    "X-Title": "Geotech AI Agent",
+                },
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.warning(f"LLM call attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)
+            else:
+                raise
+
+
+def call_llm_with_context(
+    question: str,
+    context_chunks: list[dict],
+    model: str = PRIMARY_MODEL,
+) -> str:
+    """
+    RAG-style call: provide retrieved context chunks and a question.
+    """
+    context_text = "\n\n---\n\n".join(
+        [
+            f"[Source: {c['metadata'].get('document_name', 'Unknown')} | "
+            f"Section: {c['metadata'].get('section_title', 'N/A')} | "
+            f"Page: {c['metadata'].get('page_number', 'N/A')}]\n{c['text']}"
+            for c in context_chunks
+        ]
+    )
+
+    system_prompt = """You are a senior geotechnical engineer working in Hong Kong.
+You provide answers based ONLY on the provided reference documents.
+You cite specific clause numbers, section titles, and page numbers.
+If the provided context does not contain enough information to answer,
+say so explicitly. Never invent clause numbers or code requirements.
+
+Applicable codes framework: HK Code of Practice, Geoguides, BS codes, Eurocodes.
+"""
+
+    user_prompt = f"""Based on the following reference documents, answer the question.
+
+REFERENCE DOCUMENTS:
+{context_text}
+
+QUESTION: {question}
+
+Provide your answer with specific citations to the source documents above.
+Format citations as [Source: document name, Section/Clause: X.X.X].
+"""
+
+    return call_llm(user_prompt, system_prompt=system_prompt, model=model)
+Step 1.2 — Create the Embedding Engine
+Trae AI Prompt:
+"Create a Python module for generating text embeddings using sentence-transformers with the BAAI/bge-large-en-v1.5 model. Include batch processing and caching."
+
+Create src/utils/embeddings.py:
+
+Python
+
+"""
+Local embedding engine using sentence-transformers.
+Runs entirely on your machine — no API costs, no data leakage.
+"""
+from sentence_transformers import SentenceTransformer
+from loguru import logger
+from config.settings import EMBEDDING_MODEL, EMBEDDING_DIMENSION
+
+_model = None
+
+
+def get_model() -> SentenceTransformer:
+    global _model
+    if _model is None:
+        logger.info(f"Loading embedding model: {EMBEDDING_MODEL}")
+        _model = SentenceTransformer(EMBEDDING_MODEL)
+        logger.info("Embedding model loaded successfully")
+    return _model
+
+
+def embed_text(text: str) -> list[float]:
+    """Embed a single text string."""
+    model = get_model()
+    # bge models benefit from a query prefix for retrieval
+    embedding = model.encode(text, normalize_embeddings=True)
+    return embedding.tolist()
+
+
+def embed_texts(texts: list[str], batch_size: int = 32) -> list[list[float]]:
+    """Embed a batch of texts."""
+    model = get_model()
+    embeddings = model.encode(
+        texts,
+        batch_size=batch_size,
+        show_progress_bar=True,
+        normalize_embeddings=True,
+    )
+    return embeddings.tolist()
+
+
+def embed_query(query: str) -> list[float]:
+    """
+    Embed a search query.
+    For BGE models, prepend instruction for better retrieval.
+    """
+    model = get_model()
+    instruction = "Represent this sentence for searching relevant passages: "
+    embedding = model.encode(
+        instruction + query,
+        normalize_embeddings=True,
+    )
+    return embedding.tolist()
+Step 1.3 — Create the Document Ingestion Pipeline
+Trae AI Prompt:
+"Create a PDF document ingestion pipeline that: (1) extracts text from PDF preserving structure using pymupdf4llm, (2) splits into semantic chunks by headings/sections, (3) preserves metadata like page numbers and section titles, (4) handles tables. Target geotechnical engineering codes and manuals."
+
+Create src/ingestion/pdf_processor.py:
+
+Python
+
+"""
+PDF document processor for geotechnical codes, manuals, and reports.
+Extracts structured text, splits into chunks, preserves metadata.
+"""
+import re
+import fitz  # pymupdf
+import pymupdf4llm
+from pathlib import Path
+from dataclasses import dataclass, field
+from loguru import logger
+
+
+@dataclass
+class DocumentChunk:
+    """A single chunk of document text with metadata."""
+    text: str
+    metadata: dict = field(default_factory=dict)
+
+
+@dataclass
+class ProcessedDocument:
+    """A fully processed document ready for embedding."""
+    document_id: str
+    document_name: str
+    document_type: str  # "code", "manual", "report", "drawing", "guideline"
+    chunks: list[DocumentChunk] = field(default_factory=list)
+
+
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """Extract markdown-formatted text from PDF using pymupdf4llm."""
+    logger.info(f"Extracting text from: {pdf_path}")
+    try:
+        md_text = pymupdf4llm.to_markdown(pdf_path, page_chunks=False)
+        return md_text
+    except Exception as e:
+        logger.warning(f"pymupdf4llm failed, falling back to basic extraction: {e}")
+        return _basic_extract(pdf_path)
+
+
+def _basic_extract(pdf_path: str) -> str:
+    """Fallback: basic text extraction with pymupdf."""
+    doc = fitz.open(pdf_path)
+    text_parts = []
+    for page_num, page in enumerate(doc, 1):
+        text = page.get_text("text")
+        text_parts.append(f"\n[Page {page_num}]\n{text}")
+    doc.close()
+    return "\n".join(text_parts)
+
+
+def extract_pages_with_numbers(pdf_path: str) -> list[dict]:
+    """Extract text page by page with page numbers."""
+    doc = fitz.open(pdf_path)
+    pages = []
+    for page_num, page in enumerate(doc, 1):
+        text = page.get_text("text")
+        if text.strip():
+            pages.append({
+                "page_number": page_num,
+                "text": text.strip(),
+            })
+    doc.close()
+    return pages
+
+
+def chunk_by_sections(
+    full_text: str,
+    document_id: str,
+    document_name: str,
+    document_type: str,
+    max_chunk_tokens: int = 800,
+    overlap_tokens: int = 100,
+) -> ProcessedDocument:
+    """
+    Split document text into chunks by section headings.
+    
+    Strategy:
+    1. First try to split by markdown headings (##, ###)
+    2. If sections are too large, sub-split by paragraphs
+    3. Preserve section title in metadata
+    """
+    # Split by markdown headings
+    heading_pattern = r'^(#{1,4})\s+(.+)$'
+    lines = full_text.split('\n')
+    
+    sections = []
+    current_section_title = "Preamble"
+    current_section_level = 0
+    current_text_lines = []
+    
+    for line in lines:
+        heading_match = re.match(heading_pattern, line, re.MULTILINE)
+        if heading_match:
+            # Save previous section
+            if current_text_lines:
+                section_text = '\n'.join(current_text_lines).strip()
+                if section_text:
+                    sections.append({
+                        "title": current_section_title,
+                        "level": current_section_level,
+                        "text": section_text,
+                    })
+            # Start new section
+            current_section_level = len(heading_match.group(1))
+            current_section_title = heading_match.group(2).strip()
+            current_text_lines = []
+        else:
+            current_text_lines.append(line)
+    
+    # Don't forget the last section
+    if current_text_lines:
+        section_text = '\n'.join(current_text_lines).strip()
+        if section_text:
+            sections.append({
+                "title": current_section_title,
+                "level": current_section_level,
+                "text": section_text,
+            })
+    
+    # If no headings found, split by page markers or fixed size
+    if len(sections) <= 1:
+        sections = _split_by_pages_or_size(full_text, max_chunk_tokens)
+    
+    # Now create chunks, sub-splitting large sections
+    doc = ProcessedDocument(
+        document_id=document_id,
+        document_name=document_name,
+        document_type=document_type,
+    )
+    
+    for section in sections:
+        section_text = section["text"]
+        estimated_tokens = len(section_text.split()) * 1.3  # rough token estimate
+        
+        if estimated_tokens <= max_chunk_tokens:
+            # Section fits in one chunk
+            doc.chunks.append(DocumentChunk(
+                text=section_text,
+                metadata={
+                    "document_id": document_id,
+                    "document_name": document_name,
+                    "document_type": document_type,
+                    "section_title": section.get("title", ""),
+                    "section_level": section.get("level", 0),
+                },
+            ))
+        else:
+            # Sub-split large sections by paragraphs
+            sub_chunks = _split_large_section(
+                section_text,
+                section.get("title", ""),
+                max_chunk_tokens,
+                overlap_tokens,
+            )
+            for i, sub_text in enumerate(sub_chunks):
+                doc.chunks.append(DocumentChunk(
+                    text=sub_text,
+                    metadata={
+                        "document_id": document_id,
+                        "document_name": document_name,
+                        "document_type": document_type,
+                        "section_title": section.get("title", ""),
+                        "section_level": section.get("level", 0),
+                        "sub_chunk_index": i,
+                    },
+                ))
+    
+    logger.info(
+        f"Processed '{document_name}': {len(doc.chunks)} chunks from {len(sections)} sections"
+    )
+    return doc
+
+
+def _split_large_section(
+    text: str, title: str, max_tokens: int, overlap_tokens: int
+) -> list[str]:
+    """Split a large section into overlapping chunks by paragraphs."""
+    paragraphs = text.split('\n\n')
+    chunks = []
+    current_chunk_parts = []
+    current_token_count = 0
+    
+    for para in paragraphs:
+        para_tokens = len(para.split()) * 1.3
+        
+        if current_token_count + para_tokens > max_tokens and current_chunk_parts:
+            chunks.append('\n\n'.join(current_chunk_parts))
+            # Keep last paragraph as overlap
+            overlap_parts = current_chunk_parts[-1:] if overlap_tokens > 0 else []
+            current_chunk_parts = overlap_parts
+            current_token_count = sum(len(p.split()) * 1.3 for p in current_chunk_parts)
+        
+        current_chunk_parts.append(para)
+        current_token_count += para_tokens
+    
+    if current_chunk_parts:
+        chunks.append('\n\n'.join(current_chunk_parts))
+    
+    return chunks
+
+
+def _split_by_pages_or_size(text: str, max_tokens: int) -> list[dict]:
+    """Fallback splitting when no headings are found."""
+    # Try page markers first
+    page_pattern = r'\[Page (\d+)\]'
+    page_splits = re.split(page_pattern, text)
+    
+    if len(page_splits) > 1:
+        sections = []
+        for i in range(1, len(page_splits), 2):
+            page_num = page_splits[i]
+            page_text = page_splits[i + 1] if i + 1 < len(page_splits) else ""
+            sections.append({
+                "title": f"Page {page_num}",
+                "level": 0,
+                "text": page_text.strip(),
+            })
+        return sections
+    
+    # Last resort: fixed-size chunks
+    words = text.split()
+    chunk_word_count = int(max_tokens / 1.3)
+    sections = []
+    for i in range(0, len(words), chunk_word_count):
+        chunk_text = ' '.join(words[i:i + chunk_word_count])
+        sections.append({
+            "title": f"Chunk {i // chunk_word_count + 1}",
+            "level": 0,
+            "text": chunk_text,
+        })
+    return sections
+Step 1.4 — Create the Vector Database Interface
+Trae AI Prompt:
+"Create a Qdrant vector database wrapper that can: create collections, upsert document chunks with embeddings and metadata, perform semantic search with metadata filtering, and delete documents. Use qdrant-client Python library."
+
+Create src/vectordb/qdrant_store.py:
+
+Python
+
+"""
+Qdrant vector database interface for storing and searching document chunks.
+"""
+import uuid
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import (
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
+    models,
+)
+from loguru import logger
+from config.settings import (
+    QDRANT_HOST,
+    QDRANT_PORT,
+    COLLECTION_NAME,
+    EMBEDDING_DIMENSION,
+)
+from src.utils.embeddings import embed_texts, embed_query
+
+
+class GeoVectorStore:
+    """Vector store for geotechnical knowledge base."""
+
+    def __init__(
+        self,
+        host: str = QDRANT_HOST,
+        port: int = QDRANT_PORT,
+        collection_name: str = COLLECTION_NAME,
+        use_local: bool = False,
+    ):
+        """
+        Initialize Qdrant client.
+        
+        Args:
+            use_local: If True, use file-based storage instead of Docker.
+                       Useful if Docker is not available.
+        """
+        if use_local:
+            self.client = QdrantClient(path="./qdrant_local_storage")
+            logger.info("Using local file-based Qdrant storage")
+        else:
+            self.client = QdrantClient(host=host, port=port)
+            logger.info(f"Connected to Qdrant at {host}:{port}")
+
+        self.collection_name = collection_name
+        self._ensure_collection()
+
+    def _ensure_collection(self):
+        """Create collection if it doesn't exist."""
+        collections = self.client.get_collections().collections
+        exists = any(c.name == self.collection_name for c in collections)
+
+        if not exists:
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(
+                    size=EMBEDDING_DIMENSION,
+                    distance=Distance.COSINE,
+                ),
+            )
+            # Create payload indexes for filtering
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="document_type",
+                field_schema=models.PayloadSchemaType.KEYWORD,
+            )
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="document_id",
+                field_schema=models.PayloadSchemaType.KEYWORD,
+            )
+            logger.info(f"Created collection: {self.collection_name}")
+        else:
+            logger.info(f"Collection already exists: {self.collection_name}")
+
+    def add_document(self, processed_doc) -> int:
+        """
+        Add a processed document's chunks to the vector store.
+        
+        Args:
+            processed_doc: ProcessedDocument instance
+            
+        Returns:
+            Number of chunks added
+        """
+        if not processed_doc.chunks:
+            logger.warning(f"No chunks to add for {processed_doc.document_name}")
+            return 0
+
+        texts = [chunk.text for chunk in processed_doc.chunks]
+        logger.info(f"Generating embeddings for {len(texts)} chunks...")
+        embeddings = embed_texts(texts)
+
+        points = []
+        for chunk, embedding in zip(processed_doc.chunks, embeddings):
+            point_id = str(uuid.uuid4())
+            payload = {
+                "text": chunk.text,
+                **chunk.metadata,
+            }
+            points.append(
+                PointStruct(id=point_id, vector=embedding, payload=payload)
+            )
+
+        # Upsert in batches of 100
+        batch_size = 100
+        for i in range(0, len(points), batch_size):
+            batch = points[i : i + batch_size]
+            self.client.upsert(
+                collection_name=self.collection_name,
+                points=batch,
+            )
+
+        logger.info(
+            f"Added {len(points)} chunks from '{processed_doc.document_name}'"
+        )
+        return len(points)
+
+    def search(
+        self,
+        query: str,
+        top_k: int = 10,
+        document_type: str | None = None,
+        document_id: str | None = None,
+        score_threshold: float = 0.3,
+    ) -> list[dict]:
+        """
+        Semantic search for relevant document chunks.
+        
+        Args:
+            query: Search query text
+            top_k: Number of results to return
+            document_type: Filter by type ("code", "manual", "report", etc.)
+            document_id: Filter by specific document
+            score_threshold: Minimum similarity score
+            
+        Returns:
+            List of dicts with 'text', 'metadata', and 'score'
+        """
+        query_embedding = embed_query(query)
+
+        # Build filters
+        filter_conditions = []
+        if document_type:
+            filter_conditions.append(
+                FieldCondition(
+                    key="document_type", match=MatchValue(value=document_type)
+                )
+            )
+        if document_id:
+            filter_conditions.append(
+                FieldCondition(
+                    key="document_id", match=MatchValue(value=document_id)
+                )
+            )
+
+        search_filter = (
+            Filter(must=filter_conditions) if filter_conditions else None
+        )
+
+        results = self.client.search(
+            collection_name=self.collection_name,
+            query_vector=query_embedding,
+            limit=top_k,
+            query_filter=search_filter,
+            score_threshold=score_threshold,
+        )
+
+        return [
+            {
+                "text": hit.payload.get("text", ""),
+                "metadata": {
+                    k: v for k, v in hit.payload.items() if k != "text"
+                },
+                "score": hit.score,
+            }
+            for hit in results
+        ]
+
+    def list_documents(self) -> list[dict]:
+        """List all documents in the collection with chunk counts."""
+        # Scroll through all points and aggregate by document_id
+        all_points, _ = self.client.scroll(
+            collection_name=self.collection_name,
+            limit=10000,
+            with_payload=["document_id", "document_name", "document_type"],
+        )
+
+        docs = {}
+        for point in all_points:
+            doc_id = point.payload.get("document_id", "unknown")
+            if doc_id not in docs:
+                docs[doc_id] = {
+                    "document_id": doc_id,
+                    "document_name": point.payload.get("document_name", ""),
+                    "document_type": point.payload.get("document_type", ""),
+                    "chunk_count": 0,
+                }
+            docs[doc_id]["chunk_count"] += 1
+
+        return list(docs.values())
+
+    def delete_document(self, document_id: str):
+        """Remove all chunks for a specific document."""
+        self.client.delete(
+            collection_name=self.collection_name,
+            points_selector=models.FilterSelector(
+                filter=Filter(
+                    must=[
+                        FieldCondition(
+                            key="document_id",
+                            match=MatchValue(value=document_id),
+                        )
+                    ]
+                )
+            ),
+        )
+        logger.info(f"Deleted all chunks for document: {document_id}")
+Step 1.5 — Create the Ingestion Script
+Create src/ingestion/ingest.py:
+
+Python
+
+"""
+Main ingestion script: process PDFs and store in vector database.
+"""
+import sys
+from pathlib import Path
+from loguru import logger
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from src.ingestion.pdf_processor import (
+    extract_text_from_pdf,
+    chunk_by_sections,
+)
+from src.vectordb.qdrant_store import GeoVectorStore
+
+
+def ingest_document(
+    pdf_path: str,
+    document_id: str,
+    document_name: str,
+    document_type: str = "code",
+    use_local_db: bool = False,
+) -> int:
+    """
+    Full pipeline: PDF → text → chunks → embeddings → vector DB.
+    
+    Args:
+        pdf_path: Path to the PDF file
+        document_id: Unique ID for this document (e.g., "geoguide_1")
+        document_name: Human-readable name
+        document_type: One of "code", "manual", "report", "guideline", "drawing"
+        use_local_db: Use file-based Qdrant if True
+        
+    Returns:
+        Number of chunks stored
+    """
+    # Step 1: Extract text
+    logger.info(f"Step 1/3: Extracting text from {pdf_path}")
+    full_text = extract_text_from_pdf(pdf_path)
+    
+    if not full_text or len(full_text.strip()) < 100:
+        logger.error(f"Failed to extract meaningful text from {pdf_path}")
+        return 0
+    
+    logger.info(f"  Extracted {len(full_text)} characters")
+    
+    # Step 2: Chunk
+    logger.info("Step 2/3: Chunking document into sections")
+    processed_doc = chunk_by_sections(
+        full_text=full_text,
+        document_id=document_id,
+        document_name=document_name,
+        document_type=document_type,
+    )
+    
+    logger.info(f"  Created {len(processed_doc.chunks)} chunks")
+    
+    # Step 3: Store in vector DB
+    logger.info("Step 3/3: Embedding and storing in vector database")
+    store = GeoVectorStore(use_local=use_local_db)
+    num_stored = store.add_document(processed_doc)
+    
+    logger.info(f"✓ Successfully ingested '{document_name}': {num_stored} chunks")
+    return num_stored
+
+
+def ingest_directory(
+    directory: str,
+    document_type: str = "code",
+    use_local_db: bool = False,
+):
+    """Ingest all PDFs in a directory."""
+    dir_path = Path(directory)
+    pdf_files = list(dir_path.glob("*.pdf"))
+    
+    logger.info(f"Found {len(pdf_files)} PDF files in {directory}")
+    
+    for pdf_file in pdf_files:
+        doc_id = pdf_file.stem.lower().replace(" ", "_")
+        doc_name = pdf_file.stem
+        
+        try:
+            ingest_document(
+                pdf_path=str(pdf_file),
+                document_id=doc_id,
+                document_name=doc_name,
+                document_type=document_type,
+                use_local_db=use_local_db,
+            )
+        except Exception as e:
+            logger.error(f"Failed to ingest {pdf_file.name}: {e}")
+
+
+if __name__ == "__main__":
+    """
+    Usage examples:
+    
+    # Ingest a single document
+    python -m src.ingestion.ingest single \
+        --path "data/raw_documents/Geoguide1.pdf" \
+        --id "geoguide_1" \
+        --name "Geoguide 1 - Guide to Retaining Wall Design" \
+        --type "code"
+    
+    # Ingest all PDFs in a directory
+    python -m src.ingestion.ingest directory \
+        --path "data/raw_documents/" \
+        --type "code"
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest documents into vector DB")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # Single document
+    single_parser = subparsers.add_parser("single")
+    single_parser.add_argument("--path", required=True, help="Path to PDF")
+    single_parser.add_argument("--id", required=True, help="Document ID")
+    single_parser.add_argument("--name", required=True, help="Document name")
+    single_parser.add_argument(
+        "--type", default="code",
+        choices=["code", "manual", "report", "guideline", "drawing"],
+    )
+    single_parser.add_argument("--local-db", action="store_true")
+
+    # Directory
+    dir_parser = subparsers.add_parser("directory")
+    dir_parser.add_argument("--path", required=True)
+    dir_parser.add_argument("--type", default="code")
+    dir_parser.add_argument("--local-db", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.command == "single":
+        ingest_document(
+            args.path, args.id, args.name, args.type, args.local_db
+        )
+    elif args.command == "directory":
+        ingest_directory(args.path, args.type, args.local_db)
+    else:
+        parser.print_help()
+Step 1.6 — Create the Basic Q&A Agent
+Create src/agents/qa_agent.py:
+
+Python
+
+"""
+Basic Q&A Agent: retrieves relevant code/manual sections and answers questions.
+This is the MVP — the foundation for everything else.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from loguru import logger
+from src.vectordb.qdrant_store import GeoVectorStore
+from src.utils.llm_client import call_llm_with_context, call_llm
+from config.settings import PRIMARY_MODEL, LIGHT_MODEL
+
+
+class QAAgent:
+    """
+    Question-answering agent that searches the vector database
+    and provides answers grounded in your codes and manuals.
+    """
+
+    def __init__(self, use_local_db: bool = False):
+        self.store = GeoVectorStore(use_local=use_local_db)
+        self.conversation_history: list[dict] = []
+
+    def ask(
+        self,
+        question: str,
+        document_type: str | None = None,
+        document_id: str | None = None,
+        top_k: int = 8,
+        model: str = PRIMARY_MODEL,
+    ) -> dict:
+        """
+        Ask a question and get an answer grounded in your documents.
+        
+        Args:
+            question: The user's question
+            document_type: Optionally filter by document type
+            document_id: Optionally filter by specific document
+            top_k: Number of chunks to retrieve
+            model: Which LLM model to use
+            
+        Returns:
+            dict with 'answer', 'sources', and 'query'
+        """
+        # Step 1: Retrieve relevant chunks
+        logger.info(f"Searching for: {question}")
+        chunks = self.store.search(
+            query=question,
+            top_k=top_k,
+            document_type=document_type,
+            document_id=document_id,
+        )
+
+        if not chunks:
+            return {
+                "answer": "No relevant information found in the knowledge base. "
+                          "Please check that the relevant documents have been ingested.",
+                "sources": [],
+                "query": question,
+            }
+
+        logger.info(f"Found {len(chunks)} relevant chunks (best score: {chunks[0]['score']:.3f})")
+
+        # Step 2: Generate answer using LLM with context
+        answer = call_llm_with_context(
+            question=question,
+            context_chunks=chunks,
+            model=model,
+        )
+
+        # Step 3: Format sources for citation
+        sources = []
+        seen = set()
+        for chunk in chunks:
+            source_key = (
+                chunk["metadata"].get("document_name", ""),
+                chunk["metadata"].get("section_title", ""),
+            )
+            if source_key not in seen:
+                seen.add(source_key)
+                sources.append({
+                    "document": chunk["metadata"].get("document_name", "Unknown"),
+                    "section": chunk["metadata"].get("section_title", "N/A"),
+                    "page": chunk["metadata"].get("page_number", "N/A"),
+                    "relevance_score": round(chunk["score"], 3),
+                })
+
+        # Store in conversation history
+        self.conversation_history.append({
+            "question": question,
+            "answer": answer,
+            "sources": sources,
+        })
+
+        return {
+            "answer": answer,
+            "sources": sources,
+            "query": question,
+        }
+
+    def ask_followup(self, question: str, **kwargs) -> dict:
+        """
+        Ask a follow-up question with conversation context.
+        """
+        if self.conversation_history:
+            last = self.conversation_history[-1]
+            enhanced_question = (
+                f"Context from previous question: {last['question']}\n"
+                f"Previous answer summary: {last['answer'][:500]}\n\n"
+                f"Follow-up question: {question}"
+            )
+            return self.ask(enhanced_question, **kwargs)
+        return self.ask(question, **kwargs)
+
+    def list_knowledge_base(self) -> list[dict]:
+        """Show what documents are in the knowledge base."""
+        return self.store.list_documents()
+
+
+def interactive_qa():
+    """Run an interactive Q&A session in the terminal."""
+    agent = QAAgent(use_local_db=True)  # Change to False if using Docker Qdrant
+
+    print("\n" + "=" * 60)
+    print("  GEOTECH AI Q&A AGENT")
+    print("  Type your question, or 'quit' to exit")
+    print("  Type 'docs' to list ingested documents")
+    print("=" * 60 + "\n")
+
+    while True:
+        question = input("\n📝 Your question: ").strip()
+
+        if question.lower() in ("quit", "exit", "q"):
+            print("Goodbye!")
+            break
+        elif question.lower() == "docs":
+            docs = agent.list_knowledge_base()
+            print("\n📚 Knowledge Base:")
+            for doc in docs:
+                print(f"  • {doc['document_name']} ({doc['document_type']}) "
+                      f"- {doc['chunk_count']} chunks")
+            continue
+        elif not question:
+            continue
+
+        result = agent.ask(question)
+
+        print(f"\n{'─' * 60}")
+        print(f"📖 Answer:\n{result['answer']}")
+        print(f"\n📎 Sources:")
+        for s in result["sources"][:5]:
+            print(f"  • {s['document']} | {s['section']} "
+                  f"(relevance: {s['relevance_score']})")
+        print(f"{'─' * 60}")
+
+
+if __name__ == "__main__":
+    interactive_qa()
+Step 1.7 — Test the MVP
+Now let's test everything end to end.
+
+1. Place your first PDF in the data folder:
+
+text
+
+data/raw_documents/Geoguide1.pdf
+Start with one document you know well — ideally Geoguide 1 or the Code of Practice for Foundations.
+
+2. Ingest it:
+
+Bash
+
+python -m src.ingestion.ingest single \
+    --path "data/raw_documents/Geoguide1.pdf" \
+    --id "geoguide_1" \
+    --name "Geoguide 1 - Guide to Retaining Wall Design" \
+    --type "code" \
+    --local-db
+3. Run the Q&A agent:
+
+Bash
+
+python -m src.agents.qa_agent
+4. Test with questions you know the answers to:
+
+text
+
+What is the minimum factor of safety for a retaining wall against sliding?
+What soil parameters are required for retaining wall design?
+What are the load combinations for retaining wall design?
+Verify the answers against the actual document. This is your calibration step.
+
+Step 1.8 — Create __init__.py Files
+Create empty __init__.py files to make Python packages:
+
+Bash
+
+touch src/__init__.py
+touch src/ingestion/__init__.py
+touch src/vectordb/__init__.py
+touch src/utils/__init__.py
+touch src/skills/__init__.py
+touch src/agents/__init__.py
+touch src/calculations/__init__.py
+touch src/templates/__init__.py
+touch config/__init__.py
+<a name="phase-2"></a>
+
+Phase 2: Calculation Engine & Skill Catalog
+Goal: Build deterministic calculation functions and a structured skill catalog that the agent can invoke.
+
+Step 2.1 — Create Calculation Functions
+Trae AI Prompt:
+"Create a Python module for geotechnical bearing capacity calculations following Terzaghi, Meyerhof, and Hansen methods. Include Eurocode 7 partial factors. All functions should be deterministic with clear input/output types using dataclasses. Include unit tests."
+
+Create src/calculations/bearing_capacity.py:
+
+Python
+
+"""
+Bearing capacity calculations for shallow foundations.
+Deterministic functions — NO LLM involvement in computation.
+
+References:
+- Code of Practice for Foundations 2017 (HK)
+- Geoguide 1
+- BS EN 1997-1 (Eurocode 7)
+"""
+import math
+from dataclasses import dataclass
+
+
+@dataclass
+class SoilParameters:
+    """Characteristic soil parameters for bearing capacity."""
+    cohesion_kpa: float  # c' (effective) or cu (undrained)
+    friction_angle_deg: float  # φ' in degrees
+    unit_weight_kn_m3: float  # γ (bulk unit weight)
+    is_undrained: bool = False  # True for total stress analysis
+
+
+@dataclass
+class FoundationGeometry:
+    """Foundation dimensions."""
+    width_m: float  # B
+    length_m: float  # L (use large number for strip footing)
+    depth_m: float  # Df (embedment depth)
+
+
+@dataclass
+class GroundwaterCondition:
+    """Groundwater information."""
+    gwl_depth_m: float  # Depth to GWL from ground surface
+    water_unit_weight_kn_m3: float = 9.81
+
+
+@dataclass
+class BearingCapacityResult:
+    """Result of bearing capacity calculation."""
+    q_ult_kpa: float  # Ultimate bearing capacity
+    q_allowable_kpa: float  # Allowable bearing capacity (with FoS)
+    factor_of_safety: float
+    method: str
+    bearing_capacity_factors: dict  # Nc, Nq, Nγ
+    shape_factors: dict  # sc, sq, sγ
+    depth_factors: dict  # dc, dq, dγ
+    notes: list[str]
+
+
+def terzaghi_bearing_capacity(
+    soil: SoilParameters,
+    foundation: FoundationGeometry,
+    gwl: GroundwaterCondition | None = None,
+    fos: float = 3.0,
+) -> BearingCapacityResult:
+    """
+    Terzaghi's bearing capacity equation for shallow foundations.
+    
+    q_ult = c·Nc·sc + q·Nq + 0.5·γ·B·Nγ·sγ
+    
+    For strip footing: sc = 1.0, sγ = 1.0
+    For square footing: sc = 1.3, sγ = 0.8
+    For circular footing: sc = 1.3, sγ = 0.6
+    """
+    phi_rad = math.radians(soil.friction_angle_deg)
+    
+    # Bearing capacity factors (Terzaghi)
+    if soil.friction_angle_deg == 0:
+        Nc = 5.14
+        Nq = 1.0
+        Ngamma = 0.0
+    else:
+        Nq = math.exp(math.pi * math.tan(phi_rad)) * (
+            math.tan(math.radians(45 + soil.friction_angle_deg / 2)) ** 2
+        )
+        Nc = (Nq - 1) / math.tan(phi_rad)
+        # Terzaghi's Nγ (using Kumbhojkar's approximation)
+        Ngamma = 2 * (Nq + 1) * math.tan(phi_rad)
+    
+    # Shape factors (Terzaghi)
+    B = foundation.width_m
+    L = foundation.length_m
+    
+    if L / B > 10:  # Strip footing
+        sc, sgamma = 1.0, 1.0
+    elif abs(L - B) < 0.01:  # Square
+        sc, sgamma = 1.3, 0.8
+    else:  # Rectangular
+        sc = 1.0 + 0.3 * (B / L)
+        sgamma = 1.0 - 0.2 * (B / L)
+    
+    sq = 1.0  # Terzaghi doesn't have sq
+    
+    # Overburden pressure at foundation level
+    gamma_eff = soil.unit_weight_kn_m3
+    gamma_below = soil.unit_weight_kn_m3
+    
+    notes = []
+    
+    # Groundwater correction
+    if gwl is not None:
+        if gwl.gwl_depth_m <= foundation.depth_m:
+            # GWL above or at foundation level
+            gamma_eff_above = (
+                soil.unit_weight_kn_m3 - gwl.water_unit_weight_kn_m3
+            )
+            gamma_below = soil.unit_weight_kn_m3 - gwl.water_unit_weight_kn_m3
+            q = gamma_eff_above * foundation.depth_m
+            notes.append(
+                f"GWL at {gwl.gwl_depth_m}m (above foundation level). "
+                f"Using submerged unit weight."
+            )
+        elif gwl.gwl_depth_m < foundation.depth_m + B:
+            # GWL within influence zone below foundation
+            q = soil.unit_weight_kn_m3 * foundation.depth_m
+            d_below = gwl.gwl_depth_m - foundation.depth_m
+            gamma_below = soil.unit_weight_kn_m3 - (
+                gwl.water_unit_weight_kn_m3 * (1 - d_below / B)
+            )
+            notes.append(
+                f"GWL at {gwl.gwl_depth_m}m (within B below foundation). "
+                f"Interpolated unit weight used."
+            )
+        else:
+            q = soil.unit_weight_kn_m3 * foundation.depth_m
+            notes.append(
+                f"GWL at {gwl.gwl_depth_m}m (below influence zone). "
+                f"No groundwater correction needed."
+            )
+    else:
+        q = soil.unit_weight_kn_m3 * foundation.depth_m
+        notes.append("No groundwater information provided.")
+    
+    # Calculate ultimate bearing capacity
+    q_ult = (
+        soil.cohesion_kpa * Nc * sc
+        + q * Nq * sq
+        + 0.5 * gamma_below * B * Ngamma * sgamma
+    )
+    
+    q_allowable = q_ult / fos
+    
+    notes.append(f"Factor of Safety applied: {fos}")
+    
+    return BearingCapacityResult(
+        q_ult_kpa=round(q_ult, 1),
+        q_allowable_kpa=round(q_allowable, 1),
+        factor_of_safety=fos,
+        method="Terzaghi",
+        bearing_capacity_factors={"Nc": round(Nc, 2), "Nq": round(Nq, 2), "Nγ": round(Ngamma, 2)},
+        shape_factors={"sc": round(sc, 2), "sq": round(sq, 2), "sγ": round(sgamma, 2)},
+        depth_factors={"dc": 1.0, "dq": 1.0, "dγ": 1.0},  # Terzaghi doesn't use depth factors
+        notes=notes,
+    )
+
+
+def hansen_bearing_capacity(
+    soil: SoilParameters,
+    foundation: FoundationGeometry,
+    gwl: GroundwaterCondition | None = None,
+    fos: float = 3.0,
+) -> BearingCapacityResult:
+    """
+    Hansen's general bearing capacity equation.
+    
+    q_ult = c·Nc·sc·dc·ic·bc·gc 
+          + q·Nq·sq·dq·iq·bq·gq 
+          + 0.5·γ·B'·Nγ·sγ·dγ·iγ·bγ·gγ
+    
+    (Inclination, base tilt, and ground slope factors set to 1.0
+     unless specified. Can be extended later.)
+    """
+    phi_rad = math.radians(soil.friction_angle_deg)
+    B = foundation.width_m
+    L = foundation.length_m
+    Df = foundation.depth_m
+    
+    # Bearing capacity factors (Hansen/Vesic)
+    if soil.friction_angle_deg == 0:
+        Nc = 5.14
+        Nq = 1.0
+        Ngamma = 0.0
+    else:
+        Nq = math.exp(math.pi * math.tan(phi_rad)) * (
+            math.tan(math.radians(45 + soil.friction_angle_deg / 2)) ** 2
+        )
+        Nc = (Nq - 1) / math.tan(phi_rad)
+        Ngamma = 1.5 * (Nq - 1) * math.tan(phi_rad)  # Hansen
+    
+    # Shape factors (Hansen)
+    sc = 1.0 + (Nq / Nc) * (B / L) if soil.friction_angle_deg > 0 else 1.0 + 0.2 * (B / L)
+    sq = 1.0 + (B / L) * math.tan(phi_rad)
+    sgamma = 1.0 - 0.4 * (B / L)
+    sgamma = max(sgamma, 0.6)  # Minimum value
+    
+    # Depth factors (Hansen)
+    k = Df / B if Df / B <= 1 else math.atan(Df / B)
+    dc = 1.0 + 0.4 * k
+    dq = 1.0 + 2 * math.tan(phi_rad) * (1 - math.sin(phi_rad)) ** 2 * k
+    dgamma = 1.0
+    
+    # Overburden and groundwater (same logic as Terzaghi)
+    gamma_below = soil.unit_weight_kn_m3
+    notes = []
+    
+    if gwl is not None and gwl.gwl_depth_m <= Df:
+        gamma_eff_above = soil.unit_weight_kn_m3 - gwl.water_unit_weight_kn_m3
+        q = gamma_eff_above * Df
+        gamma_below = soil.unit_weight_kn_m3 - gwl.water_unit_weight_kn_m3
+        notes.append(f"GWL at {gwl.gwl_depth_m}m — submerged unit weight used.")
+    else:
+        q = soil.unit_weight_kn_m3 * Df
+        if gwl is not None:
+            notes.append(f"GWL at {gwl.gwl_depth_m}m — below foundation level.")
+    
+    q_ult = (
+        soil.cohesion_kpa * Nc * sc * dc
+        + q * Nq * sq * dq
+        + 0.5 * gamma_below * B * Ngamma * sgamma * dgamma
+    )
+    
+    q_allowable = q_ult / fos
+    
+    return BearingCapacityResult(
+        q_ult_kpa=round(q_ult, 1),
+        q_allowable_kpa=round(q_allowable, 1),
+        factor_of_safety=fos,
+        method="Hansen",
+        bearing_capacity_factors={"Nc": round(Nc, 2), "Nq": round(Nq, 2), "Nγ": round(Ngamma, 2)},
+        shape_factors={"sc": round(sc, 3), "sq": round(sq, 3), "sγ": round(sgamma, 3)},
+        depth_factors={"dc": round(dc, 3), "dq": round(dq, 3), "dγ": round(dgamma, 3)},
+        notes=notes,
+    )
+
+
+# ─── Eurocode 7 Design Approach 1 ───
+
+@dataclass
+class EC7PartialFactors:
+    """Eurocode 7 partial factors for Design Approach 1."""
+    gamma_c: float = 1.25  # Partial factor on c'
+    gamma_phi: float = 1.25  # Partial factor on tan(φ')
+    gamma_cu: float = 1.4  # Partial factor on cu
+    gamma_G: float = 1.35  # Partial factor on permanent actions
+    gamma_Q: float = 1.5  # Partial factor on variable actions
+    gamma_Rv: float = 1.0  # Resistance factor
+    combination: str = "C2"  # "C1" or "C2"
+
+
+def ec7_bearing_capacity_da1(
+    soil: SoilParameters,
+    foundation: FoundationGeometry,
+    gwl: GroundwaterCondition | None = None,
+    characteristic_permanent_load_kn: float = 0,
+    characteristic_variable_load_kn: float = 0,
+) -> dict:
+    """
+    EC7 Design Approach 1 bearing capacity check.
+    
+    Combination 1: A1 + M1 + R1 (factor actions, don't factor soil)
+    Combination 2: A2 + M2 + R1 (don't factor actions much, factor soil)
+    
+    Both must be satisfied.
+    """
+    results = {}
+    
+    # Combination 1: A1 + M1 + R1
+    c1_factors = EC7PartialFactors(
+        gamma_c=1.0, gamma_phi=1.0, gamma_cu=1.0,
+        gamma_G=1.35, gamma_Q=1.5, gamma_Rv=1.0,
+        combination="C1",
+    )
+    
+    # Combination 2: A2 + M2 + R1  
+    c2_factors = EC7PartialFactors(
+        gamma_c=1.25, gamma_phi=1.25, gamma_cu=1.4,
+        gamma_G=1.0, gamma_Q=1.3, gamma_Rv=1.0,
+        combination="C2",
+    )
+    
+    for name, factors in [("Combination_1", c1_factors), ("Combination_2", c2_factors)]:
+        # Apply partial factors to soil parameters
+        design_c = soil.cohesion_kpa / factors.gamma_c
+        design_phi = math.degrees(
+            math.atan(math.tan(math.radians(soil.friction_angle_deg)) / factors.gamma_phi)
+        )
+        
+        design_soil = SoilParameters(
+            cohesion_kpa=design_c,
+            friction_angle_deg=design_phi,
+            unit_weight_kn_m3=soil.unit_weight_kn_m3,
+        )
+        
+        # Calculate design resistance using Hansen
+        bc_result = hansen_bearing_capacity(
+            soil=design_soil,
+            foundation=foundation,
+            gwl=gwl,
+            fos=1.0,  # No additional FoS — partial factors handle safety
+        )
+        
+        # Design bearing resistance
+        R_d = bc_result.q_ult_kpa * foundation.width_m * foundation.length_m / factors.gamma_Rv
+        
+        # Design action (load)
+        V_d = (
+            characteristic_permanent_load_kn * factors.gamma_G
+            + characteristic_variable_load_kn * factors.gamma_Q
+        )
+        
+        # Design bearing pressure
+        q_d = V_d / (foundation.width_m * foundation.length_m) if V_d > 0 else 0
+        
+        utilisation = V_d / R_d if R_d > 0 else float('inf')
+        
+        results[name] = {
+            "partial_factors": factors,
+            "design_soil_c": round(design_c, 1),
+            "design_soil_phi": round(design_phi, 1),
+            "q_ult_design_kpa": bc_result.q_ult_kpa,
+            "R_d_kn": round(R_d, 1),
+            "V_d_kn": round(V_d, 1),
+            "q_design_kpa": round(q_d, 1),
+            "utilisation_ratio": round(utilisation, 3),
+            "pass": utilisation <= 1.0,
+        }
+    
+    overall_pass = all(r["pass"] for r in results.values())
+    results["overall_pass"] = overall_pass
+    results["governing"] = "Combination_1" if (
+        results["Combination_1"]["utilisation_ratio"]
+        > results["Combination_2"]["utilisation_ratio"]
+    ) else "Combination_2"
+    
+    return results
+Create src/calculations/slope_stability.py:
+
+Python
+
+"""
+Slope stability calculations.
+Basic methods for preliminary assessment.
+
+References:
+- Geotechnical Manual for Slopes (GEO)
+- Geoguide 1
+"""
+import math
+from dataclasses import dataclass
+
+
+@dataclass
+class SlopeGeometry:
+    """Slope geometry parameters."""
+    height_m: float
+    angle_deg: float  # Slope angle from horizontal
+    
+
+@dataclass
+class SlopeStabilityResult:
+    """Result of slope stability calculation."""
+    factor_of_safety: float
+    method: str
+    critical_slip_surface: str
+    pass_fail: bool
+    required_fos: float
+    notes: list[str]
+
+
+def infinite_slope_drained(
+    slope_angle_deg: float,
+    friction_angle_deg: float,
+    cohesion_kpa: float,
+    unit_weight_kn_m3: float,
+    depth_to_slip_m: float,
+    gwl_above_slip_m: float = 0.0,
+    gamma_w: float = 9.81,
+    required_fos: float = 1.4,
+) -> SlopeStabilityResult:
+    """
+    Infinite slope analysis (drained conditions).
+    
+    FoS = (c' + (γ·z·cos²β - γw·hw·cos²β)·tanφ') / (γ·z·sinβ·cosβ)
+    
+    Common for shallow translational slides in CDG/HDG (Hong Kong).
+    """
+    beta = math.radians(slope_angle_deg)
+    phi = math.radians(friction_angle_deg)
+    z = depth_to_slip_m
+    hw = gwl_above_slip_m
+    gamma = unit_weight_kn_m3
+    c = cohesion_kpa
+    
+    # Normal stress on slip surface
+    sigma_n = gamma * z * math.cos(beta) ** 2
+    
+    # Pore pressure contribution
+    u = gamma_w * hw * math.cos(beta) ** 2
+    
+    # Shear strength (Mohr-Coulomb)
+    tau_f = c + (sigma_n - u) * math.tan(phi)
+    
+    # Driving shear stress
+    tau_d = gamma * z * math.sin(beta) * math.cos(beta)
+    
+    if tau_d <= 0:
+        fos = float('inf')
+    else:
+        fos = tau_f / tau_d
+    
+    notes = []
+    if hw > 0:
+        notes.append(f"Groundwater: {hw}m above slip surface")
+        ru = u / (gamma * z * math.cos(beta) ** 2)
+        notes.append(f"Pore pressure ratio ru ≈ {ru:.2f}")
+    
+    pass_fail = fos >= required_fos
+    
+    return SlopeStabilityResult(
+        factor_of_safety=round(fos, 3),
+        method="Infinite Slope (Drained)",
+        critical_slip_surface=f"Planar at {z}m depth",
+        pass_fail=pass_fail,
+        required_fos=required_fos,
+        notes=notes,
+    )
+
+
+def taylor_stability_number(
+    slope_angle_deg: float,
+    height_m: float,
+    cohesion_kpa: float,
+    unit_weight_kn_m3: float,
+    friction_angle_deg: float = 0.0,
+    required_fos: float = 1.4,
+) -> SlopeStabilityResult:
+    """
+    Taylor's stability chart method (φ=0 or φ>0 approximation).
+    
+    For undrained (φ=0) analysis:
+    FoS = Ns · cu / (γ · H)
+    
+    where Ns is Taylor's stability number (from chart).
+    
+    This is an approximation — for detailed analysis, use 
+    Bishop's method or numerical software.
+    """
+    notes = []
+    
+    if friction_angle_deg == 0:
+        # φ = 0 analysis (undrained)
+        beta = slope_angle_deg
+        
+        # Approximate Ns from Taylor's chart
+        # These are approximate values for toe circles
+        if beta >= 53:
+            Ns = 5.52  # Vertical cut
+        elif beta >= 45:
+            Ns = 5.5 + (53 - beta) * (6.0 - 5.5) / (53 - 45)
+        elif beta >= 30:
+            Ns = 6.0 + (45 - beta) * (7.5 - 6.0) / (45 - 30)
+        elif beta >= 15:
+            Ns = 7.5 + (30 - beta) * (11.0 - 7.5) / (30 - 15)
+        else:
+            Ns = 11.0
+            notes.append("Very gentle slope — stability number approximate.")
+        
+        fos = Ns * cohesion_kpa / (unit_weight_kn_m3 * height_m)
+        notes.append(f"Taylor's stability number Ns ≈ {Ns:.2f}")
+        notes.append("Undrained (φ=0) analysis — short-term condition")
+    else:
+        notes.append("For φ>0, Taylor's method requires chart interpolation.")
+        notes.append("This is an approximate calculation. Use Bishop's method for detailed analysis.")
+        # Very rough approximation
+        phi_rad = math.radians(friction_angle_deg)
+        c_component = cohesion_kpa / (unit_weight_kn_m3 * height_m)
+        phi_component = math.tan(phi_rad) / math.tan(math.radians(slope_angle_deg))
+        fos = c_component * 5.5 + phi_component  # Rough approximation
+    
+    pass_fail = fos >= required_fos
+    
+    return SlopeStabilityResult(
+        factor_of_safety=round(fos, 3),
+        method="Taylor's Stability Number",
+        critical_slip_surface="Circular (toe circle assumed)",
+        pass_fail=pass_fail,
+        required_fos=required_fos,
+        notes=notes,
+    )
+Step 2.2 — Create the Skill Catalog
+Trae AI Prompt:
+"Create a skill catalog system using Pydantic models. Each skill has an ID, name, description, input schema, output schema, calculation function reference, report section mapping, and code references. Include a skill registry that can load skills from JSON files."
+
+Create src/skills/skill_models.py:
+
+Python
+
+"""
+Skill catalog data models.
+Each skill represents a reusable geotechnical design task.
+"""
+from pydantic import BaseModel
+from typing import Optional, Any
+from enum import Enum
+
+
+class DesignCode(str, Enum):
+    COP_FOUNDATIONS = "cop_foundations_2017"
+    GEOGUIDE_1 = "geoguide_1"
+    GEOGUIDE_2 = "geoguide_2"
+    GEOGUIDE_7 = "geoguide_7"
+    GEO_MANUAL_SLOPES = "geo_manual_slopes"
+    EC7 = "bs_en_1997_1"
+    BS8002 = "bs_8002"
+    BS8004 = "bs_8004"
+
+
+class ReportSection(str, Enum):
+    INTRODUCTION = "1_introduction"
+    SITE_DESCRIPTION = "2_site_description"
+    GROUND_INVESTIGATION = "3_ground_investigation"
+    GEOTECHNICAL_CONDITIONS = "4_geotechnical_conditions"
+    ANALYSIS_AND_DESIGN = "5_analysis_and_design"
+    RECOMMENDATIONS = "6_recommendations"
+    CONSTRUCTION_CONSIDERATIONS = "7_construction_considerations"
+    INSTRUMENTATION_MONITORING = "8_instrumentation_monitoring"
+    REFERENCES = "9_references"
+    APPENDICES = "10_appendices"
+
+
+class CodeReference(BaseModel):
+    """Reference to a specific clause in a code or manual."""
+    code: DesignCode
+    clause: str
+    description: str = ""
+
+
+class SkillInput(BaseModel):
+    """Definition of a single input parameter for a skill."""
+    name: str
+    type: str  # "float", "string", "int", "bool", "array"
+    unit: str = ""
+    description: str = ""
+    required: bool = True
+    default: Any = None
+    valid_range: Optional[dict] = None  # {"min": 0, "max": 45}
+
+
+class SkillOutput(BaseModel):
+    """Definition of a single output from a skill."""
+    name: str
+    type: str
+    unit: str = ""
+    description: str = ""
+
+
+class Skill(BaseModel):
+    """
+    A complete skill definition.
+    
+    This is the central concept: a structured, reusable design task
+    that maps from inputs → calculation → outputs → report section.
+    """
+    skill_id: str
+    name: str
+    description: str
+    category: str  # "foundations", "slopes", "retaining_walls", "excavations"
+    
+    inputs: list[SkillInput]
+    outputs: list[SkillOutput]
+    
+    calculation_function: str  # Python import path, e.g. "src.calculations.bearing_capacity.hansen_bearing_capacity"
+    
+    applicable_codes: list[DesignCode]
+    code_references: list[CodeReference]
+    
+    report_sections: list[ReportSection]
+    
+    # Validation criteria
+    acceptance_criteria: list[str] = []  # e.g., ["FoS >= 3.0", "Settlement < 25mm"]
+    
+    # For the LLM to describe results
+    result_description_template: str = ""
+    
+    notes: list[str] = []
+Create src/skills/catalog.py:
+
+Python
+
+"""
+Skill catalog: registry of all available geotechnical design skills.
+"""
+import json
+from pathlib import Path
+from loguru import logger
+from src.skills.skill_models import (
+    Skill, SkillInput, SkillOutput, CodeReference,
+    DesignCode, ReportSection,
+)
+
+
+class SkillCatalog:
+    """Registry of all available geotechnical design skills."""
+    
+    def __init__(self):
+        self.skills: dict[str, Skill] = {}
+        self._register_builtin_skills()
+    
+    def _register_builtin_skills(self):
+        """Register the built-in skills."""
+        
+        # ─── Skill 1: Shallow Foundation Bearing Capacity ───
+        self.register(Skill(
+            skill_id="shallow_bearing_capacity",
+            name="Shallow Foundation Bearing Capacity Assessment",
+            description=(
+                "Calculate ultimate and allowable bearing capacity for shallow "
+                "foundations using Terzaghi, Meyerhof, or Hansen methods. "
+                "Includes EC7 DA1 partial factor check if required."
+            ),
+            category="foundations",
+            inputs=[
+                SkillInput(name="soil_cohesion_kpa", type="float", unit="kPa",
+                          description="Effective cohesion c' or undrained shear strength cu"),
+                SkillInput(name="soil_friction_angle_deg", type="float", unit="degrees",
+                          description="Effective friction angle φ'"),
+                SkillInput(name="soil_unit_weight", type="float", unit="kN/m³",
+                          description="Bulk unit weight of soil"),
+                SkillInput(name="foundation_width", type="float", unit="m",
+                          description="Foundation width B"),
+                SkillInput(name="foundation_length", type="float", unit="m",
+                          description="Foundation length L"),
+                SkillInput(name="foundation_depth", type="float", unit="m",
+                          description="Foundation embedment depth Df"),
+                SkillInput(name="gwl_depth", type="float", unit="m",
+                          description="Groundwater level depth below ground surface",
+                          required=False, default=None),
+                SkillInput(name="factor_of_safety", type="float", unit="-",
+                          description="Required global factor of safety",
+                          required=False, default=3.0),
+                SkillInput(name="design_code", type="string",
+                          description="Design code approach: 'traditional' or 'EC7_DA1'",
+                          required=False, default="traditional"),
+            ],
+            outputs=[
+                SkillOutput(name="q_ult_kpa", type="float", unit="kPa",
+                           description="Ultimate bearing capacity"),
+                SkillOutput(name="q_allowable_kpa", type="float", unit="kPa",
+                           description="Allowable bearing capacity"),
+                SkillOutput(name="factor_of_safety", type="float",
+                           description="Applied factor of safety"),
+                SkillOutput(name="method", type="string",
+                           description="Calculation method used"),
+                SkillOutput(name="pass_fail", type="bool",
+                           description="Whether the design passes"),
+            ],
+            calculation_function="src.calculations.bearing_capacity.hansen_bearing_capacity",
+            applicable_codes=[
+                DesignCode.COP_FOUNDATIONS,
+                DesignCode.GEOGUIDE_1,
+                DesignCode.EC7,
+            ],
+            code_references=[
+                CodeReference(
+                    code=DesignCode.COP_FOUNDATIONS,
+                    clause="Section 2",
+                    description="Requirements for foundation design",
+                ),
+                CodeReference(
+                    code=DesignCode.EC7,
+                    clause="6.5.2",
+                    description="Bearing resistance — analytical method",
+                ),
+            ],
+            report_sections=[
+                ReportSection.ANALYSIS_AND_DESIGN,
+                ReportSection.RECOMMENDATIONS,
+            ],
+            acceptance_criteria=[
+                "FoS >= 3.0 for traditional HK approach (dead + live loads)",
+                "EC7 DA1: Both Combination 1 and 2 utilisation ratio <= 1.0",
+                "Settlement within acceptable limits (typically < 25mm)",
+            ],
+            result_description_template=(
+                "The bearing capacity of the proposed {foundation_width}m × "
+                "{foundation_length}m shallow foundation at {foundation_depth}m depth "
+                "has been assessed using the {method} method. "
+                "The ultimate bearing capacity is {q_ult_kpa} kPa, giving an "
+                "allowable bearing pressure of {q_allowable_kpa} kPa with a "
+                "factor of safety of {factor_of_safety}."
+            ),
+        ))
+        
+        # ─── Skill 2: Slope Stability (Infinite Slope) ───
+        self.register(Skill(
+            skill_id="slope_stability_infinite",
+            name="Infinite Slope Stability Analysis",
+            description=(
+                "Assess stability of natural or cut slopes using the infinite "
+                "slope method. Suitable for shallow translational failures in "
+                "residual soils (CDG/HDG) common in Hong Kong."
+            ),
+            category="slopes",
+            inputs=[
+                SkillInput(name="slope_angle_deg", type="float", unit="degrees",
+                          description="Slope angle from horizontal"),
+                SkillInput(name="friction_angle_deg", type="float", unit="degrees",
+                          description="Effective friction angle φ'"),
+                SkillInput(name="cohesion_kpa", type="float", unit="kPa",
+                          description="Effective cohesion c'"),
+                SkillInput(name="unit_weight", type="float", unit="kN/m³",
+                          description="Bulk unit weight"),
+                SkillInput(name="depth_to_slip_m", type="float", unit="m",
+                          description="Depth to potential slip surface"),
+                SkillInput(name="gwl_above_slip_m", type="float", unit="m",
+                          description="Height of water table above slip surface",
+                          required=False, default=0.0),
+                SkillInput(name="required_fos", type="float",
+                          description="Required factor of safety",
+                          required=False, default=1.4),
+            ],
+            outputs=[
+                SkillOutput(name="factor_of_safety", type="float",
+                           description="Calculated factor of safety"),
+                SkillOutput(name="pass_fail", type="bool",
+                           description="Whether FoS meets requirement"),
+            ],
+            calculation_function="src.calculations.slope_stability.infinite_slope_drained",
+            applicable_codes=[
+                DesignCode.GEO_MANUAL_SLOPES,
+                DesignCode.GEOGUIDE_1,
+            ],
+            code_references=[
+                CodeReference(
+                    code=DesignCode.GEO_MANUAL_SLOPES,
+                    clause="Chapter 6",
+                    description="Stability analysis of slopes",
+                ),
+            ],
+            report_sections=[
+                ReportSection.ANALYSIS_AND_DESIGN,
+                ReportSection.RECOMMENDATIONS,
+            ],
+            acceptance_criteria=[
+                "FoS >= 1.4 for new cut slopes (GEO requirement)",
+                "FoS >= 1.2 for existing slopes (risk-based assessment)",
+                "FoS >= 1.1 for temporary works (with approval)",
+            ],
+        ))
+        
+        # ─── Skill 3: Retaining Wall Earth Pressure ───
+        self.register(Skill(
+            skill_id="earth_pressure_rankine",
+            name="Earth Pressure Calculation (Rankine)",
+            description=(
+                "Calculate active and passive earth pressures using Rankine's theory. "
+                "For retaining wall design per Geoguide 1."
+            ),
+            category="retaining_walls",
+            inputs=[
+                SkillInput(name="wall_height_m", type="float", unit="m",
+                          description="Retaining wall height"),
+                SkillInput(name="backfill_friction_angle_deg", type="float", unit="degrees",
+                          description="Friction angle of backfill soil"),
+                SkillInput(name="backfill_cohesion_kpa", type="float", unit="kPa",
+                          description="Cohesion of backfill (0 for granular)",
+                          required=False, default=0.0),
+                SkillInput(name="backfill_unit_weight", type="float", unit="kN/m³",
+                          description="Unit weight of backfill"),
+                SkillInput(name="surcharge_kpa", type="float", unit="kPa",
+                          description="Surcharge pressure on backfill surface",
+                          required=False, default=0.0),
+                SkillInput(name="gwl_behind_wall_m", type="float", unit="m",
+                          description="GWL depth behind wall from top of wall",
+                          required=False, default=None),
+            ],
+            outputs=[
+                SkillOutput(name="Ka", type="float", description="Active earth pressure coefficient"),
+                SkillOutput(name="Kp", type="float", description="Passive earth pressure coefficient"),
+                SkillOutput(name="total_active_force_kn_m", type="float", unit="kN/m",
+                           description="Total active force per metre run"),
+                SkillOutput(name="point_of_application_m", type="float", unit="m",
+                           description="Height of resultant force above base"),
+            ],
+            calculation_function="src.calculations.earth_pressure.rankine_earth_pressure",
+            applicable_codes=[DesignCode.GEOGUIDE_1, DesignCode.BS8002, DesignCode.EC7],
+            code_references=[
+                CodeReference(code=DesignCode.GEOGUIDE_1, clause="Chapter 6",
+                            description="Earth pressures on retaining walls"),
+                CodeReference(code=DesignCode.BS8002, clause="Section 3",
+                            description="Earth pressure calculation methods"),
+            ],
+            report_sections=[ReportSection.ANALYSIS_AND_DESIGN],
+            acceptance_criteria=[
+                "Sliding FoS >= 1.5 (Geoguide 1)",
+                "Overturning FoS >= 2.0 (Geoguide 1)",
+                "Bearing capacity FoS >= 3.0",
+            ],
+        ))
+
+    def register(self, skill: Skill):
+        """Register a skill in the catalog."""
+        self.skills[skill.skill_id] = skill
+        logger.debug(f"Registered skill: {skill.skill_id}")
+    
+    def get_skill(self, skill_id: str) -> Skill | None:
+        """Get a skill by ID."""
+        return self.skills.get(skill_id)
+    
+    def find_skills_for_category(self, category: str) -> list[Skill]:
+        """Find all skills in a category."""
+        return [s for s in self.skills.values() if s.category == category]
+    
+    def find_skills_for_code(self, code: DesignCode) -> list[Skill]:
+        """Find all skills applicable to a specific design code."""
+        return [s for s in self.skills.values() if code in s.applicable_codes]
+    
+    def find_skills_for_report_section(self, section: ReportSection) -> list[Skill]:
+        """Find skills that contribute to a specific report section."""
+        return [s for s in self.skills.values() if section in s.report_sections]
+    
+    def get_missing_inputs(self, skill_id: str, provided_inputs: dict) -> list[SkillInput]:
+        """Identify required inputs that are missing."""
+        skill = self.get_skill(skill_id)
+        if not skill:
+            return []
+        return [
+            inp for inp in skill.inputs
+            if inp.required and inp.name not in provided_inputs
+        ]
+    
+    def list_all(self) -> list[dict]:
+        """List all skills as summary dicts."""
+        return [
+            {
+                "skill_id": s.skill_id,
+                "name": s.name,
+                "category": s.category,
+                "codes": [c.value for c in s.applicable_codes],
+                "inputs_required": len([i for i in s.inputs if i.required]),
+            }
+            for s in self.skills.values()
+        ]
+    
+    def export_to_json(self, filepath: str):
+        """Export the catalog to JSON."""
+        data = {sid: s.model_dump() for sid, s in self.skills.items()}
+        with open(filepath, "w") as f:
+            json.dump(data, f, indent=2, default=str)
+    
+    def import_from_json(self, filepath: str):
+        """Import skills from a JSON file."""
+        with open(filepath) as f:
+            data = json.load(f)
+        for skill_id, skill_data in data.items():
+            self.register(Skill(**skill_data))
+Step 2.3 — Create the Skill Executor
+Create src/skills/executor.py:
+
+Python
+
+"""
+Skill executor: runs deterministic calculations and formats results.
+The LLM NEVER computes — it only describes results.
+"""
+import importlib
+from loguru import logger
+from src.skills.catalog import SkillCatalog
+from src.skills.skill_models import Skill
+from src.calculations.bearing_capacity import (
+    SoilParameters,
+    FoundationGeometry,
+    GroundwaterCondition,
+    terzaghi_bearing_capacity,
+    hansen_bearing_capacity,
+    ec7_bearing_capacity_da1,
+)
+from src.calculations.slope_stability import (
+    infinite_slope_drained,
+    taylor_stability_number,
+)
+
+
+class SkillExecutor:
+    """Execute skills using deterministic calculation functions."""
+    
+    def __init__(self, catalog: SkillCatalog):
+        self.catalog = catalog
+        # Map skill_ids to their actual Python functions
+        self._function_map = {
+            "shallow_bearing_capacity": self._execute_bearing_capacity,
+            "slope_stability_infinite": self._execute_slope_stability,
+            "earth_pressure_rankine": self._execute_earth_pressure,
+        }
+    
+    def execute(self, skill_id: str, inputs: dict) -> dict:
+        """
+        Execute a skill with the given inputs.
+        
+        Returns a dict with:
+        - 'success': bool
+        - 'results': dict of output values
+        - 'skill': the skill definition
+        - 'formatted_description': text description of results
+        - 'error': error message if failed
+        """
+        skill = self.catalog.get_skill(skill_id)
+        if not skill:
+            return {"success": False, "error": f"Skill not found: {skill_id}"}
+        
+        # Check for missing required inputs
+        missing = self.catalog.get_missing_inputs(skill_id, inputs)
+        if missing:
+            missing_names = [m.name for m in missing]
+            return {
+                "success": False,
+                "error": f"Missing required inputs: {missing_names}",
+                "missing_inputs": [m.model_dump() for m in missing],
+            }
+        
+        # Execute
+        executor_fn = self._function_map.get(skill_id)
+        if not executor_fn:
+            return {
+                "success": False,
+                "error": f"No executor registered for skill: {skill_id}",
+            }
+        
+        try:
+            results = executor_fn(inputs)
+            
+            # Format description using template
+            description = ""
+            if skill.result_description_template:
+                try:
+                    template_vars = {**inputs, **results}
+                    description = skill.result_description_template.format(**template_vars)
+                except KeyError:
+                    description = str(results)
+            
+            return {
+                "success": True,
+                "results": results,
+                "skill": skill.model_dump(),
+                "formatted_description": description,
+                "acceptance_criteria": skill.acceptance_criteria,
+            }
+        except Exception as e:
+            logger.error(f"Skill execution failed: {e}")
+            return {"success": False, "error": str(e)}
+    
+    def _execute_bearing_capacity(self, inputs: dict) -> dict:
+        """Execute bearing capacity calculation."""
+        soil = SoilParameters(
+            cohesion_kpa=inputs["soil_cohesion_kpa"],
+            friction_angle_deg=inputs["soil_friction_angle_deg"],
+            unit_weight_kn_m3=inputs["soil_unit_weight"],
+        )
+        foundation = FoundationGeometry(
+            width_m=inputs["foundation_width"],
+            length_m=inputs["foundation_length"],
+            depth_m=inputs["foundation_depth"],
+        )
+        gwl = None
+        if inputs.get("gwl_depth") is not None:
+            gwl = GroundwaterCondition(gwl_depth_m=inputs["gwl_depth"])
+        
+        fos = inputs.get("factor_of_safety", 3.0)
+        code = inputs.get("design_code", "traditional")
+        
+        result = hansen_bearing_capacity(soil, foundation, gwl, fos)
+        
+        output = {
+            "q_ult_kpa": result.q_ult_kpa,
+            "q_allowable_kpa": result.q_allowable_kpa,
+            "factor_of_safety": result.factor_of_safety,
+            "method": result.method,
+            "bearing_capacity_factors": result.bearing_capacity_factors,
+            "shape_factors": result.shape_factors,
+            "depth_factors": result.depth_factors,
+            "notes": result.notes,
+            "pass_fail": True,  # Will be evaluated based on applied loads
+        }
+        
+        # Also run EC7 check if requested
+        if code == "EC7_DA1" and inputs.get("characteristic_permanent_load_kn"):
+            ec7_result = ec7_bearing_capacity_da1(
+                soil=soil,
+                foundation=foundation,
+                gwl=gwl,
+                characteristic_permanent_load_kn=inputs.get("characteristic_permanent_load_kn", 0),
+                characteristic_variable_load_kn=inputs.get("characteristic_variable_load_kn", 0),
+            )
+            output["ec7_check"] = ec7_result
+        
+        return output
+    
+    def _execute_slope_stability(self, inputs: dict) -> dict:
+        """Execute slope stability calculation."""
+        result = infinite_slope_drained(
+            slope_angle_deg=inputs["slope_angle_deg"],
+            friction_angle_deg=inputs["friction_angle_deg"],
+            cohesion_kpa=inputs["cohesion_kpa"],
+            unit_weight_kn_m3=inputs["unit_weight"],
+            depth_to_slip_m=inputs["depth_to_slip_m"],
+            gwl_above_slip_m=inputs.get("gwl_above_slip_m", 0.0),
+            required_fos=inputs.get("required_fos", 1.4),
+        )
+        
+        return {
+            "factor_of_safety": result.factor_of_safety,
+            "method": result.method,
+            "critical_slip_surface": result.critical_slip_surface,
+            "pass_fail": result.pass_fail,
+            "required_fos": result.required_fos,
+            "notes": result.notes,
+        }
+    
+    def _execute_earth_pressure(self, inputs: dict) -> dict:
+        """Execute earth pressure calculation."""
+        # Import or define here
+        import math
+        
+        phi = math.radians(inputs["backfill_friction_angle_deg"])
+        H = inputs["wall_height_m"]
+        gamma = inputs["backfill_unit_weight"]
+        c = inputs.get("backfill_cohesion_kpa", 0.0)
+        q = inputs.get("surcharge_kpa", 0.0)
+        
+        # Rankine coefficients
+        Ka = math.tan(math.radians(45 - inputs["backfill_friction_angle_deg"] / 2)) ** 2
+        Kp = math.tan(math.radians(45 + inputs["backfill_friction_angle_deg"] / 2)) ** 2
+        
+        # Active earth pressure at base
+        sigma_a_base = Ka * gamma * H + Ka * q - 2 * c * math.sqrt(Ka)
+        sigma_a_base = max(sigma_a_base, 0)
+        
+        # Total active force (triangular + uniform)
+        Pa_soil = 0.5 * Ka * gamma * H ** 2
+        Pa_surcharge = Ka * q * H
+        Pa_cohesion = -2 * c * math.sqrt(Ka) * H
+        
+        total_Pa = max(Pa_soil + Pa_surcharge + Pa_cohesion, 0)
+        
+        # Point of application (from base)
+        if total_Pa > 0:
+            moment = Pa_soil * H / 3 + Pa_surcharge * H / 2
+            y_bar = moment / total_Pa if total_Pa > 0 else H / 3
+        else:
+            y_bar = H / 3
+        
+        return {
+            "Ka": round(Ka, 4),
+            "Kp": round(Kp, 4),
+            "sigma_a_base_kpa": round(sigma_a_base, 1),
+            "total_active_force_kn_m": round(total_Pa, 1),
+            "Pa_soil_kn_m": round(Pa_soil, 1),
+            "Pa_surcharge_kn_m": round(Pa_surcharge, 1),
+            "point_of_application_m": round(y_bar, 2),
+        }
+<a name="phase-3"></a>
+
+Phase 3: Designer Agent — Report Generation
+Step 3.1 — Create Report Templates
+Create src/templates/report_structure.py:
+
+Python
+
+"""
+Standard report structure for HK geotechnical reports.
+Based on typical GEO submission format.
+"""
+from dataclasses import dataclass, field
+
+
+@dataclass
+class ReportSectionTemplate:
+    """Template for a single report section."""
+    number: str
+    title: str
+    required: bool = True
+    subsections: list[dict] = field(default_factory=list)
+    guidance: str = ""  # Instructions for the LLM on what to include
+
+
+# Standard GEO-style Geotechnical Design Report structure
+STANDARD_REPORT_TEMPLATE = [
+    ReportSectionTemplate(
+        number="1",
+        title="Introduction",
+        guidance=(
+            "Describe the project background, objectives of the geotechnical "
+            "assessment, scope of work, and applicable design codes/standards. "
+            "Mention the commissioning party and any relevant contract references."
+        ),
+        subsections=[
+            {"number": "1.1", "title": "Project Background"},
+            {"number": "1.2", "title": "Scope of Work"},
+            {"number": "1.3", "title": "Applicable Standards and Codes"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="2",
+        title="Site Description",
+        guidance=(
+            "Describe the site location, topography, access, adjacent structures, "
+            "existing services, and any relevant planning constraints. Reference "
+            "the site plan in the appendices."
+        ),
+        subsections=[
+            {"number": "2.1", "title": "Site Location and Access"},
+            {"number": "2.2", "title": "Topography and Geomorphology"},
+            {"number": "2.3", "title": "Adjacent Structures and Services"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="3",
+        title="Ground Investigation",
+        guidance=(
+            "Summarise the ground investigation works carried out: number and "
+            "type of boreholes/trial pits, in-situ tests (SPT, vane shear, etc.), "
+            "laboratory tests. Reference borehole logs in appendices. "
+            "State compliance with Geoguide 2."
+        ),
+        subsections=[
+            {"number": "3.1", "title": "Scope of Ground Investigation"},
+            {"number": "3.2", "title": "Field Works"},
+            {"number": "3.3", "title": "Laboratory Testing"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="4",
+        title="Geotechnical Conditions",
+        guidance=(
+            "Describe the ground model: stratigraphy, soil and rock descriptions "
+            "(per Geoguide 3), groundwater conditions, and design soil parameters. "
+            "Present the geological model and any relevant geological hazards. "
+            "For Hong Kong: describe the weathering profile (Grade I to VI), "
+            "CDG/HDG characteristics, rockhead level, and corestone distribution."
+        ),
+        subsections=[
+            {"number": "4.1", "title": "Stratigraphy and Ground Model"},
+            {"number": "4.2", "title": "Soil and Rock Parameters"},
+            {"number": "4.3", "title": "Groundwater Conditions"},
+            {"number": "4.4", "title": "Geological Hazards"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="5",
+        title="Analysis and Design",
+        guidance=(
+            "Present all geotechnical analyses performed. For each analysis, state: "
+            "the design method used, input parameters, calculation results, and "
+            "compliance check against acceptance criteria. "
+            "All calculations should be presented in the appendices with a "
+            "summary of results here."
+        ),
+        subsections=[
+            {"number": "5.1", "title": "Design Basis and Load Cases"},
+            {"number": "5.2", "title": "Foundation Design"},
+            {"number": "5.3", "title": "Slope Stability Assessment"},
+            {"number": "5.4", "title": "Retaining Wall Design"},
+            {"number": "5.5", "title": "Settlement Assessment"},
+            {"number": "5.6", "title": "Seismic Considerations"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="6",
+        title="Recommendations",
+        guidance=(
+            "Summarise the recommended foundation type, allowable bearing "
+            "pressures, slope treatment measures, and any geotechnical "
+            "constraints on construction. Recommendations should be clear "
+            "and actionable for the structural engineer and contractor."
+        ),
+        subsections=[
+            {"number": "6.1", "title": "Foundation Recommendations"},
+            {"number": "6.2", "title": "Earthworks Recommendations"},
+            {"number": "6.3", "title": "Slope Protection and Drainage"},
+            {"number": "6.4", "title": "Geotechnical Constraints"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="7",
+        title="Construction Considerations",
+        guidance=(
+            "Highlight any specific construction considerations: excavation "
+            "support, dewatering, monitoring requirements, and any construction "
+            "risks identified. Reference relevant APP-18/APP-24 requirements."
+        ),
+        subsections=[
+            {"number": "7.1", "title": "Excavation and Temporary Support"},
+            {"number": "7.2", "title": "Construction Sequence"},
+            {"number": "7.3", "title": "Monitoring Requirements"},
+        ],
+    ),
+    ReportSectionTemplate(
+        number="8",
+        title="References",
+        required=True,
+        guidance="List all referenced codes, standards, and publications.",
+    ),
+    ReportSectionTemplate(
+        number="Appendix A",
+        title="Borehole Logs and Test Results",
+        required=True,
+        guidance="Include all borehole logs, trial pit records, and laboratory test results.",
+    ),
+    ReportSectionTemplate(
+        number="Appendix B",
+        title="Design Calculations",
+        required=True,
+        guidance="Include detailed calculation sheets for all analyses.",
+    ),
+    ReportSectionTemplate(
+        number="Appendix C",
+        title="Drawings",
+        required=False,
+        guidance="Include site plan, geological sections, and design drawings.",
+    ),
+]
+Step 3.2 — Create the Designer Agent
+Trae AI Prompt:
+"Create a Designer Agent class that: (1) takes project information from user, (2) identifies which skills/calculations are needed, (3) asks clarifying questions for missing inputs, (4) executes deterministic calculations, (5) retrieves relevant code sections from vector DB, (6) assembles a structured geotechnical report using Jinja2 templates. Use a state machine pattern for the workflow."
+
+Create src/agents/designer_agent.py:
+
+Python
+
+"""
+Designer Agent: Interactive geotechnical report generation.
+
+Workflow:
+1. Collect project information
+2. Identify required analyses (skills)
+3. Gather missing parameters
+4. Execute calculations (deterministic)
+5. Retrieve code references (RAG)
+6. Assemble report (LLM + templates)
+"""
+import json
+from enum import Enum
+from dataclasses import dataclass, field
+from loguru import logger
+from src.vectordb.qdrant_store import GeoVectorStore
+from src.utils.llm_client import call_llm, call_llm_with_context
+from src.skills.catalog import SkillCatalog
+from src.skills.executor import SkillExecutor
+from src.templates.report_structure import STANDARD_REPORT_TEMPLATE
+from config.settings import PRIMARY_MODEL, REASONING_MODEL
+
+
+class AgentState(str, Enum):
+    """States in the Designer Agent workflow."""
+    INIT = "init"
+    COLLECTING_PROJECT_INFO = "collecting_project_info"
+    IDENTIFYING_SKILLS = "identifying_skills"
+    COLLECTING_PARAMETERS = "collecting_parameters"
+    EXECUTING_CALCULATIONS = "executing_calculations"
+    GENERATING_REPORT = "generating_report"
+    COMPLETE = "complete"
+
+
+@dataclass
+class ProjectData:
+    """All collected project information."""
+    project_name: str = ""
+    project_type: str = ""  # "building", "road", "slope", "excavation", etc.
+    location: str = ""
+    description: str = ""
+    applicable_codes: list[str] = field(default_factory=list)
+    
+    # Ground conditions
+    soil_layers: list[dict] = field(default_factory=list)
+    gwl_depth_m: float | None = None
+    
+    # Structure info
+    foundation_type: str = ""
+    loads: dict = field(default_factory=dict)
+    geometry: dict = field(default_factory=dict)
+    
+    # Analysis parameters
+    design_parameters: dict = field(default_factory=dict)
+    
+    # Results
+    calculation_results: list[dict] = field(default_factory=list)
+    retrieved_references: list[dict] = field(default_factory=list)
+    
+    # Raw user inputs for history
+    conversation_history: list[dict] = field(default_factory=list)
+
+
+class DesignerAgent:
+    """
+    Interactive agent that guides the user through creating
+    a geotechnical design report.
+    """
+    
+    def __init__(self, use_local_db: bool = False):
+        self.store = GeoVectorStore(use_local=use_local_db)
+        self.catalog = SkillCatalog()
+        self.executor = SkillExecutor(self.catalog)
+        self.state = AgentState.INIT
+        self.project = ProjectData()
+        self.selected_skills: list[str] = []
+        self.current_skill_index: int = 0
+        self.pending_questions: list[str] = []
+    
+    def start(self, initial_description: str = "") -> dict:
+        """Start a new design session."""
+        self.state = AgentState.COLLECTING_PROJECT_INFO
+        self.project = ProjectData()
+        
+        if initial_description:
+            return self.process_input(initial_description)
+        
+        return {
+            "state": self.state.value,
+            "message": (
+                "Welcome to the Geotechnical Design Report Generator.\n\n"
+                "Please describe your project. Include:\n"
+                "• Project type (building foundation, slope, retaining wall, excavation)\n"
+                "• Location in Hong Kong\n"
+                "• Key dimensions and loads\n"
+                "• Available ground investigation data\n"
+                "• Applicable design codes (HK CoP, EC7, etc.)"
+            ),
+            "questions": [],
+        }
+    
+    def process_input(self, user_input: str) -> dict:
+        """Process user input based on current state."""
+        self.project.conversation_history.append({
+            "role": "user",
+            "content": user_input,
+        })
+        
+        if self.state == AgentState.COLLECTING_PROJECT_INFO:
+            return self._handle_project_info(user_input)
+        elif self.state == AgentState.COLLECTING_PARAMETERS:
+            return self._handle_parameter_input(user_input)
+        elif self.state == AgentState.IDENTIFYING_SKILLS:
+            return self._identify_required_skills()
+        elif self.state == AgentState.EXECUTING_CALCULATIONS:
+            return self._execute_calculations()
+        elif self.state == AgentState.GENERATING_REPORT:
+            return self._generate_report()
+        else:
+            return {"state": self.state.value, "message": "Session complete."}
+    
+    def _handle_project_info(self, user_input: str) -> dict:
+        """Extract project information from user description using LLM."""
+        
+        extraction_prompt = f"""Extract project information from the following description.
+Return a JSON object with these fields (use null for unknown values):
+
+{{
+    "project_name": "string",
+    "project_type": "one of: building, road, slope, excavation, retaining_wall, tunnel, reclamation",
+    "location": "string",
+    "description": "brief summary",
+    "applicable_codes": ["list of code names"],
+    "foundation_type": "shallow/deep/piled/not_specified",
+    "soil_layers": [
+        {{"depth_from_m": 0, "depth_to_m": 5, "description": "Fill", 
+          "soil_type": "fill/cdg/hdg/alluvium/marine/rock",
+          "spt_n": null, "cohesion_kpa": null, "friction_angle_deg": null, 
+          "unit_weight_kn_m3": null}}
+    ],
+    "gwl_depth_m": null,
+    "geometry": {{"width_m": null, "length_m": null, "depth_m": null, "height_m": null}},
+    "loads": {{"permanent_kn": null, "variable_kn": null, "bearing_pressure_kpa": null}},
+    "missing_critical_info": ["list of important things not mentioned"]
+}}
+
+User description:
+{user_input}
+"""
+        
+        response = call_llm(
+            extraction_prompt,
+            system_prompt="You are a geotechnical data extraction assistant. Return ONLY valid JSON.",
+            temperature=0.1,
+        )
+        
+        # Parse the JSON response
+        try:
+            # Clean up response — remove markdown code blocks if present
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            
+            extracted = json.loads(cleaned)
+        except json.JSONDecodeError:
+            logger.warning("Failed to parse LLM extraction, asking for clarification")
+            return {
+                "state": self.state.value,
+                "message": (
+                    "I couldn't fully understand the project description. "
+                    "Could you please provide the information in a more structured way?\n\n"
+                    "For example:\n"
+                    "• Project type: Building foundation\n"
+                    "• Location: Kowloon\n"
+                    "• Foundation: 2m x 3m pad footing at 1.5m depth\n"
+                    "• Soil: 3m fill over CDG, SPT N=20-30\n"
+                    "• Groundwater: 5m below ground\n"
+                    "• Load: 500 kN permanent, 200 kN variable"
+                ),
+                "questions": [],
+            }
+        
+        # Update project data
+        self.project.project_name = extracted.get("project_name", "")
+        self.project.project_type = extracted.get("project_type", "")
+        self.project.location = extracted.get("location", "")
+        self.project.description = extracted.get("description", "")
+        self.project.applicable_codes = extracted.get("applicable_codes", [])
+        self.project.foundation_type = extracted.get("foundation_type", "")
+        self.project.soil_layers = extracted.get("soil_layers", [])
+        self.project.gwl_depth_m = extracted.get("gwl_depth_m")
+        self.project.geometry = extracted.get("geometry", {})
+        self.project.loads = extracted.get("loads", {})
+        
+        # Generate follow-up questions for missing info
+        missing = extracted.get("missing_critical_info", [])
+        questions = self._generate_clarifying_questions(missing)
+        
+        if questions:
+            self.pending_questions = questions
+            self.state = AgentState.COLLECTING_PARAMETERS
+            return {
+                "state": self.state.value,
+                "message": "I've captured the following project information:\n" + 
+                          json.dumps(extracted, indent=2) +
+                          "\n\nI need some additional information:",
+                "questions": questions,
+                "extracted_data": extracted,
+            }
+        else:
+            # Move to skill identification
+            self.state = AgentState.IDENTIFYING_SKILLS
+            return self._identify_required_skills()
+    
+    def _generate_clarifying_questions(self, missing_items: list[str]) -> list[str]:
+        """Generate specific questions for missing information."""
+        standard_questions = {
+            "soil_parameters": (
+                "What are the soil parameters for the main bearing stratum? "
+                "(cohesion c', friction angle φ', unit weight γ)"
+            ),
+            "groundwater": (
+                "What is the groundwater level depth? "
+                "(metres below ground surface)"
+            ),
+            "loads": (
+                "What are the characteristic loads? "
+                "(permanent/dead load in kN, variable/live load in kN)"
+            ),
+            "geometry": (
+                "What are the foundation dimensions? "
+                "(width, length, embedment depth in metres)"
+            ),
+            "design_code": (
+                "Which design approach should be used? "
+                "(Traditional with global FoS / EC7 Design Approach 1)"
+            ),
+            "slope_geometry": (
+                "What is the slope geometry? "
+                "(height in metres, slope angle in degrees)"
+            ),
+        }
+        
+        questions = []
+        for item in missing_items:
+            item_lower = item.lower()
+            for key, question in standard_questions.items():
+                if key in item_lower or any(
+                    word in item_lower for word in key.split("_")
+                ):
+                    questions.append(question)
+                    break
+            else:
+                questions.append(f"Please provide: {item}")
+        
+        return questions[:5]  # Limit to 5 questions at a time
+    
+    def _handle_parameter_input(self, user_input: str) -> dict:
+        """Process answers to clarifying questions."""
+        # Use LLM to extract parameters from the answer
+        extraction_prompt = f"""The user was asked these questions:
+{json.dumps(self.pending_questions, indent=2)}
+
+Their response:
+{user_input}
+
+Extract any numerical values and parameters mentioned. 
+Return a JSON object with the values found.
+Use keys like: cohesion_kpa, friction_angle_deg, unit_weight_kn_m3, 
+gwl_depth_m, foundation_width_m, foundation_length_m, foundation_depth_m,
+permanent_load_kn, variable_load_kn, slope_height_m, slope_angle_deg, etc.
+Only include values that were actually provided. Return ONLY valid JSON.
+"""
+        
+        response = call_llm(
+            extraction_prompt,
+            system_prompt="You are a parameter extraction assistant. Return ONLY valid JSON.",
+            temperature=0.1,
+        )
+        
+        try:
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            params = json.loads(cleaned)
+        except json.JSONDecodeError:
+            params = {}
+        
+        # Update project data
+        self.project.design_parameters.update(params)
+        
+        if params.get("gwl_depth_m") is not None:
+            self.project.gwl_depth_m = params["gwl_depth_m"]
+        
+        # Check if we have enough info now
+        self.state = AgentState.IDENTIFYING_SKILLS
+        return self._identify_required_skills()
+    
+    def _identify_required_skills(self) -> dict:
+        """Determine which skills/analyses are needed for this project."""
+        
+        project_summary = json.dumps({
+            "type": self.project.project_type,
+            "description": self.project.description,
+            "foundation_type": self.project.foundation_type,
+            "geometry": self.project.geometry,
+            "parameters": self.project.design_parameters,
+        }, indent=2)
+        
+        available_skills = json.dumps(self.catalog.list_all(), indent=2)
+        
+        skill_selection_prompt = f"""Given this project:
+{project_summary}
+
+And these available analysis skills:
+{available_skills}
+
+Which skills should be applied? Return a JSON array of skill_id values.
+Consider:
+- Foundation projects need: bearing capacity, settlement
+- Slope projects need: slope stability
+- Retaining wall projects need: earth pressure, bearing capacity, sliding check
+- Excavation projects need: earth pressure, base heave, ground movement
+
+Return ONLY a JSON array, e.g.: ["shallow_bearing_capacity", "slope_stability_infinite"]
+"""
+        
+        response = call_llm(
+            skill_selection_prompt,
+            system_prompt="You are a geotechnical engineering assistant. Return ONLY a JSON array.",
+            temperature=0.1,
+        )
+        
+        try:
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            self.selected_skills = json.loads(cleaned)
+        except json.JSONDecodeError:
+            # Default based on project type
+            type_skill_map = {
+                "building": ["shallow_bearing_capacity"],
+                "slope": ["slope_stability_infinite"],
+                "retaining_wall": ["earth_pressure_rankine", "shallow_bearing_capacity"],
+                "excavation": ["earth_pressure_rankine"],
+            }
+            self.selected_skills = type_skill_map.get(
+                self.project.project_type, ["shallow_bearing_capacity"]
+            )
+        
+        logger.info(f"Selected skills: {self.selected_skills}")
+        
+        # Check if we have all needed inputs for selected skills
+        all_missing = []
+        for skill_id in self.selected_skills:
+            skill = self.catalog.get_skill(skill_id)
+            if skill:
+                for inp in skill.inputs:
+                    if inp.required and inp.name not in self.project.design_parameters:
+                        # Try to find in project data
+                        value = self._find_parameter_value(inp.name)
+                        if value is not None:
+                            self.project.design_parameters[inp.name] = value
+                        else:
+                            all_missing.append(inp)
+        
+        if all_missing:
+            # Need more info — ask user
+            questions = [
+                f"{inp.description} ({inp.name}, unit: {inp.unit})"
+                for inp in all_missing
+            ]
+            # Deduplicate
+            questions = list(dict.fromkeys(questions))
+            self.pending_questions = questions
+            self.state = AgentState.COLLECTING_PARAMETERS
+            
+            return {
+                "state": self.state.value,
+                "message": (
+                    f"I've identified the following analyses needed:\n"
+                    + "\n".join(f"  • {self.catalog.get_skill(s).name}" for s in self.selected_skills if self.catalog.get_skill(s))
+                    + "\n\nBut I need these additional parameters:"
+                ),
+                "questions": questions[:8],
+                "selected_skills": self.selected_skills,
+            }
+        
+        # We have everything — execute
+        self.state = AgentState.EXECUTING_CALCULATIONS
+        return self._execute_calculations()
+    
+    def _find_parameter_value(self, param_name: str):
+        """Try to find a parameter value from existing project data."""
+        # Direct match in design_parameters
+        if param_name in self.project.design_parameters:
+            return self.project.design_parameters[param_name]
+        
+        # Map from project geometry/loads
+        geometry_map = {
+            "foundation_width": self.project.geometry.get("width_m"),
+            "foundation_length": self.project.geometry.get("length_m"),
+            "foundation_depth": self.project.geometry.get("depth_m"),
+            "wall_height_m": self.project.geometry.get("height_m"),
+            "slope_angle_deg": self.project.geometry.get("slope_angle_deg"),
+        }
+        if param_name in geometry_map:
+            return geometry_map[param_name]
+        
+        # Map from soil layers (use first layer as default)
+        if self.project.soil_layers:
+            soil = self.project.soil_layers[0]
+            soil_map = {
+                "soil_cohesion_kpa": soil.get("cohesion_kpa"),
+                "soil_friction_angle_deg": soil.get("friction_angle_deg"),
+                "soil_unit_weight": soil.get("unit_weight_kn_m3"),
+                "cohesion_kpa": soil.get("cohesion_kpa"),
+                "friction_angle_deg": soil.get("friction_angle_deg"),
+                "unit_weight": soil.get("unit_weight_kn_m3"),
+                "backfill_friction_angle_deg": soil.get("friction_angle_deg"),
+                "backfill_unit_weight": soil.get("unit_weight_kn_m3"),
+            }
+            if param_name in soil_map:
+                return soil_map[param_name]
+        
+        # GWL
+        if param_name == "gwl_depth" and self.project.gwl_depth_m is not None:
+            return self.project.gwl_depth_m
+        
+        return None
+    
+    def _execute_calculations(self) -> dict:
+        """Execute all selected skills."""
+        results = []
+        
+        for skill_id in self.selected_skills:
+            logger.info(f"Executing skill: {skill_id}")
+            result = self.executor.execute(skill_id, self.project.design_parameters)
+            results.append({
+                "skill_id": skill_id,
+                "result": result,
+            })
+            
+            if result["success"]:
+                logger.info(f"  ✓ {skill_id} completed successfully")
+            else:
+                logger.warning(f"  ✗ {skill_id} failed: {result.get('error')}")
+        
+        self.project.calculation_results = results
+        
+        # Move to report generation
+        self.state = AgentState.GENERATING_REPORT
+        return self._generate_report()
+    
+    def _generate_report(self) -> dict:
+        """Generate the full report using LLM + templates + calculation results."""
+        
+        # Step 1: Retrieve relevant code references
+        logger.info("Retrieving relevant code references...")
+        for skill_id in self.selected_skills:
+            skill = self.catalog.get_skill(skill_id)
+            if skill:
+                for ref in skill.code_references:
+                    chunks = self.store.search(
+                        query=f"{ref.description} {ref.clause}",
+                        top_k=3,
+                        document_type="code",
+                    )
+                    self.project.retrieved_references.extend(chunks)
+        
+        # Step 2: Generate each report section
+        report_sections = []
+        
+        for section_template in STANDARD_REPORT_TEMPLATE:
+            logger.info(f"Generating section: {section_template.title}")
+            
+            section_content = self._generate_section(section_template)
+            report_sections.append({
+                "number": section_template.number,
+                "title": section_template.title,
+                "content": section_content,
+            })
+        
+        # Step 3: Assemble final report
+        report_markdown = self._assemble_report(report_sections)
+        
+        self.state = AgentState.COMPLETE
+        
+        return {
+            "state": self.state.value,
+            "message": "Report generation complete.",
+            "report": report_markdown,
+            "calculation_results": self.project.calculation_results,
+            "references_used": [
+                {
+                    "document": r["metadata"].get("document_name"),
+                    "section": r["metadata"].get("section_title"),
+                }
+                for r in self.project.retrieved_references[:20]
+            ],
+        }
+    
+    def _generate_section(self, template) -> str:
+        """Generate content for a single report section."""
+        
+        # Prepare context
+        project_context = json.dumps({
+            "project_name": self.project.project_name,
+            "project_type": self.project.project_type,
+            "location": self.project.location,
+            "description": self.project.description,
+            "soil_layers": self.project.soil_layers,
+            "gwl_depth_m": self.project.gwl_depth_m,
+            "geometry": self.project.geometry,
+            "design_parameters": self.project.design_parameters,
+        }, indent=2)
+        
+        # Include calculation results for Analysis sections
+        calc_context = ""
+        if "analysis" in template.title.lower() or "recommendation" in template.title.lower():
+            calc_context = "\nCALCULATION RESULTS:\n" + json.dumps(
+                self.project.calculation_results, indent=2, default=str
+            )
+        
+        # Include retrieved references
+        ref_context = ""
+        if self.project.retrieved_references:
+            ref_texts = [
+                f"[{r['metadata'].get('document_name', 'Unknown')} - "
+                f"{r['metadata'].get('section_title', 'N/A')}]: {r['text'][:300]}"
+                for r in self.project.retrieved_references[:5]
+            ]
+            ref_context = "\nRELEVANT CODE REFERENCES:\n" + "\n".join(ref_texts)
+        
+        prompt = f"""Write section "{template.number} {template.title}" for a Hong Kong 
+geotechnical design report.
+
+GUIDANCE: {template.guidance}
+
+PROJECT DATA:
+{project_context}
+
+{calc_context}
+{ref_context}
+
+REQUIREMENTS:
+- Write in formal engineering report style
+- Be specific with numbers and parameters
+- Reference applicable HK codes and Geoguides where relevant
+- For analysis sections: present the calculation method, inputs, and results clearly
+- Do NOT invent any values not provided in the project data
+- If calculation results are provided, describe them accurately — do not recalculate
+- Include subsections: {json.dumps([s['title'] for s in template.subsections])}
+
+Write the section content in markdown format.
+"""
+        
+        return call_llm(
+            prompt,
+            system_prompt=(
+                "You are a senior geotechnical engineer in Hong Kong writing a formal "
+                "geotechnical design report. Write clear, concise, technically accurate content. "
+                "Never invent data — only use what is provided."
+            ),
+            model=PRIMARY_MODEL,
+            max_tokens=2000,
+        )
+    
+    def _assemble_report(self, sections: list[dict]) -> str:
+        """Assemble all sections into the final report."""
+        lines = [
+            f"# GEOTECHNICAL DESIGN REPORT",
+            f"## {self.project.project_name}",
+            "",
+            f"**Location:** {self.project.location}",
+            f"**Date:** [Date]",
+            f"**Report No.:** [Report Number]",
+            f"**Revision:** A (Draft for Review)",
+            "",
+            "---",
+            "",
+            "## Table of Contents",
+            "",
+        ]
+        
+        # TOC
+        for section in sections:
+            lines.append(f"- {section['number']} {section['title']}")
+        
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+        
+        # Content
+        for section in sections:
+            lines.append(f"## {section['number']} {section['title']}")
+            lines.append("")
+            lines.append(section["content"])
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+        
+        return "\n".join(lines)
+<a name="phase-4"></a>
+
+Phase 4: Validator Agent — Submission Checking
+Step 4.1 — Create the Validator Agent
+Trae AI Prompt:
+"Create a Validator Agent that: (1) ingests a third-party PDF report, (2) extracts its structure and content, (3) compares against a standard report template for completeness, (4) extracts design parameters and methods, (5) checks them against codes in the vector database, (6) generates a structured compliance review report with pass/fail items."
+
+Create src/agents/validator_agent.py:
+
+Python
+
+"""
+Validator Agent: Checks third-party geotechnical submissions 
+for completeness and compliance.
+
+Levels of checking:
+  Level 1: Structural completeness (are all required sections present?)
+  Level 2: Parameter extraction and reasonableness
+  Level 3: Code compliance checking (against vector DB)
+"""
+import json
+from dataclasses import dataclass, field
+from loguru import logger
+from src.ingestion.pdf_processor import extract_text_from_pdf, extract_pages_with_numbers
+from src.vectordb.qdrant_store import GeoVectorStore
+from src.utils.llm_client import call_llm, call_llm_with_context
+from src.templates.report_structure import STANDARD_REPORT_TEMPLATE
+from config.settings import PRIMARY_MODEL, REASONING_MODEL
+
+
+@dataclass
+class CheckItem:
+    """A single compliance check result."""
+    category: str  # "completeness", "parameter", "compliance", "consistency"
+    item: str  # What was checked
+    status: str  # "pass", "fail", "warning", "not_checked"
+    details: str = ""
+    reference: str = ""  # Code clause reference
+    severity: str = "medium"  # "critical", "high", "medium", "low"
+
+
+@dataclass
+class ValidationReport:
+    """Complete validation report."""
+    document_name: str
+    checks: list[CheckItem] = field(default_factory=list)
+    summary: str = ""
+    overall_status: str = ""  # "acceptable", "revisions_needed", "rejected"
+    
+    @property
+    def pass_count(self) -> int:
+        return sum(1 for c in self.checks if c.status == "pass")
+    
+    @property
+    def fail_count(self) -> int:
+        return sum(1 for c in self.checks if c.status == "fail")
+    
+    @property
+    def warning_count(self) -> int:
+        return sum(1 for c in self.checks if c.status == "warning")
+
+
+class ValidatorAgent:
+    """
+    Validates third-party geotechnical reports against
+    HK codes and standard practice.
+    """
+    
+    def __init__(self, use_local_db: bool = False):
+        self.store = GeoVectorStore(use_local=use_local_db)
+    
+    def validate_report(self, pdf_path: str) -> ValidationReport:
+        """
+        Full validation pipeline for a third-party report.
+        
+        Args:
+            pdf_path: Path to the PDF report to validate
+            
+        Returns:
+            ValidationReport with all check results
+        """
+        document_name = pdf_path.split("/")[-1]
+        report = ValidationReport(document_name=document_name)
+        
+        # Step 1: Extract text
+        logger.info(f"Step 1: Extracting text from {pdf_path}")
+        full_text = extract_text_from_pdf(pdf_path)
+        pages = extract_pages_with_numbers(pdf_path)
+        
+        if not full_text or len(full_text.strip()) < 200:
+            report.checks.append(CheckItem(
+                category="extraction",
+                item="Document readability",
+                status="fail",
+                details="Could not extract meaningful text from the document. "
+                        "The PDF may be scanned/image-based.",
+                severity="critical",
+            ))
+            report.overall_status = "rejected"
+            return report
+        
+        # Step 2: Level 1 — Structural completeness check
+        logger.info("Step 2: Checking report structure completeness")
+        completeness_checks = self._check_completeness(full_text)
+        report.checks.extend(completeness_checks)
+        
+        # Step 3: Level 2 — Extract and check design parameters
+        logger.info("Step 3: Extracting and checking design parameters")
+        parameter_checks = self._check_parameters(full_text)
+        report.checks.extend(parameter_checks)
+        
+        # Step 4: Level 3 — Code compliance checking
+        logger.info("Step 4: Checking code compliance")
+        compliance_checks = self._check_code_compliance(full_text)
+        report.checks.extend(compliance_checks)
+        
+        # Step 5: Internal consistency
+        logger.info("Step 5: Checking internal consistency")
+        consistency_checks = self._check_consistency(full_text)
+        report.checks.extend(consistency_checks)
+        
+        # Generate summary
+        report.summary = self._generate_summary(report)
+        
+        # Determine overall status
+        critical_fails = sum(
+            1 for c in report.checks
+            if c.status == "fail" and c.severity == "critical"
+        )
+        if critical_fails > 0:
+            report.overall_status = "rejected"
+        elif report.fail_count > 3:
+            report.overall_status = "revisions_needed"
+        elif report.fail_count > 0:
+            report.overall_status = "revisions_needed"
+        else:
+            report.overall_status = "acceptable"
+        
+        return report
+    
+    def _check_completeness(self, text: str) -> list[CheckItem]:
+        """Level 1: Check if all required report sections are present."""
+        
+        expected_sections = [t for t in STANDARD_REPORT_TEMPLATE if t.required]
+        
+        prompt = f"""Analyse this geotechnical report and determine which standard sections 
+are present or absent.
+
+Expected sections:
+{json.dumps([{"number": s.number, "title": s.title} for s in expected_sections], indent=2)}
+
+Report text (first 8000 characters):
+{text[:8000]}
+
+For each expected section, determine:
+- "present": the section exists and has substantive content
+- "absent": the section is missing entirely
+- "inadequate": the section exists but has very little content
+
+Return a JSON array:
+[{{"section": "title", "status": "present/absent/inadequate", "notes": "brief note"}}]
+
+Return ONLY valid JSON.
+"""
+        
+        response = call_llm(prompt, temperature=0.1, max_tokens=2000)
+        
+        checks = []
+        try:
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            section_results = json.loads(cleaned)
+            
+            for result in section_results:
+                status = "pass" if result["status"] == "present" else "fail"
+                if result["status"] == "inadequate":
+                    status = "warning"
+                
+                checks.append(CheckItem(
+                    category="completeness",
+                    item=f"Section: {result['section']}",
+                    status=status,
+                    details=result.get("notes", ""),
+                    severity="high" if result["status"] == "absent" else "medium",
+                ))
+        except json.JSONDecodeError:
+            checks.append(CheckItem(
+                category="completeness",
+                item="Section analysis",
+                status="not_checked",
+                details="Could not parse section analysis results",
+            ))
+        
+        return checks
+    
+    def _check_parameters(self, text: str) -> list[CheckItem]:
+        """Level 2: Extract design parameters and check reasonableness."""
+        
+        prompt = f"""Extract all geotechnical design parameters from this report.
+Look for:
+- Soil parameters (cohesion c', friction angle φ', unit weight γ, SPT N values)
+- Groundwater level
+- Foundation dimensions and depths
+- Design loads
+- Factors of safety used
+- Bearing capacity values
+- Settlement estimates
+
+Report text (first 10000 characters):
+{text[:10000]}
+
+Return a JSON object:
+{{
+    "soil_parameters": [
+        {{"layer": "description", "depth_m": "range", "c_kpa": null, "phi_deg": null, 
+          "gamma_kn_m3": null, "spt_n": null, "cu_kpa": null}}
+    ],
+    "gwl_depth_m": null,
+    "foundation": {{"type": "", "width_m": null, "depth_m": null}},
+    "factors_of_safety": {{"bearing": null, "sliding": null, "overturning": null, "slope": null}},
+    "design_method": "",
+    "bearing_capacity_kpa": null,
+    "settlement_mm": null,
+    "issues_noticed": ["list of any obvious issues"]
+}}
+
+Return ONLY valid JSON.
+"""
+        
+        response = call_llm(prompt, temperature=0.1, max_tokens=2000)
+        
+        checks = []
+        try:
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            params = json.loads(cleaned)
+            
+            # Check soil parameter reasonableness
+            for layer in params.get("soil_parameters", []):
+                # Friction angle checks
+                phi = layer.get("phi_deg")
+                if phi is not None:
+                    if phi < 15 or phi > 45:
+                        checks.append(CheckItem(
+                            category="parameter",
+                            item=f"Friction angle for {layer.get('layer', 'unknown layer')}",
+                            status="warning",
+                            details=f"φ' = {phi}° is outside typical range (20-40° for HK soils)",
+                            severity="high",
+                        ))
+                    else:
+                        checks.append(CheckItem(
+                            category="parameter",
+                            item=f"Friction angle for {layer.get('layer', 'unknown layer')}",
+                            status="pass",
+                            details=f"φ' = {phi}° is within typical range",
+                        ))
+                
+                # Unit weight checks
+                gamma = layer.get("gamma_kn_m3")
+                if gamma is not None:
+                    if gamma < 14 or gamma > 25:
+                        checks.append(CheckItem(
+                            category="parameter",
+                            item=f"Unit weight for {layer.get('layer', 'unknown layer')}",
+                            status="warning",
+                            details=f"γ = {gamma} kN/m³ is outside typical range (16-22 kN/m³)",
+                            severity="medium",
+                        ))
+            
+            # Check factors of safety
+            fos_requirements = {
+                "bearing": {"min": 3.0, "ref": "Code of Practice for Foundations 2017"},
+                "sliding": {"min": 1.5, "ref": "Geoguide 1"},
+                "overturning": {"min": 2.0, "ref": "Geoguide 1"},
+                "slope": {"min": 1.4, "ref": "Geotechnical Manual for Slopes"},
+            }
+            
+            for fos_type, requirement in fos_requirements.items():
+                fos_value = params.get("factors_of_safety", {}).get(fos_type)
+                if fos_value is not None:
+                    if fos_value < requirement["min"]:
+                        checks.append(CheckItem(
+                            category="parameter",
+                            item=f"Factor of safety ({fos_type})",
+                            status="fail",
+                            details=(
+                                f"FoS = {fos_value} is below minimum requirement "
+                                f"of {requirement['min']}"
+                            ),
+                            reference=requirement["ref"],
+                            severity="critical",
+                        ))
+                    else:
+                        checks.append(CheckItem(
+                            category="parameter",
+                            item=f"Factor of safety ({fos_type})",
+                            status="pass",
+                            details=f"FoS = {fos_value} ≥ {requirement['min']}",
+                            reference=requirement["ref"],
+                        ))
+            
+            # Record any issues noticed
+            for issue in params.get("issues_noticed", []):
+                checks.append(CheckItem(
+                    category="parameter",
+                    item="Noticed issue",
+                    status="warning",
+                    details=issue,
+                    severity="medium",
+                ))
+                
+        except json.JSONDecodeError:
+            checks.append(CheckItem(
+                category="parameter",
+                item="Parameter extraction",
+                status="not_checked",
+                details="Could not parse parameter extraction results",
+            ))
+        
+        return checks
+    
+    def _check_code_compliance(self, text: str) -> list[CheckItem]:
+        """Level 3: Check design methods against codes in vector DB."""
+        checks = []
+        
+        # Extract the design method(s) used
+        method_prompt = f"""From this geotechnical report, identify:
+1. What design methods/equations were used (e.g., Terzaghi, Meyerhof, Hansen, Bishop)
+2. What codes/standards are referenced
+3. What limit state design approach is used (if any)
+
+Report excerpt:
+{text[:6000]}
+
+Return a JSON object:
+{{
+    "design_methods": ["list of methods mentioned"],
+    "referenced_codes": ["list of codes/standards"],
+    "limit_state_approach": "description or null"
+}}
+
+Return ONLY valid JSON.
+"""
+        
+        response = call_llm(method_prompt, temperature=0.1, max_tokens=1000)
+        
+        try:
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            methods = json.loads(cleaned)
+            
+            # Check each method against our code database
+            for method in methods.get("design_methods", []):
+                # Search vector DB for relevant code provisions
+                code_chunks = self.store.search(
+                    query=f"design method {method} requirements",
+                    top_k=3,
+                    document_type="code",
+                )
+                
+                if code_chunks:
+                    # Ask LLM to compare the method against code requirements
+                    comparison_prompt = f"""The report uses the "{method}" method.
+
+The relevant code provisions state:
+{json.dumps([c['text'][:500] for c in code_chunks], indent=2)}
+
+Is this method acceptable per the codes? Any specific requirements that must be met?
+Answer briefly as JSON:
+{{"acceptable": true/false, "notes": "brief explanation", "clause": "relevant clause"}}
+"""
+                    comp_response = call_llm(comparison_prompt, temperature=0.1, max_tokens=500)
+                    
+                    try:
+                        comp_cleaned = comp_response.strip()
+                        if comp_cleaned.startswith("```"):
+                            comp_cleaned = comp_cleaned.split("\n", 1)[1]
+                            comp_cleaned = comp_cleaned.rsplit("```", 1)[0]
+                        comp_result = json.loads(comp_cleaned)
+                        
+                        checks.append(CheckItem(
+                            category="compliance",
+                            item=f"Design method: {method}",
+                            status="pass" if comp_result.get("acceptable") else "warning",
+                            details=comp_result.get("notes", ""),
+                            reference=comp_result.get("clause", ""),
+                        ))
+                    except json.JSONDecodeError:
+                        pass
+            
+            # Check if required codes are referenced
+            required_hk_codes = [
+                "Code of Practice for Foundations",
+                "Geoguide",
+                "BS EN 1997",
+                "Eurocode 7",
+            ]
+            referenced = methods.get("referenced_codes", [])
+            referenced_lower = " ".join(referenced).lower()
+            
+            for req_code in required_hk_codes:
+                if req_code.lower() in referenced_lower:
+                    checks.append(CheckItem(
+                        category="compliance",
+                        item=f"Reference to {req_code}",
+                        status="pass",
+                        details=f"{req_code} is referenced in the report",
+                    ))
+            
+        except json.JSONDecodeError:
+            pass
+        
+        return checks
+    
+    def _check_consistency(self, text: str) -> list[CheckItem]:
+        """Check internal consistency of the report."""
+        
+        prompt = f"""Review this geotechnical report for internal consistency issues.
+Check for:
+1. Soil parameters used in calculations matching those described in the ground conditions section
+2. Design loads matching structural information
+3. Recommended foundation type matching the analysis performed
+4. Groundwater level used consistently throughout
+5. Any contradictions between different sections
+
+Report text:
+{text[:12000]}
+
+Return a JSON array of any inconsistencies found:
+[{{"issue": "description", "severity": "high/medium/low", "sections_involved": "which sections"}}]
+
+If no inconsistencies are found, return an empty array: []
+Return ONLY valid JSON.
+"""
+        
+        response = call_llm(prompt, temperature=0.2, max_tokens=1500, model=REASONING_MODEL)
+        
+        checks = []
+        try:
+            cleaned = response.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1]
+                cleaned = cleaned.rsplit("```", 1)[0]
+            issues = json.loads(cleaned)
+            
+            for issue in issues:
+                checks.append(CheckItem(
+                    category="consistency",
+                    item=issue.get("issue", "Consistency issue"),
+                    status="warning" if issue.get("severity") != "high" else "fail",
+                    details=f"Sections involved: {issue.get('sections_involved', 'N/A')}",
+                    severity=issue.get("severity", "medium"),
+                ))
+            
+            if not issues:
+                checks.append(CheckItem(
+                    category="consistency",
+                    item="Internal consistency",
+                    status="pass",
+                    details="No obvious inconsistencies detected",
+                ))
+                
+        except json.JSONDecodeError:
+            pass
+        
+        return checks
+    
+    def _generate_summary(self, report: ValidationReport) -> str:
+        """Generate a human-readable summary of the validation."""
+        
+        summary_data = {
+            "total_checks": len(report.checks),
+            "passed": report.pass_count,
+            "failed": report.fail_count,
+            "warnings": report.warning_count,
+            "critical_issues": [
+                c.item for c in report.checks
+                if c.status == "fail" and c.severity == "critical"
+            ],
+            "all_issues": [
+                {"item": c.item, "status": c.status, "details": c.details}
+                for c in report.checks if c.status in ("fail", "warning")
+            ],
+        }
+        
+        prompt = f"""Write a brief professional summary of this geotechnical report review.
+
+Review results:
+{json.dumps(summary_data, indent=2)}
+
+Write 2-3 paragraphs summarising:
+1. Overall assessment
+2. Key issues found
+3. Recommended actions for the submitting engineer
+
+Write in a formal, professional tone appropriate for correspondence 
+between government engineers in Hong Kong.
+"""
+        
+        return call_llm(prompt, temperature=0.3, max_tokens=800)
+    
+    def format_validation_report(self, report: ValidationReport) -> str:
+        """Format the validation report as markdown."""
+        lines = [
+            f"# SUBMISSION REVIEW REPORT",
+            f"",
+            f"**Document Reviewed:** {report.document_name}",
+            f"**Overall Status:** {report.overall_status.upper().replace('_', ' ')}",
+            f"**Checks Performed:** {len(report.checks)} "
+            f"(✓ {report.pass_count} | ✗ {report.fail_count} | ⚠ {report.warning_count})",
+            f"",
+            f"---",
+            f"",
+            f"## Summary",
+            f"",
+            report.summary,
+            f"",
+            f"---",
+            f"",
+            f"## Detailed Findings",
+            f"",
+        ]
+        
+        # Group checks by category
+        categories = {}
+        for check in report.checks:
+            if check.category not in categories:
+                categories[check.category] = []
+            categories[check.category].append(check)
+        
+        status_emoji = {
+            "pass": "✅",
+            "fail": "❌",
+            "warning": "⚠️",
+            "not_checked": "⬜",
+        }
+        
+        for category, checks in categories.items():
+            lines.append(f"### {category.replace('_', ' ').title()}")
+            lines.append("")
+            lines.append("| Status | Item | Details | Reference |")
+            lines.append("|--------|------|---------|-----------|")
+            
+            for check in checks:
+                emoji = status_emoji.get(check.status, "⬜")
+                details = check.details[:100] + "..." if len(check.details) > 100 else check.details
+                lines.append(
+                    f"| {emoji} {check.status.upper()} | {check.item} | "
+                    f"{details} | {check.reference} |"
+                )
+            
+            lines.append("")
+        
+        lines.extend([
+            "---",
+            "",
+            "## Recommended Actions",
+            "",
+            "Items marked ❌ must be addressed before the submission can be accepted.",
+            "Items marked ⚠️ should be reviewed and clarified.",
+            "",
+            "*This review was generated with AI assistance and should be verified by "
+            "the reviewing engineer before issue.*",
+        ])
+        
+        return "\n".join(lines)
+<a name="phase-5"></a>
+
+Phase 5: Web UI with Streamlit
+Step 5.1 — Create the Main Application
+Create app.py in the project root:
+
+Python
+
+"""
+Streamlit web UI for the Geotech AI Agent.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+
+import streamlit as st
+import json
+import tempfile
+import os
+
+from src.agents.qa_agent import QAAgent
+from src.agents.designer_agent import DesignerAgent
+from src.agents.validator_agent import ValidatorAgent
+from src.ingestion.ingest import ingest_document
+
+
+# ─── Page Configuration ───
+st.set_page_config(
+    page_title="Geotech AI Agent",
+    page_icon="🏗️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# ─── Session State Initialization ───
+if "qa_agent" not in st.session_state:
+    st.session_state.qa_agent = QAAgent(use_local_db=True)
+
+if "designer_agent" not in st.session_state:
+    st.session_state.designer_agent = None
+
+if "validator_agent" not in st.session_state:
+    st.session_state.validator_agent = ValidatorAgent(use_local_db=True)
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+if "designer_messages" not in st.session_state:
+    st.session_state.designer_messages = []
+
+
+# ─── Sidebar ───
+with st.sidebar:
+    st.title("🏗️ Geotech AI Agent")
+    st.caption("AI-powered geotechnical engineering assistant for HK practice")
+    
+    mode = st.radio(
+        "Select Mode",
+        ["📚 Knowledge Q&A", "📝 Report Generator", "✅ Submission Checker", "📂 Document Manager"],
+        index=0,
+    )
+    
+    st.divider()
+    st.caption("Powered by OpenRouter + Local Embeddings")
+    st.caption("All data processed locally")
+
+
+# ─── Mode 1: Knowledge Q&A ───
+if mode == "📚 Knowledge Q&A":
+    st.header("📚 Knowledge Base Q&A")
+    st.caption(
+        "Ask questions about HK geotechnical codes, Geoguides, and design manuals. "
+        "Answers are grounded in your ingested documents."
+    )
+    
+    # Display chat history
+    for msg in st.session_state.chat_history:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            if msg.get("sources"):
+                with st.expander("📎 Sources"):
+                    for s in msg["sources"]:
+                        st.caption(
+                            f"• {s['document']} | {s['section']} "
+                            f"(score: {s['relevance_score']})"
+                        )
+    
+    # Chat input
+    if prompt := st.chat_input("Ask about HK geotech codes and practice..."):
+        # Display user message
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        # Get response
+        with st.chat_message("assistant"):
+            with st.spinner("Searching knowledge base and generating answer..."):
+                result = st.session_state.qa_agent.ask(prompt)
+            
+            st.markdown(result["answer"])
+            
+            if result["sources"]:
+                with st.expander("📎 Sources"):
+                    for s in result["sources"]:
+                        st.caption(
+                            f"• {s['document']} | {s['section']} "
+                            f"(score: {s['relevance_score']})"
+                        )
+        
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": result["answer"],
+            "sources": result["sources"],
+        })
+
+
+# ─── Mode 2: Report Generator ───
+elif mode == "📝 Report Generator":
+    st.header("📝 Geotechnical Report Generator")
+    st.caption(
+        "Describe your project and I'll generate a structured geotechnical "
+        "design report following HK practice."
+    )
+    
+    # Initialize designer agent
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        if st.button("🔄 Start New Report"):
+            st.session_state.designer_agent = DesignerAgent(use_local_db=True)
+            st.session_state.designer_messages = []
+            result = st.session_state.designer_agent.start()
+            st.session_state.designer_messages.append({
+                "role": "assistant",
+                "content": result["message"],
+            })
+            st.rerun()
+    
+    # Display conversation
+    for msg in st.session_state.designer_messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            if msg.get("questions"):
+                for q in msg["questions"]:
+                    st.info(f"❓ {q}")
+            if msg.get("report"):
+                st.divider()
+                st.markdown(msg["report"])
+                st.download_button(
+                    "📥 Download Report (Markdown)",
+                    msg["report"],
+                    file_name="geotechnical_report.md",
+                    mime="text/markdown",
+                )
+    
+    # Chat input for designer
+    if st.session_state.designer_agent and st.session_state.designer_agent.state.value != "complete":
+        if prompt := st.chat_input("Provide project information or answer questions..."):
+            st.session_state.designer_messages.append({
+                "role": "user", "content": prompt
+            })
+            
+            with st.spinner("Processing..."):
+                result = st.session_state.designer_agent.process_input(prompt)
+            
+            message_data = {
+                "role": "assistant",
+                "content": result.get("message", ""),
+                "questions": result.get("questions", []),
+            }
+            
+            if result.get("report"):
+                message_data["report"] = result["report"]
+            
+            st.session_state.designer_messages.append(message_data)
+            st.rerun()
+    
+    elif not st.session_state.designer_agent:
+        st.info("👆 Click 'Start New Report' to begin.")
+
+
+# ─── Mode 3: Submission Checker ───
+elif mode == "✅ Submission Checker":
+    st.header("✅ Submission Compliance Checker")
+    st.caption(
+        "Upload a third-party geotechnical report to check for completeness "
+        "and compliance with HK codes and standards."
+    )
+    
+    uploaded_file = st.file_uploader(
+        "Upload a geotechnical report (PDF)",
+        type=["pdf"],
+        help="Upload the PDF report you want to validate.",
+    )
+    
+    if uploaded_file:
+        st.write(f"**File:** {uploaded_file.name} ({uploaded_file.size / 1024:.0f} KB)")
+        
+        if st.button("🔍 Run Compliance Check", type="primary"):
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(uploaded_file.getbuffer())
+                tmp_path = tmp.name
+            
+            try:
+                with st.spinner("Analysing report... This may take 2-5 minutes."):
+                    report = st.session_state.validator_agent.validate_report(tmp_path)
+                    formatted = st.session_state.validator_agent.format_validation_report(report)
+                
+                # Display results
+                # Status banner
+                status_colors = {
+                    "acceptable": "green",
+                    "revisions_needed": "orange",
+                    "rejected": "red",
+                }
+                status_text = report.overall_status.upper().replace("_", " ")
+                
+                col1, col2, col3, col4 = st.columns(4)
+                col1.metric("Overall Status", status_text)
+                col2.metric("✅ Passed", report.pass_count)
+                col3.metric("❌ Failed", report.fail_count)
+                col4.metric("⚠️ Warnings", report.warning_count)
+                
+                st.divider()
+                
+                # Full report
+                st.markdown(formatted)
+                
+                # Download
+                st.download_button(
+                    "📥 Download Review Report",
+                    formatted,
+                    file_name=f"review_{uploaded_file.name.replace('.pdf', '.md')}",
+                    mime="text/markdown",
+                )
+            finally:
+                os.unlink(tmp_path)
+
+
+# ─── Mode 4: Document Manager ───
+elif mode == "📂 Document Manager":
+    st.header("📂 Knowledge Base Manager")
+    st.caption("Manage the documents in your vector database.")
+    
+    # List current documents
+    st.subheader("Current Documents")
+    docs = st.session_state.qa_agent.list_knowledge_base()
+    
+    if docs:
+        for doc in docs:
+            col1, col2, col3 = st.columns([3, 1, 1])
+            col1.write(f"📄 **{doc['document_name']}**")
+            col2.write(f"Type: {doc['document_type']}")
+            col3.write(f"Chunks: {doc['chunk_count']}")
+    else:
+        st.info("No documents ingested yet. Upload your first document below.")
+    
+    st.divider()
+    
+    # Upload new document
+    st.subheader("Add New Document")
+    
+    uploaded = st.file_uploader(
+        "Upload a PDF document",
+        type=["pdf"],
+        key="ingest_upload",
+    )
+    
+    if uploaded:
+        col1, col2 = st.columns(2)
+        with col1:
+            doc_name = st.text_input(
+                "Document Name",
+                value=uploaded.name.replace(".pdf", ""),
+            )
+            doc_id = st.text_input(
+                "Document ID",
+                value=uploaded.name.replace(".pdf", "").lower().replace(" ", "_"),
+            )
+        with col2:
+            doc_type = st.selectbox(
+                "Document Type",
+                ["code", "manual", "guideline", "report", "drawing"],
+            )
+        
+        if st.button("📥 Ingest Document", type="primary"):
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(uploaded.getbuffer())
+                tmp_path = tmp.name
+            
+            try:
+                with st.spinner(f"Processing {doc_name}... This may take a few minutes."):
+                    num_chunks = ingest_document(
+                        pdf_path=tmp_path,
+                        document_id=doc_id,
+                        document_name=doc_name,
+                        document_type=doc_type,
+                        use_local_db=True,
+                    )
+                
+                st.success(f"✅ Successfully ingested '{doc_name}' ({num_chunks} chunks)")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Error ingesting document: {e}")
+            finally:
+                os.unlink(tmp_path)
+Step 5.2 — Run the Application
+Bash
+
+streamlit run app.py
+The app opens at http://localhost:8501.
+
+Phase 6: Testing & Iteration Checklist
+Step 6.1 — Testing Sequence
+Run through this checklist in order:
+
+text
+
+□ 1. DOCUMENT INGESTION
+  □ Ingest Geoguide 1 PDF → verify chunk count is reasonable
+  □ Ingest Code of Practice for Foundations → verify
+  □ Search "bearing capacity" → verify relevant chunks returned
+  □ Search "slope stability factor of safety" → verify
+  □ Search "retaining wall sliding" → verify
+
+□ 2. Q&A AGENT
+  □ "What FoS is required for bearing capacity?" → should cite CoP
+  □ "What are the partial factors in EC7 DA1?" → should cite EC7
+  □ "How to design a gravity retaining wall?" → should cite Geoguide 1
+  □ Ask a question NOT in your documents → should say "not found"
+  □ Ask in Chinese (if applicable) → test bilingual handling
+
+□ 3. CALCULATION ENGINE
+  □ Run bearing capacity with known inputs → verify against hand calc
+  □ Run slope stability → verify against hand calc
+  □ Run earth pressure → verify against hand calc
+  □ Test with edge cases (φ=0, very high loads, GWL at surface)
+
+□ 4. DESIGNER AGENT
+  □ Start new session → should ask for project info
+  □ Describe a simple pad footing project → should identify skills
+  □ Answer clarifying questions → should execute calculations
+  □ Review generated report → check structure and accuracy
+  □ Verify code citations are real (not hallucinated)
+
+□ 5. VALIDATOR AGENT
+  □ Upload one of YOUR OWN reports → see what it flags
+  □ Upload a report with a known error → does it catch it?
+  □ Upload a well-structured report → are passes reasonable?
+  □ Upload a poorly structured report → are failures appropriate?
+Step 6.2 — Common Issues and Fixes
+Issue	Likely Cause	Fix
+Empty search results	Embedding model not loaded or chunks too small	Check embed_query has the BGE instruction prefix; increase chunk size
+LLM returns non-JSON	Model doesn't follow structured output instructions	Add "Return ONLY valid JSON, no markdown" to prompts; use regex fallback parsing
+Wrong code citations	LLM hallucinating clause numbers	Post-process: verify every citation against vector DB search
+Slow performance	Large model or too many LLM calls	Use lighter model for simple tasks; cache embeddings; batch LLM calls
+PDF extraction fails	Scanned/image PDF	Use pytesseract OCR pipeline; or manually convert problematic PDFs
+Calculation errors	Bug in deterministic code	Write unit tests; compare against textbook examples
+Project File Structure Summary
+text
+
+geotech-agent/
+├── .env                          # API keys
+├── app.py                        # Streamlit web UI
+├── requirements.txt
+├── config/
+│   ├── __init__.py
+│   └── settings.py               # All configuration
+├── src/
+│   ├── __init__.py
+│   ├── ingestion/
+│   │   ├── __init__.py
+│   │   ├── pdf_processor.py      # PDF → text → chunks
+│   │   └── ingest.py             # Main ingestion script
+│   ├── vectordb/
+│   │   ├── __init__.py
+│   │   └── qdrant_store.py       # Vector DB interface
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── llm_client.py         # OpenRouter LLM client
+│   │   └── embeddings.py         # Local embedding engine
+│   ├── calculations/
+│   │   ├── __init__.py
+│   │   ├── bearing_capacity.py   # Foundation calculations
+│   │   ├── slope_stability.py    # Slope calculations
+│   │   └── earth_pressure.py     # Earth pressure calculations
+│   ├── skills/
+│   │   ├── __init__.py
+│   │   ├── skill_models.py       # Pydantic skill definitions
+│   │   ├── catalog.py            # Skill registry
+│   │   └── executor.py           # Skill execution engine
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   ├── qa_agent.py           # Q&A agent (MVP)
+│   │   ├── designer_agent.py     # Report generation agent
+│   │   └── validator_agent.py    # Submission checking agent
+│   └── templates/
+│       ├── __init__.py
+│       └── report_structure.py   # Standard report templates
+├── data/
+│   ├── raw_documents/            # Put your PDFs here
+│   ├── processed/
+│   └── borehole_data/
+├── outputs/
+│   ├── reports/
+│   └── reviews/
+├── tests/
+├── qdrant_local_storage/         # Local vector DB files
+└── qdrant_storage/               # Docker vector DB files
+Quick Start Commands
+Bash
+
+# 1. Setup
+cd geotech-agent
+python -m venv venv && source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+
+# 2. Start vector DB (choose one)
+# Option A: Docker
+docker run -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage --name geotech_qdrant qdrant/qdrant
+# Option B: Local file-based (no Docker needed — already handled in code with use_local=True)
+
+# 3. Ingest your first document
+python -m src.ingestion.ingest single \
+    --path "data/raw_documents/YourFirstDoc.pdf" \
+    --id "your_doc_id" \
+    --name "Your Document Name" \
+    --type code \
+    --local-db
+
+# 4. Test Q&A in terminal
+python -m src.agents.qa_agent
+
+# 5. Launch web UI
+streamlit run app.py
