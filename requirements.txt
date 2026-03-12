@@ -1,18 +1,46 @@
+# LLM & Embeddings
 openai>=1.30.0
 sentence-transformers>=3.0.0
 tiktoken>=0.7.0
+
+# Vector Database
 qdrant-client>=1.9.0
+
+# Document Processing
 pymupdf>=1.24.0
 pymupdf4llm>=0.0.5
 python-docx>=1.1.0
 openpyxl>=3.1.0
 pandas>=2.2.0
+
+# OCR (for scanned documents)
 pytesseract>=0.3.10
+Pillow>=10.0.0
+
+# Web UI
 streamlit>=1.35.0
+
+# Utilities
 python-dotenv>=1.0.0
 pydantic>=2.7.0
 loguru>=0.7.0
 numpy>=1.26.0
 scipy>=1.13.0
+
+# Report generation
 jinja2>=3.1.0
 markdown>=3.6
+pdfkit>=1.0.0  # Requires wkhtmltopdf
+
+# Advanced document processing
+docling>=2.0.0
+pdfplumber>=0.11.0
+
+# Google Generative AI (alternative provider)
+google-generativeai>=0.8.0
+
+# Visualization
+matplotlib>=3.8.0
+
+# Re-ranking (optional, for enhanced search)
+# Install separately: pip install sentence-transformers (already included)

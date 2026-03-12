@@ -1,0 +1,248 @@
+1. Core Philosophy: Structure Assembly vs. Text Splitting
+Traditional RAG
+Docling-First Strategy
+Splits text by character count (e.g., 500 tokens).
+Assembles chunks by document logic (Clause → Sub-clause → Content).
+Tables are often broken into text rows.
+Tables are atomic objects (Markdown/JSON) preserved intact.
+Headers are just text lines.
+Headers are structural anchors used for metadata & hierarchy.
+Equations are often garbled OCR text.
+Equations are recognized (LaTeX/Image) and linked to context.
+2. Updated Pipeline Architecture
+graph TD
+    A[CoP PDF] --> B[Docling Converter]
+    B --> C[DoclingDocument Object]
+    C --> D[Iterate Items Loop]
+    
+    subgraph Chunking Logic
+    D --> E{Item Type?}
+    E -->|SectionHeader| F[Start New Clause Chunk]
+    E -->|Table| G[Create Atomic Table Chunk]
+    E -->|Paragraph/Formula| H[Append to Current Clause]
+    end
+    
+    F & G & H --> I[Enrich Metadata]
+    I --> J[Clause ID Regex Extraction]
+    I --> K[Regulatory Strength Detection]
+    K --> L[Vector Store]
+
+3. Implementation Guide
+Step 1: Installation & Setup
+# Install Docling and dependencies
+pip install docling pdfplumber pandas
+
+# Optional: For better OCR/Formula recognition
+pip install docling[ocr]
+
+Step 2: Docling Parsing & Custom Chunking
+This script replaces generic splitters with a structure-aware iterator.
+from docling.document_converter import DocumentConverter
+from docling.datamodel.base_models import InputFormat
+from typing import List, Dict, Any
+import re
+
+class CoPChunker:
+    def __init__(self):
+        self.converter = DocumentConverter()
+        # Regex to capture Clause IDs like "3.1.2" or "6.1.5.7"
+        self.clause_pattern = re.compile(r'^(\d+(?:\.\d+)*)')
+        
+    def parse_and_chunk(self, pdf_path: str) -> List[Dict[str, Any]]:
+        # 1. Convert PDF to DoclingDocument
+        result = self.converter.convert(pdf_path)
+        doc = result.document
+        
+        chunks = []
+        current_chunk_content = []
+        current_metadata = {}
+        
+        # 2. Iterate through structured items
+        # Docling yields (item, level) where level is heading depth
+        for item, level in doc.iterate_items():
+            item_type = item.label.name  # e.g., SECTION_HEADER, TABLE, PARAGRAPH
+            
+            # --- HANDLE SECTION HEADERS (Clause Boundaries) ---
+            if item_type == "SECTION_HEADER":
+                # Save previous chunk before starting new one
+                if current_chunk_content:
+                    chunks.append(self._create_chunk(current_chunk_content, current_metadata))
+                    current_chunk_content = []
+                
+                # Extract Clause ID from Header Text (e.g., "6.1.5 Flat Slabs" -> "6.1.5")
+                header_text = item.text
+                clause_id_match = self.clause_pattern.match(header_text)
+                clause_id = clause_id_match.group(1) if clause_id_match else "unknown"
+                
+                # Update Metadata for new context
+                current_metadata = {
+                    "clause_id": clause_id,
+                    "clause_title": header_text,
+                    "hierarchy_level": level,
+                    "content_type": "clause_header",
+                    "page_no": item.page_no
+                }
+                current_chunk_content.append(f"# {header_text}")
+                
+            # --- HANDLE TABLES (Atomic Units) ---
+            elif item_type == "TABLE":
+                # Flush any pending text first
+                if current_chunk_content:
+                    chunks.append(self._create_chunk(current_chunk_content, current_metadata))
+                    current_chunk_content = []
+                
+                # Export table as Markdown (LLM-friendly) or Dict (Data-friendly)
+                table_md = item.export_to_markdown()
+                
+                chunks.append({
+                    "text": table_md,
+                    "metadata": {
+                        **current_metadata,
+                        "content_type": "table",
+                        "table_caption": item.caption.text if hasattr(item, 'caption') and item.caption else "Untitled Table",
+                        "page_no": item.page_no
+                    }
+                })
+                
+            # --- HANDLE PARAGRAPHS & FORMULAS ---
+            elif item_type in ["PARAGRAPH", "FORMULA", "LIST_ITEM"]:
+                # Append to current clause context
+                if item.text.strip():
+                    current_chunk_content.append(item.text)
+        
+        # Flush final chunk
+        if current_chunk_content:
+            chunks.append(self._create_chunk(current_chunk_content, current_metadata))
+            
+        return chunks
+
+    def _create_chunk(self, content_lines: List[str], metadata: Dict) -> Dict:
+        text = "\n".join(content_lines)
+        # Add Engineering Specific Metadata
+        metadata["regulatory_strength"] = self._detect_regulatory_strength(text)
+        metadata["char_count"] = len(text)
+        return {"text": text, "metadata": metadata}
+
+    def _detect_regulatory_strength(self, text: str) -> str:
+        text_lower = text.lower()
+        if "shall" in text_lower or "must" in text_lower:
+            return "mandatory"
+        elif "should" in text_lower:
+            return "advisory"
+        else:
+            return "informative"
+
+# Usage
+chunker = CoPChunker()
+chunks = chunker.parse_and_chunk("CoP_SUC2013e.pdf")
+
+4. Engineering-Specific Enhancements
+A. Clause ID Normalization
+Docling sees "6.1.5" as text. We must normalize it for filtering.
+Action: The regex ^\d+(?:\.\d+)* in the code above extracts the ID.
+Benefit: Allows queries like filter: clause_id STARTS WITH "6.1.5" to find all flat slab rules.
+B. Table Integrity
+CoP tables (e.g., Concrete Cover Requirements) are critical.
+Action: Docling exports tables as Markdown.
+Improvement: For complex tables, also store a JSON representation in metadata for precise data lookup.
+python
+
+# Inside TABLE handling block
+table_json = item.export_to_dict() # Structured data
+metadata["table_struct"] = table_json # Store in DB if supported
+
+C. Formula Handling
+Docling attempts to recognize formulas as LaTeX.
+Action: If item_type == "FORMULA", preserve the LaTeX string.
+Benefit: LLMs can render or calculate based on LaTeX better than OCR text.
+python
+# If Docling identifies it as a formula
+metadata["formula_latex"] = item.text 
+
+D. Cross-Reference Linking
+CoP frequently says "See Clause 5.2".
+Action: Post-process chunks to extract these references
+
+refs = re.findall(r'Clause\s+(\d+(?:\.\d+)+)', text)
+metadata["cross_references"] = refs
+Benefit: Enables graph-based retrieval (jump from Clause 6.1 to referenced Clause 5.2).
+
+5. Metadata Schema for Vector Store
+Ensure your vector database (e.g., Qdrant, Pinecone) supports these fields:
+
+Field Name
+Type
+Source
+Usage
+clause_id
+Keyword
+Regex on Header
+Filtering (clause_id: "6.1.5")
+hierarchy_level
+Integer
+Docling level
+Sorting/Granularity
+content_type
+Keyword
+Docling label
+Routing (Table vs. Text)
+regulatory_strength
+Keyword
+NLP Detection
+Compliance Checks
+page_no
+Integer
+Docling page_no
+Citation
+cross_references
+List
+Regex Extraction
+Graph Traversal
+text
+Text
+Docling item.text
+Embedding
+
+6. Validation & Quality Control
+Before deploying, run these Docling-Specific Checks:
+Header Continuity:
+Test: Search for "6.1.5".
+Pass: All text under 6.1.5 is in chunks with clause_id: "6.1.5".
+Fail: Text bleeds into 6.1.6 without a header break.
+Table Row Integrity:
+Test: Retrieve Table 4.2.
+Pass: Markdown table renders correctly with aligned columns.
+Fail: Rows are split across different chunks.
+Formula Readability:
+Test: Search for shear stress formula.
+Pass: Variables (e.g., v_c) are readable, not garbled symbols.
+Fail: Formula is an image with no text alternative.
+Page Accuracy:
+Test: Click a retrieval result.
+Pass: Opens PDF to the exact page listed in page_no.
+7. Configuration Summary
+
+# docling_cop_config.yaml
+parser:
+  engine: docling
+  ocr: true  # Enable for scanned equations
+  artifacts: true # Load model artifacts for better layout recognition
+
+chunking:
+  strategy: structure_assembly
+  boundaries:
+    - SECTION_HEADER  # Primary break
+    - TABLE           # Atomic break
+  merge_paragraphs: true # Combine adjacent paragraphs within same clause
+  max_chunk_chars: 1500 # Safety limit, though structure is primary
+
+metadata:
+  extract_clause_id: true
+  extract_regulatory_strength: true
+  extract_cross_refs: true
+  store_page_number: true
+
+retrieval:
+  hybrid_search: true # Keyword (for clause IDs) + Vector (for semantics)
+  filter_enabled: true
+  reranking: true

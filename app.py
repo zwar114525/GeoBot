@@ -10,6 +10,12 @@ from src.agents.qa_agent import QAAgent
 from src.agents.designer_agent import DesignerAgent
 from src.agents.validator_agent import ValidatorAgent
 from src.ingestion.ingest import ingest_document
+from src.utils.llm_client import (
+    set_runtime_llm_config,
+    get_runtime_llm_config,
+    list_openai_models,
+    list_google_models,
+)
 
 st.set_page_config(page_title="Geotech AI Agent", page_icon="🏗️", layout="wide", initial_sidebar_state="expanded")
 
@@ -23,11 +29,19 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "designer_messages" not in st.session_state:
     st.session_state.designer_messages = []
+if "llm_models" not in st.session_state:
+    st.session_state.llm_models = []
+if "llm_connected" not in st.session_state:
+    st.session_state.llm_connected = False
 
 with st.sidebar:
     st.title("🏗️ Geotech AI Agent")
     st.caption("AI-powered geotechnical engineering assistant")
-    mode = st.radio("Select Mode", ["📚 Knowledge Q&A", "📝 Report Generator", "✅ Submission Checker", "📂 Document Manager"], index=0)
+    mode = st.radio(
+        "Select Mode",
+        ["📚 Knowledge Q&A", "📝 Report Generator", "✅ Submission Checker", "📂 Document Manager", "⚙️ LLM Settings"],
+        index=0,
+    )
 
 if mode == "📚 Knowledge Q&A":
     st.header("📚 Knowledge Base Q&A")
@@ -36,6 +50,16 @@ if mode == "📚 Knowledge Q&A":
         value=False,
         help="Prioritize critical design equations, variable definitions, and check criteria in answers.",
     )
+    with st.expander("Advanced Retrieval Filters"):
+        docs = st.session_state.qa_agent.list_knowledge_base()
+        doc_options = {"All documents": ""}
+        for d in docs:
+            doc_options[f"{d['document_name']} ({d['document_id']})"] = d["document_id"]
+        selected_doc_label = st.selectbox("Document", list(doc_options.keys()))
+        selected_doc_id = doc_options[selected_doc_label]
+        clause_filter = st.text_input("Clause ID (e.g. 6.1.5)")
+        content_type_filter = st.selectbox("Content Type", ["Any", "clause_text", "table"])
+        regulatory_filter = st.selectbox("Regulatory Strength", ["Any", "mandatory", "advisory", "informative"])
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
@@ -44,11 +68,26 @@ if mode == "📚 Knowledge Q&A":
                     for s in msg["sources"]:
                         st.caption(f"• {s['document']} | {s['section']} (score: {s['relevance_score']})")
     if prompt := st.chat_input("Ask about geotechnical codes and practice..."):
-        user_content = f"{prompt}\n\n[Equation mode: {'ON' if equation_mode else 'OFF'}]"
+        applied_filters = (
+            f"doc={selected_doc_id or 'all'}, clause={clause_filter or 'any'}, "
+            f"content_type={content_type_filter}, regulatory={regulatory_filter}"
+        )
+        user_content = (
+            f"{prompt}\n\n"
+            f"[Equation mode: {'ON' if equation_mode else 'OFF'}]\n"
+            f"[Filters: {applied_filters}]"
+        )
         st.session_state.chat_history.append({"role": "user", "content": user_content})
         with st.chat_message("assistant"):
             with st.spinner("Searching knowledge base..."):
-                result = st.session_state.qa_agent.ask(prompt, equation_mode=equation_mode)
+                result = st.session_state.qa_agent.ask(
+                    prompt,
+                    document_id=selected_doc_id or None,
+                    clause_id=clause_filter.strip() or None,
+                    content_type=None if content_type_filter == "Any" else content_type_filter,
+                    regulatory_strength=None if regulatory_filter == "Any" else regulatory_filter,
+                    equation_mode=equation_mode,
+                )
             st.markdown(result["answer"])
             if result["sources"]:
                 with st.expander("📎 Sources"):
@@ -113,14 +152,30 @@ elif mode == "📂 Document Manager":
     st.header("📂 Knowledge Base Manager")
     docs = st.session_state.qa_agent.list_knowledge_base()
     if docs:
+        doc_options = {f"{d['document_name']} ({d['document_id']})": d["document_id"] for d in docs}
         for doc in docs:
             col1, col2, col3 = st.columns([3, 1, 1])
             col1.write(f"📄 **{doc['document_name']}**")
             col2.write(f"Type: {doc['document_type']}")
             col3.write(f"Chunks: {doc['chunk_count']}")
         st.divider()
+        st.subheader("Delete Document")
+        delete_doc_label = st.selectbox("Select document to delete", list(doc_options.keys()), key="delete_doc_select")
+        delete_confirm = st.checkbox("Confirm permanent deletion from knowledge base", key="delete_doc_confirm")
+        if st.button("🗑️ Delete Document"):
+            if not delete_confirm:
+                st.warning("Please confirm deletion before proceeding.")
+            else:
+                delete_doc_id = doc_options[delete_doc_label]
+                try:
+                    st.session_state.qa_agent.store.delete_document(delete_doc_id)
+                    st.success(f"Deleted document '{delete_doc_label}' and all associated chunks.")
+                    st.session_state.chat_history = []
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to delete document: {e}")
+        st.divider()
         st.subheader("Inspect Stored Chunks")
-        doc_options = {f"{d['document_name']} ({d['document_id']})": d["document_id"] for d in docs}
         selected_doc_label = st.selectbox("Select document", list(doc_options.keys()))
         selected_doc_id = doc_options[selected_doc_label]
         sample_limit = st.slider("Sample chunk count", min_value=1, max_value=20, value=5)
@@ -182,3 +237,75 @@ elif mode == "📂 Document Manager":
                 st.rerun()
             finally:
                 os.unlink(tmp_path)
+
+elif mode == "⚙️ LLM Settings":
+    st.header("⚙️ LLM Provider Configuration")
+    current_cfg = get_runtime_llm_config()
+    default_provider = (current_cfg.get("provider") or "openai").lower()
+    provider_label = st.radio(
+        "Provider Selection",
+        ["OpenAI", "Google"],
+        index=0 if default_provider == "openai" else 1,
+        horizontal=True,
+    )
+    provider = provider_label.lower()
+    if st.session_state.get("llm_provider_ui") != provider:
+        st.session_state.llm_provider_ui = provider
+        st.session_state.llm_models = []
+        st.session_state.llm_connected = False
+    api_key = st.text_input(
+        "API Key",
+        type="password",
+        value=current_cfg.get("api_key", ""),
+        placeholder="Enter provider API key",
+    )
+    base_url = ""
+    if provider == "openai":
+        base_url = st.text_input(
+            "Base URL (OpenAI Only)",
+            value=current_cfg.get("base_url", "https://api.openai.com/v1") or "https://api.openai.com/v1",
+            help="Use custom URL for compatible providers (e.g. OpenRouter).",
+        )
+    selected_model = st.selectbox(
+        "Model Selection",
+        options=st.session_state.llm_models if st.session_state.llm_models else ["No models loaded"],
+        index=0,
+    )
+    if st.button("Save / Connect", type="primary"):
+        if not api_key.strip():
+            st.error("Please enter a valid API key.")
+        else:
+            try:
+                if provider == "openai":
+                    models = list_openai_models(api_key=api_key.strip(), base_url=base_url.strip() or "https://api.openai.com/v1")
+                else:
+                    models = list_google_models(api_key=api_key.strip())
+                if not models:
+                    st.error("No usable generative models found for this provider.")
+                else:
+                    st.session_state.llm_models = models
+                    model_to_use = models[0]
+                    set_runtime_llm_config(
+                        provider=provider,
+                        api_key=api_key.strip(),
+                        base_url=base_url.strip(),
+                        model=model_to_use,
+                    )
+                    st.session_state.llm_connected = True
+                    st.success(f"Connected successfully. Loaded {len(models)} models.")
+                    st.rerun()
+            except Exception as e:
+                st.session_state.llm_connected = False
+                st.error(f"Connection failed: {e}")
+    if st.session_state.llm_connected:
+        st.info("Connection active. Select a model and click Apply Model.")
+        chosen_model = st.selectbox("Available Models", options=st.session_state.llm_models, key="llm_active_model")
+        if st.button("Apply Model"):
+            cfg = get_runtime_llm_config()
+            set_runtime_llm_config(
+                provider=cfg.get("provider") or provider,
+                api_key=cfg.get("api_key") or api_key.strip(),
+                base_url=cfg.get("base_url") or base_url.strip(),
+                model=chosen_model,
+            )
+            st.success(f"Model set to {chosen_model}.")
