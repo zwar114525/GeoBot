@@ -4,8 +4,26 @@ from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.ingestion.pdf_processor import extract_text_from_pdf, chunk_by_sections
+from src.ingestion.pdf_processor import parse_pdf_with_structure
 from src.vectordb.qdrant_store import GeoVectorStore
+
+_INGEST_LOG_SINK_ID = None
+
+
+def setup_ingestion_logging():
+    global _INGEST_LOG_SINK_ID
+    if _INGEST_LOG_SINK_ID is not None:
+        return
+    logs_dir = Path(__file__).parent.parent.parent / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    log_path = logs_dir / "ingestion.log"
+    _INGEST_LOG_SINK_ID = logger.add(
+        str(log_path),
+        level="INFO",
+        rotation="10 MB",
+        retention="14 days",
+        enqueue=True,
+    )
 
 
 def ingest_document(
@@ -15,18 +33,18 @@ def ingest_document(
     document_type: str = "code",
     use_local_db: bool = False,
 ) -> int:
-    logger.info(f"Step 1/3: Extracting text from {pdf_path}")
-    full_text = extract_text_from_pdf(pdf_path)
-    if not full_text or len(full_text.strip()) < 100:
-        logger.error(f"Failed to extract meaningful text from {pdf_path}")
-        return 0
-    logger.info("Step 2/3: Chunking document")
-    processed_doc = chunk_by_sections(
-        full_text=full_text,
+    setup_ingestion_logging()
+    logger.info(f"Step 1/3: Parsing and structure-aware chunking from {pdf_path}")
+    processed_doc = parse_pdf_with_structure(
+        pdf_path=pdf_path,
         document_id=document_id,
         document_name=document_name,
         document_type=document_type,
     )
+    if not processed_doc.chunks:
+        logger.error(f"Failed to extract meaningful chunks from {pdf_path}")
+        return 0
+    logger.info("Step 2/3: Chunking complete")
     logger.info("Step 3/3: Embedding and storing in vector database")
     store = GeoVectorStore(use_local=use_local_db)
     num_stored = store.add_document(processed_doc)
@@ -35,6 +53,7 @@ def ingest_document(
 
 
 def ingest_directory(directory: str, document_type: str = "code", use_local_db: bool = False):
+    setup_ingestion_logging()
     dir_path = Path(directory)
     pdf_files = list(dir_path.glob("*.pdf"))
     logger.info(f"Found {len(pdf_files)} PDF files in {directory}")

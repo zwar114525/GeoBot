@@ -2,8 +2,21 @@ import json
 from enum import Enum
 from dataclasses import dataclass, field
 from jinja2 import Template
+from loguru import logger
 from src.vectordb.qdrant_store import GeoVectorStore
 from src.utils.llm_client import call_llm
+from src.utils.json_validator import (
+    extract_json_from_response,
+    parse_json_with_retry,
+    safe_parse_json,
+)
+from src.schemas.designer_schemas import (
+    ProjectExtractionSchema,
+    ParameterExtractionSchema,
+    SoilLayerSchema,
+    GeometrySchema,
+    LoadsSchema,
+)
 from src.skills.catalog import SkillCatalog
 from src.skills.executor import SkillExecutor
 from src.templates.report_structure import STANDARD_REPORT_TEMPLATE
@@ -77,39 +90,75 @@ class DesignerAgent:
         extraction_prompt = (
             "Extract JSON with project_name, project_type, location, description, applicable_codes, "
             "foundation_type, soil_layers, gwl_depth_m, geometry, loads, missing_critical_info.\n"
-            f"User description:\n{user_input}\nReturn ONLY valid JSON."
+            "For soil_layers, extract array of objects with: description, cohesion_kpa, friction_angle_deg, unit_weight_kn_m3.\n"
+            "For geometry, extract object with: width_m, length_m, depth_m, height_m as applicable.\n"
+            "For loads, extract object with: permanent_load_kn, variable_load_kn.\n"
+            f"User description:\n{user_input}\n\nReturn ONLY valid JSON matching this structure."
         )
-        response = call_llm(
-            extraction_prompt,
-            system_prompt="You are a geotechnical data extraction assistant. Return only JSON.",
-            temperature=0.1,
-        )
+        
         try:
-            cleaned = response.strip()
-            if cleaned.startswith("```"):
-                cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
-            extracted = json.loads(cleaned)
-        except Exception:
+            response = call_llm(
+                extraction_prompt,
+                system_prompt="You are a geotechnical data extraction assistant. Return only valid JSON with all required fields.",
+                temperature=0.1,
+                max_tokens=2000,
+            )
+            
+            # Use robust parsing with retry logic
+            extracted = safe_parse_json(
+                response=response,
+                target_type=ProjectExtractionSchema,
+                default_factory=lambda: ProjectExtractionSchema(
+                    missing_critical_info=[
+                        "foundation dimensions",
+                        "soil parameters",
+                        "loading information"
+                    ]
+                ),
+                context="project information extraction",
+            )
+            
+            # Log parsing warnings if default was used
+            if not extracted.project_type and not extracted.location:
+                logger.warning("Project extraction returned mostly default values")
+            
+        except Exception as e:
+            logger.error(f"Project info extraction failed: {e}")
             return {
                 "state": self.state.value,
                 "message": "Please provide project details in structured form: type, location, geometry, loads, soil, groundwater.",
                 "questions": [],
             }
-        self.project.project_name = extracted.get("project_name", "")
-        self.project.project_type = extracted.get("project_type", "")
-        self.project.location = extracted.get("location", "")
-        self.project.description = extracted.get("description", "")
-        self.project.applicable_codes = extracted.get("applicable_codes", [])
-        self.project.foundation_type = extracted.get("foundation_type", "")
-        self.project.soil_layers = extracted.get("soil_layers", [])
-        self.project.gwl_depth_m = extracted.get("gwl_depth_m")
-        self.project.geometry = extracted.get("geometry", {})
-        self.project.loads = extracted.get("loads", {})
-        questions = self._generate_clarifying_questions(extracted.get("missing_critical_info", []))
+        
+        # Update project data with validated fields
+        self.project.project_name = extracted.project_name or ""
+        self.project.project_type = extracted.project_type or ""
+        self.project.location = extracted.location or ""
+        self.project.description = extracted.description or ""
+        self.project.applicable_codes = extracted.applicable_codes or []
+        self.project.foundation_type = extracted.foundation_type or ""
+        
+        # Convert Pydantic models to dicts for internal use
+        if extracted.soil_layers:
+            self.project.soil_layers = [
+                layer.model_dump(exclude_none=True) 
+                for layer in extracted.soil_layers
+            ]
+        if extracted.geometry:
+            self.project.geometry = extracted.geometry.model_dump(exclude_none=True)
+        if extracted.loads:
+            self.project.loads = extracted.loads.model_dump(exclude_none=True)
+        
+        self.project.gwl_depth_m = extracted.gwl_depth_m
+        
+        # Generate clarifying questions for missing info
+        questions = self._generate_clarifying_questions(extracted.missing_critical_info or [])
+        
         if questions:
             self.pending_questions = questions
             self.state = AgentState.COLLECTING_PARAMETERS
             return {"state": self.state.value, "message": "I need additional information.", "questions": questions}
+        
         self.state = AgentState.IDENTIFYING_SKILLS
         return self._identify_required_skills()
 
@@ -121,22 +170,45 @@ class DesignerAgent:
     def _handle_parameter_input(self, user_input: str) -> dict:
         extraction_prompt = (
             "Extract numeric parameters as JSON from this answer. "
-            "Use keys like cohesion_kpa, friction_angle_deg, unit_weight_kn_m3, gwl_depth_m, "
+            "Use keys like: cohesion_kpa, friction_angle_deg, unit_weight_kn_m3, gwl_depth_m, "
             "foundation_width, foundation_length, foundation_depth, permanent_load_kn, variable_load_kn, "
-            "slope_angle_deg, depth_to_slip_m.\n"
-            f"Answer: {user_input}\nReturn ONLY valid JSON."
+            "slope_angle_deg, depth_to_slip_m, wall_height_m, backfill_friction_angle_deg, backfill_unit_weight, surcharge_kpa.\n"
+            "Only include parameters that are explicitly mentioned or can be confidently inferred.\n"
+            f"Answer: {user_input}\n\nReturn ONLY valid JSON with numeric values (no units in values)."
         )
-        response = call_llm(extraction_prompt, system_prompt="Return only JSON.", temperature=0.1)
+        
         try:
-            cleaned = response.strip()
-            if cleaned.startswith("```"):
-                cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
-            params = json.loads(cleaned)
-        except Exception:
-            params = {}
-        self.project.design_parameters.update(params)
-        if params.get("gwl_depth_m") is not None:
-            self.project.gwl_depth_m = params["gwl_depth_m"]
+            response = call_llm(
+                extraction_prompt,
+                system_prompt="Return only valid JSON with numeric parameter values. Use null for unknown values.",
+                temperature=0.1,
+                max_tokens=1000,
+            )
+            
+            # Use robust parsing with retry logic
+            params = safe_parse_json(
+                response=response,
+                target_type=ParameterExtractionSchema,
+                default_factory=ParameterExtractionSchema,
+                context="parameter extraction",
+            )
+            
+            # Convert to dict and filter out None values
+            params_dict = params.model_dump(exclude_none=True)
+            
+            if params_dict:
+                logger.info(f"Extracted parameters: {params_dict}")
+            else:
+                logger.warning("No parameters could be extracted from user input")
+                
+        except Exception as e:
+            logger.error(f"Parameter extraction failed: {e}")
+            params_dict = {}
+        
+        self.project.design_parameters.update(params_dict)
+        if params.gwl_depth_m is not None:
+            self.project.gwl_depth_m = params.gwl_depth_m
+        
         self.state = AgentState.IDENTIFYING_SKILLS
         return self._identify_required_skills()
 

@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.vectordb.qdrant_store import GeoVectorStore
 from src.utils.llm_client import call_llm_with_context
+from src.utils.citation_verifier import CitationVerifier, CitationAwareQAAgent as CitationWrapper
 from config.settings import PRIMARY_MODEL
 
 
@@ -19,6 +20,9 @@ class QAAgent:
         question: str,
         document_type: str | None = None,
         document_id: str | None = None,
+        clause_id: str | None = None,
+        content_type: str | None = None,
+        regulatory_strength: str | None = None,
         top_k: int = 8,
         model: str = PRIMARY_MODEL,
         equation_mode: bool = False,
@@ -28,6 +32,9 @@ class QAAgent:
             top_k=top_k,
             document_type=document_type,
             document_id=document_id,
+            clause_id=clause_id,
+            content_type=content_type,
+            regulatory_strength=regulatory_strength,
         )
         if equation_mode:
             equation_query = (
@@ -39,6 +46,9 @@ class QAAgent:
                 top_k=max(top_k, 12),
                 document_type=document_type,
                 document_id=document_id,
+                clause_id=clause_id,
+                content_type=content_type,
+                regulatory_strength=regulatory_strength,
                 score_threshold=0.0,
             )
             chunks = self._merge_chunks(chunks, eq_chunks, limit=max(top_k, 12))
@@ -167,6 +177,64 @@ class QAAgent:
 
     def list_knowledge_base(self) -> list[dict]:
         return self.store.list_documents()
+
+    def ask_with_verification(self, question: str, **kwargs) -> dict:
+        """
+        Ask a question with automatic citation verification.
+        This method verifies that all citations in the answer exist in retrieved chunks.
+        
+        Args:
+            question: User question
+            **kwargs: Additional arguments passed to ask()
+            
+        Returns:
+            Answer dict with verification info added
+        """
+        result = self.ask(question, **kwargs)
+        
+        # Verify citations if we have an answer and sources
+        if result.get("answer") and result.get("sources"):
+            verifier = CitationVerifier()
+            
+            # Reconstruct retrieved chunks for verification
+            retrieved_chunks = [
+                {
+                    "id": f"{s['document']}_{s['section']}_{s.get('page', '')}",
+                    "metadata": {
+                        "document_name": s["document"],
+                        "section_title": s["section"],
+                        "clause_id": s.get("clause_id", ""),
+                        "page_number": s.get("page"),
+                    },
+                    "score": s.get("relevance_score", 0),
+                }
+                for s in result["sources"]
+            ]
+            
+            verification = verifier.verify(
+                answer=result["answer"],
+                retrieved_chunks=retrieved_chunks,
+                strict_mode=True,
+            )
+            
+            # Add verification info to result
+            result["verification"] = {
+                "total_citations": verification.total_citations,
+                "verified_count": verification.verified_count,
+                "unverified_count": verification.unverified_count,
+                "hallucinated_count": verification.hallucinated_count,
+                "overall_confidence": verification.overall_confidence,
+                "warnings": verification.warnings,
+            }
+            
+            # Add warning if hallucinations detected
+            if verification.hallucinated_count > 0:
+                result["warning"] = (
+                    f"⚠️ {verification.hallucinated_count} citation(s) could not be verified. "
+                    "Please verify against source documents."
+                )
+        
+        return result
 
 
 def interactive_qa():

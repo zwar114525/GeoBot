@@ -51,16 +51,18 @@ class GeoVectorStore:
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(size=EMBEDDING_DIMENSION, distance=Distance.COSINE),
             )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="document_type",
-                field_schema=models.PayloadSchemaType.KEYWORD,
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="document_id",
-                field_schema=models.PayloadSchemaType.KEYWORD,
-            )
+            for field_name in [
+                "document_type",
+                "document_id",
+                "clause_id",
+                "content_type",
+                "regulatory_strength",
+            ]:
+                self.client.create_payload_index(
+                    collection_name=self.collection_name,
+                    field_name=field_name,
+                    field_schema=models.PayloadSchemaType.KEYWORD,
+                )
             logger.info(f"Created collection: {self.collection_name}")
         else:
             logger.info(f"Collection already exists: {self.collection_name}")
@@ -85,6 +87,9 @@ class GeoVectorStore:
         top_k: int = 10,
         document_type: str | None = None,
         document_id: str | None = None,
+        clause_id: str | None = None,
+        content_type: str | None = None,
+        regulatory_strength: str | None = None,
         score_threshold: float = 0.3,
     ) -> list[dict]:
         query_embedding = embed_query(query)
@@ -93,6 +98,14 @@ class GeoVectorStore:
             filter_conditions.append(FieldCondition(key="document_type", match=MatchValue(value=document_type)))
         if document_id:
             filter_conditions.append(FieldCondition(key="document_id", match=MatchValue(value=document_id)))
+        if clause_id:
+            filter_conditions.append(FieldCondition(key="clause_id", match=MatchValue(value=clause_id)))
+        if content_type:
+            filter_conditions.append(FieldCondition(key="content_type", match=MatchValue(value=content_type)))
+        if regulatory_strength:
+            filter_conditions.append(
+                FieldCondition(key="regulatory_strength", match=MatchValue(value=regulatory_strength))
+            )
         search_filter = Filter(must=filter_conditions) if filter_conditions else None
         if hasattr(self.client, "search"):
             results = self.client.search(
