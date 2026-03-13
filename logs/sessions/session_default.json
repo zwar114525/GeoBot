@@ -1,0 +1,127 @@
+{
+  "session_id": "default",
+  "saved_at": "2026-03-13T17:17:16.557398",
+  "chat_history": [
+    {
+      "role": "user",
+      "content": "teach me how to design a footing\n\n[Equation mode: ON]\n[Filters: doc=all, clause=any, content_type=Any, regulatory=Any]"
+    },
+    {
+      "role": "assistant",
+      "content": "No relevant information found in the knowledge base.",
+      "sources": []
+    },
+    {
+      "role": "user",
+      "content": "teach me how to design a footing step by step\n\n[Equation mode: ON]\n[Filters: doc=all, clause=any, content_type=Any, regulatory=Any]"
+    },
+    {
+      "role": "assistant",
+      "content": "Retrieved relevant context, but LLM response generation failed. Error: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable\n\nTop retrieved excerpts:\n##### **2.1 GENERAL**\n\n**2.1.1** **BASIC REQUIREMENTS**\n\n\nFoundations of any building or structure shall be designed and constructed to\nwithstand safely all the dead, imposed and wind loads without impairing the stability\nor inducing excessive movement to the building or of any other building, street, land,\nslope or services.\n\n\nThe allowable capaci\n\n\nFor foundations bearing on soils, such as shallow footings or friction piles, the\nusual design practice is to limit the increase of vertical effective stress at the\nmarble surface to an insignificantly low value, so as to prevent the collapse of\nany cavities in the rock due to the imposition of foundation load.\n\n\n**(2)** **An Empirical Approach**\n\n\n##### **1.1 SCOPE**\n\nThis Code of Practice was prepared on the basis of being ‘deemed-to-satisfy’ the\nBuilding (Construction) Regulations as far as the design and construction of\nfoundations are concerned. Departure from the requirements and recommendations of\nthis Code of Practice or the use of other standards or codes of practice for design of\nfo",
+      "sources": [
+        {
+          "document": "FoundationCode2017",
+          "section": "**2. GENERAL DESIGN REQUIREMENTS**",
+          "page": 17,
+          "relevance_score": 0.456,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**1. GENERAL**",
+          "page": 10,
+          "relevance_score": 0.452,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**4 SHALLOW FOUNDATIONS**",
+          "page": 56,
+          "relevance_score": 0.45,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**List of Figures**",
+          "page": 9,
+          "relevance_score": 0.448,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**3. SITE INVESTIGATION**",
+          "page": 50,
+          "relevance_score": 0.447,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "NSF = ∫",
+          "page": 63,
+          "relevance_score": 0.471,
+          "clause_id": "unknown"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "teach me how to design a footing step by step\n\n[Equation mode: ON]\n[Filters: doc=all, clause=any, content_type=Any, regulatory=Any]"
+    },
+    {
+      "role": "assistant",
+      "content": "### Step 1: General Requirements & Initial Considerations\n**Critical equation(s)**\nEquation not found in retrieved context\n**Variable definitions (units)**\nN/A (no equation in retrieved context).\n**Acceptance/check criterion**\n- The foundation must be structurally adequate to sustain all applied loads and transmit them safely to the ground without undue settlement.\n- The foundation should not overload adjacent foundations or destabilize slopes.\n- Ensure compatibility between site investigation, testing, computations, and construction methods.\n**Citation**\n[Source: FoundationCode2017, Section: 4. SHALLOW FOUNDATIONS, Page: 56]\n[Source: FoundationCode2017, Section: 2. GENERAL DESIGN REQUIREMENTS, Page: 17]\n\n### Step 2: Determine Design Loads\n**Critical equation(s)**\nEquation not found in retrieved context\n**Variable definitions (units)**\nN/A (no equation in retrieved context).\n**Acceptance/check criterion**\n- Assess dead load, imposed load, and wind load according to relevant codes.\n- Include buoyancy force and earth pressure in imposed load calculations.\n- Verify that detailed superstructure load calculations do not exceed assumed loads used in foundation design.\n**Citation**\n[Source: FoundationCode2017, Section: 2.5.2, Page: 26]\n\n### Step 3: Site Investigation & Ground Conditions\n**Critical equation(s)**\nEquation not found in retrieved context\n**Variable definitions (units)**\nN/A (no equation in retrieved context).\n**Acceptance/check criterion**\n- Conduct a thorough site investigation according to GEOGUIDE 2 and GEOGUIDE 3.\n- Identify geological features, rock outcrops, previous landslides, and site formation works.\n- Assess groundwater conditions, including highest anticipated and possible levels.\n- For marble bedrock, determine the marble mass class using drill hole rating.\n**Citation**\n[Source: FoundationCode2017, Section: 3. SITE INVESTIGATION, Page: 50]\n[Source: FoundationCode2017, Section: 2.8.2.4, Page: 47]\n\n### Step 4: Determine Allowable Bearing Pressure (Rational Design)\n**Critical equation(s)**\n$$\nqa = qu * F - q\n$$\n**Variable definitions (units)**\n- $qa$: allowable vertical bearing pressure (kPa)\n- $qu$: ultimate bearing capacity of the granular soil (kPa)\n- $F$: factor of safety (dimensionless, not less than 3)\n- $q$: overburden pressure at base level of the foundation (kPa)\n**Acceptance/check criterion**\n- The allowable bearing pressure should be determined using sound engineering principles and analysis.\n- A factor of safety of at least 3 should be applied to the calculated ultimate bearing capacity, adjusting based on soil/rock type and reliability of the method.\n**Citation**\n[Source: FoundationCode2017, Section: 2.2.1, Page: 18]\n[Source: FoundationCode2017, Section: 2.2, Page: 17]\n\n### Step 5: Determine Allowable Bearing Pressure (Presumed Values)\n**Critical equation(s)**\nEquation not found in retrieved context\n**Variable definitions (units)**\nN/A (no equation in retrieved context).\n**Acceptance/check criterion**\n- If using presumed values, ensure the ground investigation meets Chapter 3 requirements.\n- The structure should not be sensitive to settlement if using presumed values.\n- For marble bedrock, check rock joints to prevent slip if the rock profile is inclined.\n**Citation**\n[Source: FoundationCode2017, Section: 2.2.2, Page: 18]\n\n### Step 6: Settlement Estimation\n**Critical equation(s)**\n$$\nSe = q_{net} * E_s * B_s * F_o\n$$\n**Variable definitions (units)**\n- $Se$: settlement (units not specified)\n- $q_{net}$: net bearing pressure (units not specified)\n- $E_s$: Young’s modulus of the soil (MPa)\n- $B_s$: width of the footing (units not specified)\n- $F_o$: factor (dimensionless, units not specified)\n**Acceptance/check criterion**\n- Estimate immediate, primary consolidation, and secondary consolidation settlements.\n- Settlements should be checked against tolerances for the structure and surrounding buildings.\n- Angular rotation, differential settlement, and lateral deflection should be assessed separately.\n**Citation**\n[Source: FoundationCode2017, Section: 2.3.1, Page: 28]\n[Source: FoundationCode2017, Section: 4.2.2, Page: 57]\n\n### Step 7: Structural Design of Footing\n**Critical equation(s)**\nEquation not found in retrieved context\n**Variable definitions (units)**\nN/A (no equation in retrieved context).\n**Acceptance/check criterion**\n- Design the reinforced concrete footing according to the Code of Practice for Structural Use of Concrete.\n- Ensure the footing's stability satisfies clause 2.5.4 of the code.\n**Citation**\n[Source: FoundationCode2017, Section: 4.3, Page: 58]\n[Source: FoundationCode2017, Section: 2.5, Page: 26]",
+      "sources": [
+        {
+          "document": "FoundationCode2017",
+          "section": "**2. GENERAL DESIGN REQUIREMENTS**",
+          "page": 17,
+          "relevance_score": 0.456,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**1. GENERAL**",
+          "page": 10,
+          "relevance_score": 0.452,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**4 SHALLOW FOUNDATIONS**",
+          "page": 56,
+          "relevance_score": 0.45,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**List of Figures**",
+          "page": 9,
+          "relevance_score": 0.448,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "**3. SITE INVESTIGATION**",
+          "page": 50,
+          "relevance_score": 0.447,
+          "clause_id": "unknown"
+        },
+        {
+          "document": "FoundationCode2017",
+          "section": "NSF = ∫",
+          "page": 63,
+          "relevance_score": 0.471,
+          "clause_id": "unknown"
+        }
+      ]
+    }
+  ],
+  "designer_messages": [
+    {
+      "role": "assistant",
+      "content": "Describe your project type, location, geometry, loads, GI data, and design codes."
+    }
+  ],
+  "llm_config": {},
+  "metadata": {}
+}

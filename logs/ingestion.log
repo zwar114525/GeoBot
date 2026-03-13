@@ -26,3 +26,534 @@
 2026-03-12 14:14:10.356 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
 2026-03-12 14:14:10.358 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
 2026-03-12 14:14:10.359 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 00:06:06.592 | INFO     | src.ingestion.ingest:ingest_document:37 - Step 1/3: Parsing and structure-aware chunking from C:\Users\PC\AppData\Local\Temp\tmp1e1ojco6.pdf
+2026-03-13 00:06:06.592 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp1e1ojco6.pdf
+2026-03-13 00:06:18.236 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 00:06:18.236 | INFO     | src.ingestion.ingest:ingest_document:47 - Step 2/3: Chunking complete
+2026-03-13 00:06:18.237 | INFO     | src.ingestion.ingest:ingest_document:48 - Step 3/3: Embedding and storing in vector database
+2026-03-13 00:06:18.237 | INFO     | src.vectordb.qdrant_store:__init__:46 - Reusing local file-based Qdrant client
+2026-03-13 00:06:18.237 | INFO     | src.vectordb.qdrant_store:_ensure_collection:76 - Collection already exists: geotech_knowledge
+2026-03-13 00:06:18.239 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 00:06:18.278 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 68 new embeddings (0 from cache)
+2026-03-13 00:06:18.279 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 00:06:22.463 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 00:07:30.886 | INFO     | src.vectordb.qdrant_store:add_document:89 - Added 68 chunks from 'FoundationCode2017'
+2026-03-13 00:07:30.887 | INFO     | src.ingestion.ingest:ingest_document:51 - Successfully ingested 'FoundationCode2017': 68 chunks
+2026-03-13 00:10:57.345 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 00:22:18.437 | INFO     | src.vectordb.qdrant_store:__init__:46 - Reusing local file-based Qdrant client
+2026-03-13 00:22:18.438 | INFO     | src.vectordb.qdrant_store:_ensure_collection:76 - Collection already exists: geotech_knowledge
+2026-03-13 00:22:18.462 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 2513 terms
+2026-03-13 00:22:18.463 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 00:22:18.697 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 00:22:18.697 | INFO     | src.vectordb.qdrant_store:__init__:46 - Reusing local file-based Qdrant client
+2026-03-13 00:22:18.698 | INFO     | src.vectordb.qdrant_store:_ensure_collection:76 - Collection already exists: geotech_knowledge
+2026-03-13 00:23:54.188 | INFO     | src.ingestion.ingest:ingest_document:37 - Step 1/3: Parsing and structure-aware chunking from C:\Users\PC\AppData\Local\Temp\tmp1wfyse22.pdf
+2026-03-13 00:23:54.188 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp1wfyse22.pdf
+2026-03-13 00:24:05.288 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 00:24:05.288 | INFO     | src.ingestion.ingest:ingest_document:47 - Step 2/3: Chunking complete
+2026-03-13 00:24:05.288 | INFO     | src.ingestion.ingest:ingest_document:48 - Step 3/3: Embedding and storing in vector database
+2026-03-13 00:24:05.288 | INFO     | src.vectordb.qdrant_store:__init__:46 - Reusing local file-based Qdrant client
+2026-03-13 00:24:05.289 | INFO     | src.vectordb.qdrant_store:_ensure_collection:76 - Collection already exists: geotech_knowledge
+2026-03-13 00:24:05.290 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 00:24:06.445 | INFO     | src.vectordb.qdrant_store:add_document:89 - Added 68 chunks from 'FoundationCode2017'
+2026-03-13 00:24:06.446 | INFO     | src.ingestion.ingest:ingest_document:51 - Successfully ingested 'FoundationCode2017': 68 chunks
+2026-03-13 00:24:28.221 | INFO     | src.ingestion.ingest:ingest_document:37 - Step 1/3: Parsing and structure-aware chunking from C:\Users\PC\AppData\Local\Temp\tmphdfxpaj_.pdf
+2026-03-13 00:24:28.221 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmphdfxpaj_.pdf
+2026-03-13 00:24:39.621 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 00:24:39.622 | INFO     | src.ingestion.ingest:ingest_document:47 - Step 2/3: Chunking complete
+2026-03-13 00:24:39.622 | INFO     | src.ingestion.ingest:ingest_document:48 - Step 3/3: Embedding and storing in vector database
+2026-03-13 00:24:39.622 | INFO     | src.vectordb.qdrant_store:__init__:46 - Reusing local file-based Qdrant client
+2026-03-13 00:24:39.622 | INFO     | src.vectordb.qdrant_store:_ensure_collection:76 - Collection already exists: geotech_knowledge
+2026-03-13 00:24:40.989 | INFO     | src.vectordb.qdrant_store:add_document:89 - Added 68 chunks from 'FoundationCode2017'
+2026-03-13 00:24:40.992 | INFO     | src.ingestion.ingest:ingest_document:51 - Successfully ingested 'FoundationCode2017': 68 chunks
+2026-03-13 00:25:05.584 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 00:25:09.117 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 00:25:40.841 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 00:25:40.886 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 00:26:07.404 | WARNING  | src.utils.llm_client:call_llm:152 - LLM call attempt 1 failed: Error code: 400 - {'error': {'message': 'Provider returned error', 'code': 400, 'metadata': {'raw': '{\n  "error": {\n    "code": 400,\n    "message": "Developer instruction is not enabled for models/gemma-3-27b-it",\n    "status": "INVALID_ARGUMENT"\n  }\n}\n', 'provider_name': 'Google AI Studio', 'is_byok': False}}, 'user_id': 'user_30d7nq75mWOwrzoiMjr9yLfr6yU'}
+2026-03-13 00:26:13.906 | WARNING  | src.utils.llm_client:call_llm:152 - LLM call attempt 2 failed: Error code: 429 - {'error': {'message': 'Provider returned error', 'code': 429, 'metadata': {'raw': 'google/gemma-3-27b-it:free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations', 'provider_name': 'Google AI Studio', 'is_byok': False}}, 'user_id': 'user_30d7nq75mWOwrzoiMjr9yLfr6yU'}
+2026-03-13 00:27:11.669 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 16:25:37.434 | INFO     | src.ingestion.ingest:ingest_document:37 - Step 1/3: Parsing and structure-aware chunking from C:\Users\PC\AppData\Local\Temp\tmpu58ewuog.pdf
+2026-03-13 16:25:37.434 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpu58ewuog.pdf
+2026-03-13 16:25:48.180 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:25:48.180 | INFO     | src.ingestion.ingest:ingest_document:47 - Step 2/3: Chunking complete
+2026-03-13 16:25:48.181 | INFO     | src.ingestion.ingest:ingest_document:48 - Step 3/3: Embedding and storing in vector database
+2026-03-13 16:25:48.181 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:25:48.181 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:25:48.182 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:25:49.386 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 68 chunks from 'FoundationCode2017'
+2026-03-13 16:25:49.387 | INFO     | src.ingestion.ingest:ingest_document:51 - Successfully ingested 'FoundationCode2017': 68 chunks
+2026-03-13 16:37:27.732 | INFO     | src.ingestion.ingest:ingest_document_dual_index:95 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpbyhitr5p.pdf
+2026-03-13 16:37:27.732 | INFO     | src.ingestion.ingest:ingest_document_dual_index:98 - Step 1/4: Parsing PDF
+2026-03-13 16:41:06.442 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:41:06.442 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:41:06.443 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:41:06.443 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:41:06.703 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:41:06.704 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:41:06.704 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:41:06.706 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:41:15.545 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpxr4m_5y5.pdf
+2026-03-13 16:41:15.546 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:41:15.546 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:41:15.546 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpxr4m_5y5.pdf
+2026-03-13 16:41:15.546 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpxr4m_5y5.pdf
+2026-03-13 16:41:26.763 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:41:26.763 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:41:26.763 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:41:26.763 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:41:26.764 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:41:26.764 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:41:26.764 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:41:26.764 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:41:26.765 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:41:26.765 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:41:26.785 | INFO     | src.vectordb.qdrant_store:create_section_index:208 - Created section index: geotech_knowledge_sections
+2026-03-13 16:41:26.785 | INFO     | src.vectordb.qdrant_store:create_section_index:208 - Created section index: geotech_knowledge_sections
+2026-03-13 16:41:26.799 | INFO     | src.vectordb.qdrant_store:create_rule_index:228 - Created rule index: geotech_knowledge_rules
+2026-03-13 16:41:26.799 | INFO     | src.vectordb.qdrant_store:create_rule_index:228 - Created rule index: geotech_knowledge_rules
+2026-03-13 16:41:26.801 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:41:26.801 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:41:26.855 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:41:28.053 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:41:28.053 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:41:28.055 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:41:28.055 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:41:41.919 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpx970_38l.pdf
+2026-03-13 16:41:41.920 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:41:41.919 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpx970_38l.pdf
+2026-03-13 16:41:41.920 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpx970_38l.pdf
+2026-03-13 16:41:41.920 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:41:41.920 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpx970_38l.pdf
+2026-03-13 16:41:53.060 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:41:53.060 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:41:53.060 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:41:53.060 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:41:53.061 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:41:53.061 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:41:53.061 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:41:53.061 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:41:53.061 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:41:53.061 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:41:53.125 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:41:54.329 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:41:54.329 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:41:54.331 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:41:54.331 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:42:04.743 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp7tch8030.pdf
+2026-03-13 16:42:04.743 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp7tch8030.pdf
+2026-03-13 16:42:04.743 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:42:04.743 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:42:04.744 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp7tch8030.pdf
+2026-03-13 16:42:04.744 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp7tch8030.pdf
+2026-03-13 16:42:16.276 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:42:16.276 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:42:16.277 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:42:16.277 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:42:16.277 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:42:16.277 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:42:16.277 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:42:16.277 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:42:16.278 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:42:16.278 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:42:16.337 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:42:16.337 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:42:17.501 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:42:17.501 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:42:17.502 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:42:17.502 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:45:43.762 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:45:43.762 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:45:43.763 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:45:43.763 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:45:43.763 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:45:43.763 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:45:43.764 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:45:43.764 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:45:44.012 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:45:44.012 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:45:44.013 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:45:44.013 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:45:44.014 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:45:44.014 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:45:44.016 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:45:44.016 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:45:56.265 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 16:45:56.265 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 16:46:00.175 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp6pvn7ywj.pdf
+2026-03-13 16:46:00.175 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp6pvn7ywj.pdf
+2026-03-13 16:46:00.175 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp6pvn7ywj.pdf
+2026-03-13 16:46:00.175 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:46:00.175 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:46:00.175 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:46:00.176 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp6pvn7ywj.pdf
+2026-03-13 16:46:00.176 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp6pvn7ywj.pdf
+2026-03-13 16:46:00.176 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp6pvn7ywj.pdf
+2026-03-13 16:46:11.369 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:46:11.369 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:46:11.369 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'FoundationCode2017': 68 chunks
+2026-03-13 16:46:11.370 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:46:11.370 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:46:11.370 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:46:11.370 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:46:11.370 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:46:11.370 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 3, Rule: 65
+2026-03-13 16:46:11.370 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:46:11.371 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:46:11.371 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:46:11.370 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:46:11.371 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:46:11.373 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:46:11.373 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:46:11.373 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:46:11.433 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:46:11.433 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:46:11.433 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 3 chunks from 'FoundationCode2017'
+2026-03-13 16:46:12.649 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:46:12.649 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:46:12.649 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:46:12.650 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:46:12.650 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:46:12.650 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 3, Rule: 65
+2026-03-13 16:51:33.471 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:51:33.471 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:51:33.471 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:51:33.472 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:51:33.472 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:51:33.473 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:51:33.472 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:51:33.473 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:51:33.473 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:51:33.474 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:51:33.474 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:51:33.474 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:51:33.713 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:51:33.713 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:51:33.713 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:51:33.714 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:51:33.714 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:51:33.714 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:51:33.715 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:51:33.715 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:51:33.715 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:51:33.717 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:51:33.717 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:51:33.717 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:58:24.025 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:24.025 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:24.025 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:24.026 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:24.026 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:24.027 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:58:24.026 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:24.027 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:58:24.027 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:58:24.027 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:58:24.027 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 16:58:24.027 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 16:58:24.262 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:58:24.262 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:58:24.263 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:24.262 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 16:58:24.263 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:24.264 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:24.264 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:24.263 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:24.264 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:24.265 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:58:24.265 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:58:24.265 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 16:58:31.254 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 16:58:31.254 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 16:58:31.254 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:94 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:58:35.564 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:58:35.563 | INFO     | src.ingestion.ingest:ingest_document_dual_index:97 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 16:58:35.564 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.564 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:35.564 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmp90tmfho3.pdf
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:58:46.813 | INFO     | src.ingestion.ingest:ingest_document_dual_index:106 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 16:58:46.814 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 16:58:46.814 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 16:58:46.814 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 16:58:46.814 | INFO     | src.ingestion.ingest:ingest_document_dual_index:131 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 16:58:46.815 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:46.815 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:46.815 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:46.815 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 16:58:46.816 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:46.816 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:46.816 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:46.816 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 16:58:46.818 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:58:46.818 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:58:46.818 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:58:46.818 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 16:58:46.836 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 4 new embeddings (1 from cache)
+2026-03-13 16:58:46.836 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 4 new embeddings (1 from cache)
+2026-03-13 16:58:46.836 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 4 new embeddings (1 from cache)
+2026-03-13 16:58:46.836 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 4 new embeddings (1 from cache)
+2026-03-13 16:58:46.837 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 16:58:46.837 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 16:58:46.837 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 16:58:46.837 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 16:58:50.601 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 16:58:50.601 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 16:58:50.601 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 16:58:50.601 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 16:58:55.884 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 16:58:55.884 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 16:58:55.884 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 16:58:55.955 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 62 new embeddings (3 from cache)
+2026-03-13 16:58:55.955 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 62 new embeddings (3 from cache)
+2026-03-13 16:58:55.955 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 62 new embeddings (3 from cache)
+2026-03-13 16:58:55.955 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 62 new embeddings (3 from cache)
+2026-03-13 16:59:57.975 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:59:57.975 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:59:57.975 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:59:57.976 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 16:59:57.975 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 16:59:57.976 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 16:59:57.976 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 16:59:57.976 | INFO     | src.ingestion.ingest:ingest_document_dual_index:165 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 17:03:24.693 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.693 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.693 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.693 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.694 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.694 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.694 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.694 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.695 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:03:24.695 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:03:24.695 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:03:24.696 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:03:24.696 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:03:24.695 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:03:24.696 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:03:24.696 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:03:24.933 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:03:24.933 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:03:24.933 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:03:24.933 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:03:24.934 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.934 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.934 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.936 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.934 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:24.936 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.936 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.936 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:24.938 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:03:24.938 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:03:24.938 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:03:24.938 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:03:34.542 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 17:03:34.542 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 17:03:34.542 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 17:03:34.542 | INFO     | src.vectordb.qdrant_store:delete_document:194 - Deleted all chunks for document: foundationcode2017
+2026-03-13 17:03:38.690 | INFO     | src.ingestion.ingest:ingest_document_dual_index:150 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.690 | INFO     | src.ingestion.ingest:ingest_document_dual_index:150 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.690 | INFO     | src.ingestion.ingest:ingest_document_dual_index:150 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.690 | INFO     | src.ingestion.ingest:ingest_document_dual_index:150 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.690 | INFO     | src.ingestion.ingest:ingest_document_dual_index:150 - Dual-index ingestion: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.691 | INFO     | src.ingestion.ingest:ingest_document_dual_index:153 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 17:03:38.691 | INFO     | src.ingestion.ingest:ingest_document_dual_index:153 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 17:03:38.691 | INFO     | src.ingestion.ingest:ingest_document_dual_index:153 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 17:03:38.691 | INFO     | src.ingestion.ingest:ingest_document_dual_index:153 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 17:03:38.691 | INFO     | src.ingestion.ingest:ingest_document_dual_index:153 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 17:03:38.692 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.692 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.692 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.692 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:38.692 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:254 - Extracting text from: C:\Users\PC\AppData\Local\Temp\tmpjl61ol4k.pdf
+2026-03-13 17:03:50.184 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 17:03:50.184 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 17:03:50.184 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 17:03:50.184 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 17:03:50.184 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:418 - Processed 'FoundationCode2017': 70 chunks
+2026-03-13 17:03:50.185 | INFO     | src.ingestion.ingest:ingest_document_dual_index:162 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 17:03:50.185 | INFO     | src.ingestion.ingest:ingest_document_dual_index:162 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 17:03:50.185 | INFO     | src.ingestion.ingest:ingest_document_dual_index:162 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 17:03:50.185 | INFO     | src.ingestion.ingest:ingest_document_dual_index:162 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 17:03:50.185 | INFO     | src.ingestion.ingest:ingest_document_dual_index:162 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 17:03:50.191 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:59 - Saved 70 chunks to C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.191 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:59 - Saved 70 chunks to C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.191 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:59 - Saved 70 chunks to C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.191 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:59 - Saved 70 chunks to C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.191 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:59 - Saved 70 chunks to C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.192 | INFO     | src.ingestion.ingest:ingest_document_dual_index:179 - Chunks saved to: C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.192 | INFO     | src.ingestion.ingest:ingest_document_dual_index:179 - Chunks saved to: C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.192 | INFO     | src.ingestion.ingest:ingest_document_dual_index:179 - Chunks saved to: C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.192 | INFO     | src.ingestion.ingest:ingest_document_dual_index:179 - Chunks saved to: C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.192 | INFO     | src.ingestion.ingest:ingest_document_dual_index:179 - Chunks saved to: C:\Users\PC\Desktop\Cursor\GeoBot\chunked_files\FoundationCode2017.txt
+2026-03-13 17:03:50.194 | INFO     | src.ingestion.ingest:ingest_document_dual_index:191 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 17:03:50.194 | INFO     | src.ingestion.ingest:ingest_document_dual_index:191 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 17:03:50.194 | INFO     | src.ingestion.ingest:ingest_document_dual_index:191 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 17:03:50.194 | INFO     | src.ingestion.ingest:ingest_document_dual_index:191 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 17:03:50.194 | INFO     | src.ingestion.ingest:ingest_document_dual_index:191 - Step 3/4: Distributing to indices - Section: 5, Rule: 65
+2026-03-13 17:03:50.195 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:50.195 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:50.195 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:50.195 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:50.195 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:03:50.196 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:50.196 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:50.196 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:50.196 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:50.196 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:03:50.199 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:03:50.199 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:03:50.199 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:03:50.199 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:03:50.199 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:03:50.301 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 17:03:50.301 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 17:03:50.301 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 17:03:50.301 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 17:03:50.301 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 5 chunks from 'FoundationCode2017'
+2026-03-13 17:03:51.532 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 17:03:51.532 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 17:03:51.532 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 17:03:51.532 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 17:03:51.532 | INFO     | src.vectordb.qdrant_store:add_document:90 - Added 65 chunks from 'FoundationCode2017'
+2026-03-13 17:03:51.534 | INFO     | src.ingestion.ingest:ingest_document_dual_index:225 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 17:03:51.534 | INFO     | src.ingestion.ingest:ingest_document_dual_index:225 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 17:03:51.534 | INFO     | src.ingestion.ingest:ingest_document_dual_index:225 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 17:03:51.534 | INFO     | src.ingestion.ingest:ingest_document_dual_index:225 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 17:03:51.534 | INFO     | src.ingestion.ingest:ingest_document_dual_index:225 - Step 4/4: Dual-index ingestion complete - Section: 5, Rule: 65
+2026-03-13 17:10:49.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:10:49.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:10:49.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:10:49.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:10:49.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:10:53.118 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:10:53.118 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:10:53.118 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:10:53.118 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:10:53.118 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:12:27.594 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:27.594 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:27.594 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:27.594 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:27.594 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:27.595 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:27.595 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:27.595 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:27.595 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:27.595 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:33.774 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:33.774 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:33.774 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:33.774 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:33.774 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:12:33.775 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:33.775 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:33.775 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:33.775 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:12:33.775 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:13:07.433 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:13:07.433 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:13:07.433 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:13:07.433 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:13:07.433 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:15:18.323 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.323 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.323 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.323 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.323 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.324 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.324 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.324 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.324 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.325 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:15:18.325 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:15:18.324 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.325 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:15:18.325 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:15:18.326 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:15:18.326 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:15:18.325 | INFO     | src.utils.enhanced_search:_build_keyword_index:66 - Built keyword index with 0 terms
+2026-03-13 17:15:18.326 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:15:18.326 | INFO     | src.utils.enhanced_search:_load_model:187 - Loading cross-encoder: ms-marco-MiniLM-L-6-v2
+2026-03-13 17:15:18.578 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:15:18.578 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:15:18.578 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:15:18.578 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:15:18.578 | WARNING  | src.utils.enhanced_search:_load_model:193 - Failed to load cross-encoder: ms-marco-MiniLM-L-6-v2 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+2026-03-13 17:15:18.580 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.580 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.580 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.580 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.580 | INFO     | src.vectordb.qdrant_store:__init__:47 - Reusing local file-based Qdrant client
+2026-03-13 17:15:18.581 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.581 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.581 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.581 | INFO     | src.vectordb.qdrant_store:_ensure_collection:77 - Collection already exists: geotech_knowledge
+2026-03-13 17:15:18.589 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:15:18.589 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:15:18.589 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:15:18.589 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:15:18.589 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 17:15:33.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:15:33.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:15:33.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:15:33.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:15:33.529 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 17:15:36.989 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:15:36.989 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:15:36.989 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:15:36.989 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:15:36.989 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 17:15:36.993 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:15:36.993 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:15:36.993 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:15:36.993 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:15:36.993 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:16:03.508 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:16:03.508 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:16:03.508 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:16:03.508 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:16:03.508 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 17:16:03.513 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:16:03.513 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:16:03.513 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:16:03.513 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:16:03.513 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
