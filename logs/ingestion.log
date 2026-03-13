@@ -557,3 +557,121 @@ If this is a private repository, make sure to pass a token having permission to 
 2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
 2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
 2026-03-13 17:17:16.558 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 22:24:37.724 | INFO     | src.ingestion.ingest:ingest_document:37 - Step 1/3: Parsing and structure-aware chunking from C:\Users\SAMSON~1\AppData\Local\Temp\tmpvbfmjm62.pdf
+2026-03-13 22:24:59.870 | WARNING  | src.ingestion.pdf_processor:parse_pdf_with_structure:423 - Docling structure chunking failed; fallback to markdown chunking: [WinError 1314] A required privilege is not held by the client: '..\\..\\blobs\\98434d37ace2399b824d685b0795ab7a68e53dd2' -> 'C:\\Users\\samsonscs\\.cache\\huggingface\\hub\\models--docling-project--docling-layout-heron\\snapshots\\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8\\config.json'
+2026-03-13 22:24:59.871 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\SAMSON~1\AppData\Local\Temp\tmpvbfmjm62.pdf
+2026-03-13 22:27:21.430 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'An Explanatory Handbook to the Code of Practice for Structural Use of Concrete 2013': 332 chunks
+2026-03-13 22:27:21.433 | INFO     | src.ingestion.ingest:ingest_document:47 - Step 2/3: Chunking complete
+2026-03-13 22:27:21.433 | INFO     | src.ingestion.ingest:ingest_document:48 - Step 3/3: Embedding and storing in vector database
+2026-03-13 22:27:21.435 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 22:27:21.435 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 22:27:21.456 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 22:27:22.075 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 332 new embeddings (0 from cache)
+2026-03-13 22:27:22.077 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 22:28:07.550 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 22:37:37.078 | INFO     | src.vectordb.qdrant_store:add_document:81 - Added 332 chunks from 'An Explanatory Handbook to the Code of Practice for Structural Use of Concrete 2013'
+2026-03-13 22:37:37.086 | INFO     | src.ingestion.ingest:ingest_document:51 - Successfully ingested 'An Explanatory Handbook to the Code of Practice for Structural Use of Concrete 2013': 332 chunks
+2026-03-13 22:37:37.099 | INFO     | src.ingestion.ingest:ingest_document:37 - Step 1/3: Parsing and structure-aware chunking from C:\Users\SAMSON~1\AppData\Local\Temp\tmptqy8iipb.pdf
+2026-03-13 22:37:53.304 | WARNING  | src.ingestion.pdf_processor:parse_pdf_with_structure:423 - Docling structure chunking failed; fallback to markdown chunking: [WinError 1314] A required privilege is not held by the client: '..\\..\\blobs\\575b058b45230d48a06df9b1944f4bd40949db1d' -> 'C:\\Users\\samsonscs\\.cache\\huggingface\\hub\\models--docling-project--docling-models\\snapshots\\fc0f2d45e2218ea24bce5045f58a389aed16dc23\\.gitattributes'
+2026-03-13 22:37:53.316 | INFO     | src.ingestion.pdf_processor:extract_text_from_pdf:240 - Extracting text from: C:\Users\SAMSON~1\AppData\Local\Temp\tmptqy8iipb.pdf
+2026-03-13 22:41:11.059 | INFO     | src.ingestion.pdf_processor:chunk_by_sections:390 - Processed 'An Explanatory Handbook to the Code of Practice for Foundations 2017': 361 chunks
+2026-03-13 22:41:11.060 | INFO     | src.ingestion.ingest:ingest_document:47 - Step 2/3: Chunking complete
+2026-03-13 22:41:11.060 | INFO     | src.ingestion.ingest:ingest_document:48 - Step 3/3: Embedding and storing in vector database
+2026-03-13 22:41:11.060 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 22:41:11.061 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 22:41:11.299 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 361 new embeddings (0 from cache)
+2026-03-13 22:52:15.713 | INFO     | src.vectordb.qdrant_store:add_document:81 - Added 361 chunks from 'An Explanatory Handbook to the Code of Practice for Foundations 2017'
+2026-03-13 22:52:15.721 | INFO     | src.ingestion.ingest:ingest_document:51 - Successfully ingested 'An Explanatory Handbook to the Code of Practice for Foundations 2017': 361 chunks
+2026-03-13 23:02:06.755 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 23:02:06.761 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:02:06.762 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:02:06.764 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:02:06.765 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:02:26.033 | INFO     | src.vectordb.qdrant_store:delete_document:210 - Deleted all chunks for document: an_explanatory_handbook_to_the_code_of_practice_for_structural_use_of_concrete_2013
+2026-03-13 23:02:34.562 | INFO     | src.vectordb.qdrant_store:delete_document:210 - Deleted all chunks for document: an_explanatory_handbook_to_the_code_of_practice_for_foundations_2017
+2026-03-13 23:04:15.051 | INFO     | src.ingestion.ingest:ingest_document_dual_index:129 - Dual-index ingestion: C:\Users\SAMSON~1\AppData\Local\Temp\tmpjfkpbowb.pdf
+2026-03-13 23:04:15.052 | INFO     | src.ingestion.ingest:ingest_document_dual_index:130 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+ta\Local\Temp\tmpjfkpbowb.pdf
+2026-03-13 23:04:15.052 | INFO     | src.ingestion.ingest:ingest_document_dual_index:130 - Step 1/4: Parsing PDF (Docling/pymupdf4llm)
+2026-03-13 23:16:15.773 | INFO     | src.ingestion.pdf_processor:parse_pdf_with_structure:420 - Docling structure chunking used for 'GS 2006 Vol 1 Rev 28_210610' with 173 chunks
+2026-03-13 23:16:15.773 | INFO     | src.ingestion.pdf_processor:parse_pdf_with_structure:420 - Docling structure chunking used for 'GS 2006 Vol 1 Rev 28_210610' with 173 chunks
+2026-03-13 23:16:15.794 | INFO     | src.ingestion.ingest:ingest_document_dual_index:137 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 23:16:15.794 | INFO     | src.ingestion.ingest:ingest_document_dual_index:137 - Step 2/4: Classifying chunks for dual-index
+2026-03-13 23:16:15.799 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:45 - Saved 173 chunks to C:\Users\samsonscs\Desktop\Cursor\GeoBot\chunked_files\GS_2006_Vol_1_Rev_28_210610.txt
+2026-03-13 23:16:15.799 | INFO     | src.ingestion.ingest:save_chunks_to_text_file:45 - Saved 173 chunks to C:\Users\samsonscs\Desktop\Cursor\GeoBot\chunked_files\GS_2006_Vol_1_Rev_28_210610.txt
+2026-03-13 23:16:15.800 | INFO     | src.ingestion.ingest:ingest_document_dual_index:151 - Chunks saved to: C:\Users\samsonscs\Desktop\Cursor\GeoBot\chunked_files\GS_2006_Vol_1_Rev_28_210610.txt
+2026-03-13 23:16:15.801 | INFO     | src.ingestion.ingest:ingest_document_dual_index:160 - Step 3/4: Distributing to indices - Section: 154, Rule: 19
+2026-03-13 23:16:15.800 | INFO     | src.ingestion.ingest:ingest_document_dual_index:151 - Chunks saved to: C:\Users\samsonscs\Desktop\Cursor\GeoBot\chunked_files\GS_2006_Vol_1_Rev_28_210610.txt
+2026-03-13 23:16:15.802 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:16:15.801 | INFO     | src.ingestion.ingest:ingest_document_dual_index:160 - Step 3/4: Distributing to indices - Section: 154, Rule: 19
+2026-03-13 23:16:15.802 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:16:15.802 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:16:15.802 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:16:15.816 | INFO     | src.vectordb.qdrant_store:create_section_index:262 - Created section index: geotech_knowledge_sections
+2026-03-13 23:16:15.829 | INFO     | src.vectordb.qdrant_store:create_rule_index:280 - Created rule index: geotech_knowledge_rules
+2026-03-13 23:16:15.829 | INFO     | src.vectordb.qdrant_store:create_rule_index:280 - Created rule index: geotech_knowledge_rules
+2026-03-13 23:16:15.832 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:16:15.832 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:16:15.925 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 154 new embeddings (0 from cache)
+2026-03-13 23:16:15.925 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 154 new embeddings (0 from cache)
+2026-03-13 23:16:15.925 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 23:16:15.925 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 23:16:20.058 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 23:16:20.058 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 23:17:34.539 | INFO     | src.vectordb.qdrant_store:add_document:81 - Added 154 chunks from 'GS 2006 Vol 1 Rev 28_210610'
+2026-03-13 23:17:34.539 | INFO     | src.vectordb.qdrant_store:add_document:81 - Added 154 chunks from 'GS 2006 Vol 1 Rev 28_210610'
+2026-03-13 23:17:34.560 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 19 new embeddings (0 from cache)
+2026-03-13 23:17:34.560 | INFO     | src.utils.embeddings:embed_texts:92 - Computing 19 new embeddings (0 from cache)
+2026-03-13 23:18:23.527 | INFO     | src.vectordb.qdrant_store:add_document:81 - Added 19 chunks from 'GS 2006 Vol 1 Rev 28_210610'
+2026-03-13 23:18:23.527 | INFO     | src.vectordb.qdrant_store:add_document:81 - Added 19 chunks from 'GS 2006 Vol 1 Rev 28_210610'
+2026-03-13 23:18:23.527 | INFO     | src.ingestion.ingest:ingest_document_dual_index:184 - Step 4/4: Dual-index ingestion complete - Section: 154, Rule: 19
+2026-03-13 23:18:23.527 | INFO     | src.ingestion.ingest:ingest_document_dual_index:184 - Step 4/4: Dual-index ingestion complete - Section: 154, Rule: 19
+2026-03-13 23:29:15.651 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 23:29:15.651 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 23:29:15.660 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:29:15.661 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:29:15.661 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:29:15.664 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:29:15.664 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:29:15.665 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:29:15.665 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:30:54.296 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 23:30:54.296 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 23:30:58.566 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 23:30:58.566 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 23:30:58.573 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:30:58.573 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:30:59.716 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:31:38.082 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:31:38.082 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:35:29.742 | INFO     | src.utils.session_persistence:load_session:78 - Session loaded: default
+2026-03-13 23:35:29.747 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:35:29.747 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:35:29.748 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:35:29.748 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:35:29.749 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:35:29.749 | INFO     | src.vectordb.qdrant_store:__init__:38 - Reusing local file-based Qdrant client
+2026-03-13 23:35:29.750 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:35:29.750 | INFO     | src.vectordb.qdrant_store:_ensure_collection:68 - Collection already exists: geotech_knowledge
+2026-03-13 23:35:39.293 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:35:39.293 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:35:40.522 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:35:40.522 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:35:41.514 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:35:41.514 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:38:09.321 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 23:38:09.321 | INFO     | src.utils.embeddings:get_model:13 - Loading embedding model: BAAI/bge-large-en-v1.5
+2026-03-13 23:38:13.625 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 23:38:13.625 | INFO     | src.utils.embeddings:get_model:15 - Embedding model loaded successfully
+2026-03-13 23:38:13.629 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:38:13.629 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:38:14.274 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:38:14.274 | INFO     | src.utils.cache:__init__:42 - Cache database initialized at cache\cache.db
+2026-03-13 23:38:24.096 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:38:24.096 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:39:53.514 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:39:53.514 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:41:52.474 | WARNING  | src.utils.llm_client:call_llm:152 - LLM call attempt 1 failed: Error code: 400 - {'error': {'message': 'Provider returned error', 'code': 400, 'metadata': {'raw': '{\n  "error": {\n    "code": 400,\n    "message": "Developer instruction is not enabled for models/gemma-3-27b-it",\n    "status": "INVALID_ARGUMENT"\n  }\n}\n', 'provider_name': 'Google AI Studio', 'is_byok': False}}, 'user_id': 'user_30d7nq75mWOwrzoiMjr9yLfr6yU'}
+2026-03-13 23:41:52.474 | WARNING  | src.utils.llm_client:call_llm:152 - LLM call attempt 1 failed: Error code: 400 - {'error': {'message': 'Provider returned error', 'code': 400, 'metadata': {'raw': '{\n  "error": {\n    "code": 400,\n    "message": "Developer instruction is not enabled for models/gemma-3-27b-it",\n    "status": "INVALID_ARGUMENT"\n  }\n}\n', 'provider_name': 'Google AI Studio', 'is_byok': False}}, 'user_id': 'user_30d7nq75mWOwrzoiMjr9yLfr6yU'}
+2026-03-13 23:41:57.035 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default
+2026-03-13 23:41:57.035 | INFO     | src.utils.session_persistence:save_session:55 - Session saved: default

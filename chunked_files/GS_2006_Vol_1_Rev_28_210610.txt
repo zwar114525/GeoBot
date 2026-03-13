@@ -1,0 +1,1884 @@
+Document: GS 2006 Vol 1 Rev 28_210610
+Total Chunks: 173
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 1
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: General Specification for Civil Engineering Works (GS), 2006 Edition Volume 1 of 2
+────────────────────────────────────────────────────────────────────────────────
+
+# General Specification for Civil Engineering Works (GS), 2006 Edition Volume 1 of 2
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 2
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: General Specification for Civil Engineering Works (GS), 2006 Edition Volume 1 of 2
+────────────────────────────────────────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 3
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: (This Version is Continuously Updated to include Amendments issued)
+────────────────────────────────────────────────────────────────────────────────
+
+# (This Version is Continuously Updated to include Amendments issued)
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 4
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: (This Version is Continuously Updated to include Amendments issued)
+────────────────────────────────────────────────────────────────────────────────
+
+| Rev         | Issue Date       | Amendment Incorporated   |
+|-------------|------------------|--------------------------|
+| First Issue | March 2007       | -                        |
+| 1           | 9 July 2007      | Amendment No. 1/2007     |
+| 2           | 27 December 2007 | Amendment No. 2/2007     |
+| 3           | 17 January 2008  | Amendment No. 1/2008     |
+| 4           | 12 June 2008     | Amendment No. 2/2008     |
+| 5           | 6 February 2009  | Amendment No. 1/2009     |
+| 6           | 26 August 2009   | Amendment No. 3/2009     |
+| 7           | 26 November 2009 | Amendment No. 4/2009     |
+| 8           | 2 February 2010  | Amendment No. 1/2010     |
+| 9           | 9 March 2010     | Amendment No. 2/2010     |
+| 10          | 15 April 2010    | Amendment No. 3/2010     |
+| 11          | 19 April 2010    | Amendment No. 4/2010     |
+| 12          | 9 March 2010     | Amendment No. 1/2011     |
+| 13          | 3 August 2011    | Amendment No. 2/2011     |
+| 14          | 5 April 2012     | Amendment No. 1/2012     |
+| 15          | 7 February 2013  | Amendment No. 1/2013     |
+| 16          | 14 June 2013     | Amendment No. 2/2013     |
+| 17          | 24 November 2014 | Amendment No. 1/2014     |
+| 18          | 28 December 2015 | Amendment No. 1/2015     |
+| 19          | 30 December 2016 | Amendment No. 1/2016     |
+| 20          | 24 April 2017    | Amendment No. 1/2017     |
+| 21          | 21 December 2017 | Amendment No. 2/2017     |
+| 22          | 19 January 2018  | Amendment No. 1/2018     |
+| 23          | 13 August 2018   | Amendment No. 2/2018     |
+| 24          | 1 January 2019   | Amendment No. 1/2019     |
+| 25          | 30 August 2019   | Amendment No. 2/2019     |
+| 26          | 3 December 2019  | Amendment No. 3/2019     |
+| 27          | 29 May 2020      | Amendment No. 1/2020     |
+| 28          | 10 June 2021     | Amendment No. 1/2021     |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 5
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GENERAL SPECIFICATION FOR CIVIL ENGINEERING WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+# GENERAL SPECIFICATION FOR CIVIL ENGINEERING WORKS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 6
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title:  The Government of the Hong Kong Special Administrative Region
+────────────────────────────────────────────────────────────────────────────────
+
+#  The Government of the Hong Kong Special Administrative Region
+Visit the online Government Bookstore at www.bookstore.gov.hk
+Download the order form from the Information Services Department website at www.isd.gov.hk and submit the order direct online or by fax to the Information Services Department at 2523 7195
+By e-mail at puborder@isd.gov.hk
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 7
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: FOREWORD
+────────────────────────────────────────────────────────────────────────────────
+
+# FOREWORD
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 8
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: VOLUME 1
+────────────────────────────────────────────────────────────────────────────────
+
+# VOLUME 1
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 9
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GENERAL SPECIFICATION FOR CIVIL ENGINEERING WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+# GENERAL SPECIFICATION FOR CIVIL ENGINEERING WORKS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 10
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: CONTENTS
+────────────────────────────────────────────────────────────────────────────────
+
+# CONTENTS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 11
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SECTION 1
+────────────────────────────────────────────────────────────────────────────────
+
+# SECTION 1
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 12
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GENERAL
+────────────────────────────────────────────────────────────────────────────────
+
+# GENERAL
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 13
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: INTERPRETATION OF DOCUMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+# INTERPRETATION OF DOCUMENTS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 14
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: CONTENT OF VOLUME 1
+────────────────────────────────────────────────────────────────────────────────
+
+# CONTENT OF VOLUME 1
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 15
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GS (2006 Edition)
+────────────────────────────────────────────────────────────────────────────────
+
+# GS (2006 Edition)
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 16
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GS (2006 Edition)
+────────────────────────────────────────────────────────────────────────────────
+
+# GS (2006 Edition)
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 17
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GS (2006 Edition)
+────────────────────────────────────────────────────────────────────────────────
+
+# GS (2006 Edition)
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 18
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: INSPECTION PITS, TRIAL PITS AND SLOPE SURFACE STRIPPING
+────────────────────────────────────────────────────────────────────────────────
+
+# INSPECTION PITS, TRIAL PITS AND SLOPE SURFACE STRIPPING
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 19
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GS (2006 Edition)
+────────────────────────────────────────────────────────────────────────────────
+
+# GS (2006 Edition)
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 20
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SECTION 8 PILING WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+# SECTION 8 PILING WORKS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 21
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Reception areas, queuing areas and access roads 6.61
+────────────────────────────────────────────────────────────────────────────────
+
+# Reception areas, queuing areas and access roads 6.61
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 22
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Management of dump truck movements 6.62
+────────────────────────────────────────────────────────────────────────────────
+
+# Management of dump truck movements 6.62
+Reception areas, queuing areas and access roads shall be provided in accordance with the Drawings.
+The Contractor shall operate and maintain reception areas, queuing areas and access roads complying with the following requirements:
+(a) The  riding  surfaces  shall  be  kept  in  good  condition  without excessive bumps and depressions,
+(b) The surfaces shall be kept in wet condition so as to minimize dust generation,
+(c) The surfaces shall be kept free of grease, debris and the like, and
+(d) Measures shall be taken to prevent ponding and flooding.
+(a) Maintain  orderly  traffic conditions  at the reception areas, queuing areas and access roads,
+(b) Ensure  all  dump  trucks  are  inspected  and  weighed  at  the combined reception and exit offices before and after deposition. In  the  event  that  the  materials  carried  by  a  dump  truck  are inspected  as  not  acceptable,  the  Contractor  shall  direct  the dump truck to leave the Site as instructed by the Engineer, and
+(c) Direct  dump  trucks  to  the  designated  deposition  point  for deposition.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 23
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Temporary haul roads and drains 6.63
+────────────────────────────────────────────────────────────────────────────────
+
+# Temporary haul roads and drains 6.63
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 24
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Handling and storage of wet soil 6.64
+────────────────────────────────────────────────────────────────────────────────
+
+# Handling and storage of wet soil 6.64
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 25
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Deposition of public fill 6.65
+────────────────────────────────────────────────────────────────────────────────
+
+# Deposition of public fill 6.65
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 26
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Compaction of public fill 6.66
+────────────────────────────────────────────────────────────────────────────────
+
+# Compaction of public fill 6.66
+The Contractor shall provide and maintain temporary haul roads and drains to suit the programme of deposition and shall remove all temporary drainage  systems  after  the  Works.    Lighting  facilities  shall  be  provided along the temporary haul roads and at each deposition point to ensure safe operation.
+The Contractor shall grade, regulate and compact all temporary haul roads as instructed by the Engineer to prevent undulation.
+Public fill may consist of wet soil.    Wet soil may be any naturally occurring or processed material, which at the time of deposition is unable to be compacted in accordance with the specified requirements to form a stable area of fill.
+In addition to Clauses 6.48(1), 6.48(2) and 6.50(1), public fill shall be compacted to the requirements of Clauses 6.66(2), 6.66(3) and 6.66(4). The Contractor shall submit the proposed method of compaction including the proposed compaction plant, thickness of compacted layer and minimum number of passes to the Engineer for approval at least 7 days before any compaction starts.
+Definitions  and  requirements  associated  with  Table  6.2B  are  as follows:
+(a) Where combinations of different types or categories of plant are used, the compaction requirements shall be:
+-The  depth  of  layer  shall  be  that  for  the  type  of  plant
+-The number of passes shall  be  that for  the  type  of  plant requiring the greatest number of passes.
+(b) The number of passes of the roller shall only be counted when the  roller  is  travelled  on  the  materials  to  be  compacted  at  a speed of not more than 2 km per hour with full vibration where appropriate.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 27
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Compaction of public fill 6.66
+────────────────────────────────────────────────────────────────────────────────
+
+(c) The  plant  other  than  the  approved  compaction  plant  by  the Engineer  as  stated  in  Clause  6.66(1) to  carry  out  material spreading or to provide some preliminary compaction only to assist the use of heavier plant shall be disregarded in counting the number of passes.
+(d) The  force  per  100  mm  width  is  the  total  weight  on  the  roll divided by the total roll width. Where a smooth-wheeled roller has  more  than  one  axle  the  machine  will  be  assessed  on  the basis of the axle giving the highest value of force per 100 mm width.
+(e) Wheel  load  is  the  total  weight  of  the  roller  divided  by  the number of wheels.
+(f) Vibratory rollers  are  machines  having  means  of  applying mechanical vibration to one or more rolls.
+-The requirements for vibratory rollers are based on the use of  the  lowest  gear  on  a  self-propelled  machine  and  a towing speed of 1800 - 2400 m/hour for a towed machine. If higher gears or speed are used, an increased number of passes  shall  be  provided  in  proportion  to  the  increase  in speed of travel.
+-Vibratory rollers operating without their vibration mechanism  in  use  will  be  classified  as  smooth-wheeled rollers.
+-Vibratory rollers shall only be operated with their vibration mechanism operating at the frequency of vibration recommended by the manufacturers. All such rollers shall be  equipped  with  a  device  automatically  indicating  the frequency at which the mechanism is operating.
+(g) Vibrating-plate compactors are machines having a base-plate to which a source of vibration consisting of one or two eccentrically weighted shafts is attached.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 28
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Compaction of public fill 6.66
+────────────────────────────────────────────────────────────────────────────────
+
+-The  static  pressure  under  the  plate  of  a  vibrating-plate compactor is calculated by dividing the total weight of the machine  in  working  order  by  the  area  in  contact  with compacted material.
+-Vibrating-plate compactors shall be operated at the frequency of vibration recommended by the manufacturer. They  shall  normally  be  operated  at  travelling  speeds  of
+(h) Vibro-tampers are machines in which an engine-driven reciprocating  mechanism  acts  on  a  spring  system,  through which oscillations are set up in a base-plate.
+(i) Power rammers are machines that are actuated by explosions in an internal combustion cylinder, each explosion being controlled manually by the operator.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 29
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PART 7: SLOPE AND RETAINING WALL RECORD SURVEY
+────────────────────────────────────────────────────────────────────────────────
+
+# PART 7: SLOPE AND RETAINING WALL RECORD SURVEY
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 30
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GENERAL
+────────────────────────────────────────────────────────────────────────────────
+
+# GENERAL
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 31
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: GENERAL
+────────────────────────────────────────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 32
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SUBMISSIONS
+────────────────────────────────────────────────────────────────────────────────
+
+# SUBMISSIONS
+The following particulars of the slope and retaining wall record survey shall be submitted to the Engineer:
+(a) All necessary details of the subject slopes and retaining walls as required by the Engineer, including details of the extent of new fill  body  of  a  fill  slope  as  appropriate,  recorded  on  a  plan  of 1:1000  scale  showing  the  locations  with  graphical  boundaries appropriately  highlighted  and  referenced  to  the  HK1980  Grid, and
+(b) A soft copy of the plan as stated in Clause 7.267(1)(a) prepared in a format as specified in the Contract.
+The particulars shall be submitted to the Engineer not more than 28 days, or such other time stated in the Contract, after completion of the slope and retaining wall record survey as agreed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 33
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Particulars of paint
+────────────────────────────────────────────────────────────────────────────────
+
+# Particulars of paint
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 34
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PART 8: PAINTING TO CONCRETE / SPRAYED CONCRETE SURFACES
+────────────────────────────────────────────────────────────────────────────────
+
+# PART 8: PAINTING TO CONCRETE / SPRAYED CONCRETE SURFACES
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 35
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+# MATERIALS
+7.268 Paint  for  concrete/sprayed  concrete surfaces  shall  be water-based  paint  for external  use.    The  components  of  paint  shall  not  be  toxic  or  hazardous  to health.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 36
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SUBMISSION
+────────────────────────────────────────────────────────────────────────────────
+
+# SUBMISSION
+7.269 Details  of  paint  products  (e.g.  specification  and  colour  samples  etc.)  and method  statement  shall  be  submitted  for  the  Engineer's  approval  prior  to painting.    The colour of paint shall be 'Antique' to BS 5252F:2004 colour code 10B25 or other colour as directed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 37
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PAINTING TO CONCRETE / SPRAYED CONCRETE SURFACES
+────────────────────────────────────────────────────────────────────────────────
+
+# PAINTING TO CONCRETE / SPRAYED CONCRETE SURFACES
+7.270 (1) The  surface  of  concrete/sprayed  concrete  shall  be  prepared  prior  to applying  the  paint.  The  surface  to  be  painted  shall  be  clean,  free  of contaminants  such  as  oils,  grease,  release  agents,  mortar  splashes  etc.  All debris and loose materials shall be removed from the surface. Painting shall not  be  carried  out  in  direct  strong  sunlight,  hot  windy  conditions  or  in  an environment with excessive dust.
+Paint shall be stored in accordance with Section 24 and shall be mixed in accordance with the manufacturer's instruction prior to application. Two coats  of  paint  shall  be  applied  to  the  surface.  Each  coat  of  paint  shall  be applied using an airless spray at 12 m 2 /litre or equivalent to obtain a uniform finish or as recommended by the manufacturer. Sufficient time gap shall be allowed between the applications of first and second coating as recommended by the manufacturer. Each coating shall be protected from rain for the first 24 hours after application.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 38
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: APPENDIX 7.1
+────────────────────────────────────────────────────────────────────────────────
+
+# APPENDIX 7.1
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 39
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: DYNAMIC PROBE TEST
+────────────────────────────────────────────────────────────────────────────────
+
+# DYNAMIC PROBE TEST
+7.1.1 This  method  covers  the  determination  of  the  penetration  resistance  of  soil using the dynamic probe.
+7.1.2 The following apparatus is required:
+(a) Dynamic Probe as shown in Figure 36 of `Geoguide 2: Guide to Site  Investigation,'  Hong  Kong  Government  1987.    The  anvils shall be rigidly fixed to the guide rod; the lower anvil shall also be  rigidly  fixed  to  the  extension  rods.    The  mass  of  the  lower anvil shall be 1.5 kg to 1.8 kg.    The combined mass of the anvils and guide rod shall not exceed 5.0 kg.
+(b) Extension  rods  with  a  length  of  1000  mm  ±10  mm.    The  rods shall be attached to bear against each other by means of external couplers.
+Procedure 7.1.3 The procedure shall be as follows:
+(a) The lower end of the probe shall be rested against the ground at the test location, with the first extension rod and guide rod in a vertical position.
+(b) The hammer shall be raised to bear against the upper anvil, and shall be allowed to fall freely. It shall not be connected to objects which may influence its acceleration and deceleration, and shall be stationary when released in the upper position.    The fall shall be 300 mm ± 5 mm.
+(c) The  hammer  shall  be  used  to  drive  the  probe  into  the  ground, with a rate of driving between 20 and 60 blows per minute.
+(d) Additional extension rods shall be added as necessary. The rods shall be rotated clockwise one full turn each time a rod is added to ensure that screw joints are tight.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 40
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: DYNAMIC PROBE TEST
+────────────────────────────────────────────────────────────────────────────────
+
+(e) The  blow  count  for  every  100  mm  of  penetration  shall  be recorded,  or  at  refusal  the  penetration  distance  for  50  blows  of the hammer. Interruptions exceeding 5 minutes shall be recorded.
+(f) If  any  obstruction  to the  probe  is  encountered  which  cannot  be penetrated  over  100  mm  by  100  blows  of  the  driving  hammer, then that probe shall be considered to have reached refusal and the test shall be terminated.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 41
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Reporting of results 7.1.4 The following shall be reported:
+────────────────────────────────────────────────────────────────────────────────
+
+# Reporting of results 7.1.4 The following shall be reported:
+(a) Blow  count  for  every  100  mm  penetration  or  at  refusal  the penetration distance for 50 blows of the hammer.
+(b) Interruptions exceeding 5 minutes.
+(c) Dynamic probe record (Figure 37 of Geoguide 2).
+(d) That the test was carried out in accordance with this
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 42
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Reporting of results 7.1.4 The following shall be reported:
+────────────────────────────────────────────────────────────────────────────────
+
+|                                  |      | (6) Cast steel pile shoes for steel bearing piles shall be manufactured from steel complying with BS EN 10293, Grade A. Amd 4/2010                                                                                                                                                                                                   |
+|----------------------------------|------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|                                  |      | (7) Welded fabricated pile shoes for steel bearing piles shall be manufactured from steel complying with BS 4360, Grade 43A.                                                                                                                                                                                                         |
+| Epoxy paint                      | 8.19 | Epoxy based paint for epoxy coatings to steel piles shall be a proprietary type approved by the Engineer.                                                                                                                                                                                                                            |
+| Bituminous coating material      | 8.2  | Bituminous coating material for steel piles shall be hot-applied filled or unfilled bituminous material complying with BS 4147.                                                                                                                                                                                                      |
+| Grout for piling works           | 8.21 | (1) Grout for piling works shall consist of Portand cement (PC) and water. Sand, PFAand admixtures may be used with the approval of the Engineer.                                                                                                                                                                                    |
+|                                  |      | (2) The minimum cementitious content of grout shall be 600 kg/m 3 , unless otherwise permitted by the Engineer.                                                                                                                                                                                                                      |
+|                                  |      | (3) Grout used to fill core holes shall have a minimum crushing strength of not less than the specified grade strength of the concrete surrounding the core hole.                                                                                                                                                                    |
+|                                  |      | (4) Grout used in minipiles shall have a minimum crushing strength of 30 MPa at 28 days.                                                                                                                                                                                                                                             |
+|                                  |      | (5) The amount of bleeding of grout shall not exceed 2% in the first 3 hours and shall not exceed 4% in total. The water shall be reabsorbed by the grout during the 24 hours after mixing.                                                                                                                                          |
+|                                  |      | (6) Free expansion of grout shall not exceed 10% at the ambient temperature.                                                                                                                                                                                                                                                         |
+|                                  |      | (7) The chloride ion content of admixtures for concrete containing embedded metal or for concrete made with SRPC shall not exceed 2% by mass of the admixture or 0.03% by mass of the cementitious content, whichever is less.                                                                                                       |
+|                                  |      | (8) The maximum total chloride content of grout, expressed as a percentage relationship between the chloride ion and the cementitious content by mass in the grout, shall not exceed 0.1%.                                                                                                                                           |
+| Reinforcement connectors         | 8.22 | Reinforcement connectors for minipiles shall be capable of transmitting the total pile load in tension or compression as appropriate.                                                                                                                                                                                                |
+|                                  |      | SURFACE TREATMENTOFSTEELPILES                                                                                                                                                                                                                                                                                                        |
+| Surface treatment of steel piles | 8.23 | (1) Surface preparation and application of protective coatings other than bituminous coatings to steel piles shall be carried out in a fully enclosed well-ventilated workshop.                                                                                                                                                      |
+|                                  |      | (2) The method of application of protective coatings to steel piles, the ambient temperature and humidity at the time of application and the time interval between the application of successive coats shall be in accordance with the manufacturer's recommendations. The complete coating shall be applied in and around clutches. |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 43
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Surface preparation of 8.24
+────────────────────────────────────────────────────────────────────────────────
+
+# Surface preparation of 8.24
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 44
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: steel piles
+────────────────────────────────────────────────────────────────────────────────
+
+# steel piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 45
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Epoxy coatings to steel piles 8.25
+────────────────────────────────────────────────────────────────────────────────
+
+# Epoxy coatings to steel piles 8.25
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 46
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Bituminous coatings to 8.26
+────────────────────────────────────────────────────────────────────────────────
+
+# Bituminous coatings to 8.26
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 47
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: steel piles
+────────────────────────────────────────────────────────────────────────────────
+
+# steel piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 48
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Surface treatment of extended steel piles
+────────────────────────────────────────────────────────────────────────────────
+
+# Surface treatment of extended steel piles
+8.27 The splice areas of steel piles, which are extended in-situ, shall be prepared by  blast  cleaning  and  the  protective  coating  shall  be  applied  to  the  area. Steel  piles  for  marine  works  shall  be  spliced  and  the  surface  treatment applied  to  the  splice  areas  before  the  piles  are  driven  unless  otherwise permitted by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 49
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Removal of protective 8.28
+────────────────────────────────────────────────────────────────────────────────
+
+# Removal of protective 8.28
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 50
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: coatings to steel piles
+────────────────────────────────────────────────────────────────────────────────
+
+# coatings to steel piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 51
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Particulars of piling 8.29
+────────────────────────────────────────────────────────────────────────────────
+
+# Particulars of piling 8.29
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 52
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: works
+────────────────────────────────────────────────────────────────────────────────
+
+# works
+Protective coatings shall be removed from the heads of steel piles which will be encased in concrete by blast cleaning, flame cleaning or by other methods agreed by the Engineer.    The coatings shall be removed to a level of 75 mm above the underside of the concrete into which the pile will be encased.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 53
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SUBMISSIONS
+────────────────────────────────────────────────────────────────────────────────
+
+# SUBMISSIONS
+(a) Details of construction plant,
+(b) Methods and sequence of installation of piles, including methods of avoiding damage to adjacent piles, structures and utilities and measures to be taken to deal with hard material and obstructions,
+(c) Calculations of driving stresses,
+(d) Methods of jointing and lengthening piles,
+(e) Methods of controlling groundwater, or groundwater treatment,
+(f) Anticipated ground vibration, ground movement and
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 54
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Particulars of hand-dug caissons 8.31
+────────────────────────────────────────────────────────────────────────────────
+
+# Particulars of hand-dug caissons 8.31
+(g) Methods  and  sequence  of  excavation,  including  methods  of supporting excavations and of cleaning the excavation,
+(h) Methods of concreting,
+(i) Details of protective coatings to steel piles, including manufacturers' literature,
+(j) Details of preliminary piles, and
+(k) Methods  of  testing,  including  details  of  the  specialist  firm  for non-destructive testing of welds and the programme for integrity testing.
+(a) A certificate for bentonite showing the type, the manufacturer's name, the date and place of manufacture and including details of the apparent viscosity range in Pa.s and the gel strength range in N/m2  for solids in water,
+(b) Characteristics of the bentonite slurry in a freshly mixed condition and in the excavation immediately before concreting,
+(c) Methods  of  quality  control,  sampling,  testing,  mixing,  storing, recirculating,  removing  silt  and  sand,  preventing  spillages  and disposal from the Site,
+(d) Head of bentonite slurry, including stability calculations,
+(e) Details of guide walls,
+(f) Methods of placing concrete by tremie, and
+(g) Sequence of construction.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 55
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Handling and storage 8.33
+────────────────────────────────────────────────────────────────────────────────
+
+# Handling and storage 8.33
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 56
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: of piles
+────────────────────────────────────────────────────────────────────────────────
+
+# of piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 57
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Handling and storage 8.34
+────────────────────────────────────────────────────────────────────────────────
+
+# Handling and storage 8.34
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 58
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: of bentonite
+────────────────────────────────────────────────────────────────────────────────
+
+# of bentonite
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 59
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Commencement of 8.35
+────────────────────────────────────────────────────────────────────────────────
+
+# Commencement of 8.35
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 60
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: piling works
+────────────────────────────────────────────────────────────────────────────────
+
+# piling works
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 61
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Prevention of damage 8.36
+────────────────────────────────────────────────────────────────────────────────
+
+# Prevention of damage 8.36
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 62
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: due to piling works
+────────────────────────────────────────────────────────────────────────────────
+
+# due to piling works
+(b) Details of grout mix as stated in Clause 17.13, and
+(c) Sequence and timing of grouting, including details of secondary pressure grouting.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 63
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: HANDLING AND STORAGE OF MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+# HANDLING AND STORAGE OF MATERIALS
+Different types and sizes of piles shall be stored separately.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 64
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GENERAL PILING WORKS REQUIREMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+# GENERAL PILING WORKS REQUIREMENTS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 65
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: GENERAL PILING WORKS REQUIREMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+| Monitoring of noise, vibration, ground movement and groundwater level   |   8.37 | (1) Measurements of noise level, vibration, ground movement and groundwater level shall be taken at locations and time intervals stated in the Contract or instructed by the Engineer when piling works are being carried out. Records of the measurements shall be kept and a copy of the records supplied to the Engineer. Arrangements for installing instruments and taking measurements both inside and outside the Site shall be made by the Contractor. (2) Measurements of noise level and vibration shall be made with instruments of a type agreed by the Engineer. (3) Sufficient numbers of piezometers and survey points shall be installed to allow the changing groundwater levels and the effects on structures, utilities and previously installed piles to be measured. Measurements shall be taken at regular intervals when groundwater control is carried out and until such time as the groundwater has resumed its natural regime. (4) The Contractor shall inform the Engineer immediately of any unanticipated change in measurements. (5) If the specified limits, or limits agreed by the Engineer, on vibration, groundwater movement or groundwater level are exceeded, the work causing   |
+|-------------------------------------------------------------------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Ground investigation for piling works                                   |   8.38 | (1) Before piling works start, boreholes of minimum NX size shall be sunk and piezometers shall be installed at locations stated in the Contract or instructed by the Engineer to determine the soil characteristics and the groundwater regime and to determine the founding level of non-displacement cast-in-situ piles.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Ground investigation for piles founded on rock                          |   8.39 | All ground investigation for piles founded on rock, including pre-drilling and proof-drilling as well as any core-drilling on the constructed piles, shall be carried out by an independent Specialist Contractor for Public Works registered under the Work Category of "Ground Investigation Field Work", who is required to make a declaration that it is not a holding company, a subsidiary company, an associated company or a related party of the Contractor or any of his sub-contractors responsible for the piles for which the ground investigation is carried out, and that it has no financial interests in                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Pre-drilling for piles founded on rock                                  |   8.4  | (1) For piles founded on rock, sufficient pre-drilling should be carried out before the installation works, such that the quality of the founding rock can be identified and the appropriate founding levels can be determined. The pre-drilling should be sunk to at least 5m below the tentative founding rock levels of the piles. (2) Pre-drilling should be carried out for each of the large-diameter bored piles, barrettes and the like. For minipiles, socketted steel H-piles and similar small diameter-bored piles, founding on rock, the number of pre-drill                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 66
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Founding levels
+────────────────────────────────────────────────────────────────────────────────
+
+# Founding levels
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 67
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Preliminary piles
+────────────────────────────────────────────────────────────────────────────────
+
+# Preliminary piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 68
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Supports for driven piles
+────────────────────────────────────────────────────────────────────────────────
+
+# Supports for driven piles
+The Contractor shall allow the Engineer to inspect the material at the proposed  founding  level  and  shall  inform  the  Engineer  immediately  the founding level is reached.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 69
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PRELIMINARY PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# PRELIMINARY PILES
+8.42 (1) Preliminary piles shall be constructed using the materials and methods of  construction  proposed  for  the  working  piles  and  which  have  been submitted  to  the  Engineer.    The  location  and  details  of  preliminary  piles shall be as instructed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 70
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: DRIVEN PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# DRIVEN PILES
+Driven  piles  shall  be  supported  and  restrained  by  means  of  leaders, trestles,  temporary  supports or other guide arrangements in such a manner that:
+(a) The piles are maintained in position and alignment,
+(b) The piles are not loosened in the ground, and
+(c) Damage  resulting  from  oscillation,  vibration  or  movement  of free-standing piles does not occur.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 71
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: DRIVEN PILES
+────────────────────────────────────────────────────────────────────────────────
+
+| Use of diesel hammer               |   8.44 | The use of diesel hammer for percussive piling is prohibited.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|------------------------------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Followers                          |   8.45 | Followers or long dollies shall not be used unless permitted by the Engineer. If permitted, the set shall be revised by the Contractor and agreed by the Engineer, to allow for the reduction in effectiveness of the hammer blows.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Marking of piles                   |   8.46 | Piles, including temporary and permanent casings, shall be marked at 1 m intervals before pitching.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Driving piles                      |   8.47 | (1) Unless otherwise permitted by the Engineer each pile, other than sheet piles, shall be driven without interruption until the required depth or set has been achieved. If a minimum depth of penetration is stated in the Contract, the Contractor shall submit to the Engineer his proposals for achieving this requirement and it shall be his responsibility to ensure that the minimum penetration and set are achieved without causing damage to the pile. (2) The sequence and method of driving piles shall be such as to minimise the detrimental effects of heave and lateral displacement of the ground and to cause the least possible displacement to previously installed piles. Piles, including casings, shall not be driven within a centre to centre distance of 3 mor five times the diameter of the pile or casing, whichever is less, from an unfilled excavation or from an uncased concrete pile which has been cast for |
+| Driving concrete piles             |   8.48 | (1) Concrete piles shall not be driven until the concrete has attained the specified grade strength.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Displaced piles                    |   8.49 | Piles that have been displaced as a result of driving adjacent piles shall be corrected. Particulars of the method of correction and measures to be taken to avoid displacement in subsequent driving shall be submitted to the Engineer for approval.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Re-drive checks                    |   8.5  | No re-drive checks shall be carried out within 24 hours of completion of first driving.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Lengthening driven piles           |   8.51 | The strength of piles at joints shall not be less than the strength at any normal section of the pile. Lengthened piles shall not be driven until the joint has developed the designed strength. Pile joints shall be tested as stated in the Contract or as instructed by the Engineer.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Measurement of set of driven piles |   8.52 | (1) Set shall be measured for each driven pile at times agreed by the Engineer and in the presence of the Engineer. The final set shall be measured as either:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 72
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Excavation for cast-in-situ piles
+────────────────────────────────────────────────────────────────────────────────
+
+# Excavation for cast-in-situ piles
+(a) Penetration per 10 blows, or
+(b) The number of blows required to produce 25 mm penetration.
+When final set is measured:
+(a) The exposed part of the pile shall be in good condition without damage or distortion,
+(b) The dolly and packing shall be in sound condition,
+(c) The hammer blow shall be in line with the axis of the pile and the impact surfaces shall be flat and at right angles to the axes of the pile and hammer, and
+(d) The hammer shall be in good condition and operating correctly.
+The temporary compression of each driven pile shall be measured.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 73
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: CAST-IN-SITU CONCRETE PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# CAST-IN-SITU CONCRETE PILES
+8.53 (1) Except as stated in Clause 8.54,  excavation  for  cast-in-situ  concrete piles shall be carried out by mechanical methods.    Blasting and compressed air  shall  not  be  used  unless  permitted  by  the  Engineer.    Large-diameter bored piles shall be formed by boring, chiseling or grabbing and filled with concrete.    Piles  with  enlarged  bases  shall  not  be  used  unless  specified otherwise.    Where so permitted, the enlarged base shall only be formed by under-reaming with a reverse circulation drill.    The relevant technique shall have been approved by the Engineer.
+(a) Temporary casings,
+(b) Permanent casings, or
+(c) A thixotropic slurry containing bentonite or other agent.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 74
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Excavation for hand-dug caissons 8.54
+────────────────────────────────────────────────────────────────────────────────
+
+# Excavation for hand-dug caissons 8.54
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 75
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Sealing and scaling of hand-dug caissons 8.55
+────────────────────────────────────────────────────────────────────────────────
+
+# Sealing and scaling of hand-dug caissons 8.55
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 76
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: HAND-DUG CAISSONS
+────────────────────────────────────────────────────────────────────────────────
+
+# HAND-DUG CAISSONS
+The  Contractor  shall  adopt  a  method  of  construction  that  will  only cause minimum settlement or disturbance of any kind to adjacent structures, pavements,  public  or  private  services.    The  Contractor  shall  establish  an approved  monitoring  system  and  take  regular  readings  and  prepare  and submit reports to the Engineer in the format and quantity as requested.    The Contractor shall modify the method of construction if the effects of ground movement are detected in any such structures, pavements and services.
+(a) The position of blast holes and the size of charges shall be such that shattering of rock beyond the caisson is minimised,
+(b) The rock face shall not be shattered within the toe-in or bell-out zone at the bottom of the caisson, and
+(c) The caisson opening shall be covered to prevent the projection of fragments of material.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 77
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Excavation for barrettes
+────────────────────────────────────────────────────────────────────────────────
+
+# Excavation for barrettes
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 78
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Excavation for minipiles
+────────────────────────────────────────────────────────────────────────────────
+
+# Excavation for minipiles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 79
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Excavation using
+────────────────────────────────────────────────────────────────────────────────
+
+# Excavation using
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 80
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: BARRETTES
+────────────────────────────────────────────────────────────────────────────────
+
+# BARRETTES
+8.56 (1) Excavation for barrettes shall be carried out by mechanical methods. Blasting shall not be used unless permitted by the Engineer.
+The  stability  of  excavations  for  barrettes  shall  be  maintained  by  a thixotropic slurry containing bentonite or other agent.
+The height of guide walls for barrettes shall be such that the head of slurry is sufficient to ensure the stability of excavations and that excessive movements of  the  adjacent  ground  will  not  occur.    The  position,  alignment  and  level  of guide walls shall be checked at regular intervals agreed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 81
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: MINIPILES
+────────────────────────────────────────────────────────────────────────────────
+
+# MINIPILES
+8.57 (1) The stability of excavations for minipiles shall be maintained where necessary  by  temporary  casings  or  by  other  methods  approved  by  the Engineer.
+Temporary casings shall be used if excavation is carried out by wash boring methods or when water or air is used as a flushing medium.
+The pressure of the water or air that is used as a flushing medium shall be regulated frequently to ensure that it does  not induce  significant disturbance to the surrounding geological strata, or cause hydraulic fracture of the ground.
+Unless  otherwise  specified  in  the  Contract  or  instructed  by  the Engineer,  mini-piles  are  to  be  socketed  into  Grade  III  rock  or  better  with minimum  total  core  recovery  of  not  less  than  90%.    Minimum  length  of rock socket for the piles is shown on the Drawings or determined on Site by the Engineer.
+8.58 Grouting  trials  shall  be  carried  out  to  demonstrate  accurate  control  of water/cement  ratio,  consistency  of  mixing,  satisfactory  workability  and achievement of strength requirements.    The trial shall be carried out on one minipile  which  is  representative  of  those  which  will  be  used  in  the permanent work and at a location agreed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 82
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: CONSTRUCTION USING BENTONITE SLURRY
+────────────────────────────────────────────────────────────────────────────────
+
+# CONSTRUCTION USING BENTONITE SLURRY
+8.59 (1) Excavations  for  piles  using  bentonite  slurry  shall  be  filled  with  the
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 83
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: CONSTRUCTION USING BENTONITE SLURRY
+────────────────────────────────────────────────────────────────────────────────
+
+| bentonite slurry                        |      | slurry from the time that excavation commences until concreting is complete. The slurry shall be maintained at a level of at least 1 mabove the level of the external groundwater and such that the slurry pressure exceeds the pressure exerted by the soil and ground water. (2) Subject to the Engineer's approval and the availability of the necessary equipment, the Contractor may use polymer slurry as an alternative to bentonite slurry. The handling and disposal of polymer slurry shall follow the supplier's recommendation and be subject to the Engineer's agreement. (3) If there is a loss of bentonite slurry from the excavation, which is sufficient to result in a lack of stability, and if instructed by the Engineer, the excavation shall be immediately filled with material agreed by the Engineer. The cause of the loss of slurry shall be investigated and excavation shall not recommence until remedial measures have been approved by the Engineer.   |
+|-----------------------------------------|------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mixing of bentonite slurry              | 8.6  | (1) Bentonite shall be thoroughly mixed with water in a colloidal mixer. The water shall be taken from the public supply of potable water and shall be at a temperature of at least 5 ° C. The temperature of the bentonite slurry shall be at least 5 ° C when supplied to the excavation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Protection of bentonite slurry material | 8.61 | All solid additives shall be stored in a separate waterproof store with a raised floor or in a waterproof silo, which shall not allow the material to become contaminated.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Disposal of bentonite slurry            | 8.62 | Bentonite slurry that will not be reused shall be disposed of from the Site directly or mixed with sufficient decomposed rock or similar material before disposal to approved Public Fills as soon as practicable, in accordance with the requirements under the Construction Waste Disposal Charging Scheme and other relevant documents issued by the Civil Engineering and Development Department or Environmental Protection Department. Amd 1/2010                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 84
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: FIXING REINFORCEMENT FOR PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# FIXING REINFORCEMENT FOR PILES
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 85
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: FIXING REINFORCEMENT FOR PILES
+────────────────────────────────────────────────────────────────────────────────
+
+| Fixing reinforcement for piles    |   8.63 | Prefabricated reinforcement cages for piles shall be marked and fitted with spacers to ensure that the cage is correctly orientated and positioned within the pile. The reinforcement cage shall be lowered into position only in the daytime after the Engineer's Representative has verified both the length of the reinforcement cage and the depth of the hole and after the base has been cleaned.   |
+|-----------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Temporary protection on pile head |   8.64 | Reinforcement protruding above a concreted pile shaft shall be protected against corrosion with cement paste that shall be removed before subsequent construction works commence. If the protection period is longer than a few weeks, weak concrete should be used instead of cement paste.                                                                                                              |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 86
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Cleaning and drying excavations for piles 8.65
+────────────────────────────────────────────────────────────────────────────────
+
+# Cleaning and drying excavations for piles 8.65
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 87
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Placing concrete in piles 8.66
+────────────────────────────────────────────────────────────────────────────────
+
+# Placing concrete in piles 8.66
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 88
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PLACING CONCRETE IN PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# PLACING CONCRETE IN PILES
+The bases of excavations for piles shall be cleaned by air-lifting or by other  methods  agreed  by  the  Engineer  before  concrete  is  placed.    If excavation is carried out under water, cleaning shall continue until the water is clear and free of particles of soil.    Measures shall be taken to prevent the accumulation  of  silt  and  other  material  at  the  base  of  the  excavation. During  the  process  of  base-cleaning,  the Contractor  shall  maintain  a sufficient positive water head inside the borehole in order to prevent ingress of water from the outside.
+Each  pile shall be concreted as soon as practicable after the permission  of  the  Engineer  has  been  obtained.  If  a  tremie  pipe  is  used,  it must be watertight and of sufficient strength. Before concreting commences,  the  Contractor  shall  submit  a  method  statement  of  placing tremie concrete to the Engineer for approval.    This statement should at least contain  the  proposals  of  the  immersed  depth  of  the  tremie  pipe  below  the upper surface of rising concrete, procedure of safely raising the tremie pipe as concreting proceeds, means of carrying out accurate measurement of the level of the rising concrete surface, etc.    This method statement should also include a contingency plan of necessary measures that shall be taken to cater for any incident that the tremie pipe might become blocked or removed from the concrete.
+(a) Concrete shall be placed by tremie unless otherwise permitted by the Engineer,
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 89
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PLACING CONCRETE IN PILES
+────────────────────────────────────────────────────────────────────────────────
+
+(b) The minimum cementitious content of the concrete shall be 375 kg/m 3 ,
+(c) The level of the top of the concrete in piles shall be at least 750 mm above the specified cut-off level,
+(d) If the top of the guide wall for barrettes is at the specified cut-off level, concrete shall continue to be placed until the top of the pile is free of contamination, and
+(e) After the concrete has hardened, excess concrete shall be removed to the specified cut-off level.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 90
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Removal of temporary casings to piles 8.67
+────────────────────────────────────────────────────────────────────────────────
+
+# Removal of temporary casings to piles 8.67
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 91
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Empty bores above piles 8.68
+────────────────────────────────────────────────────────────────────────────────
+
+# Empty bores above piles 8.68
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 92
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Inspection of excavations for piles
+────────────────────────────────────────────────────────────────────────────────
+
+# Inspection of excavations for piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 93
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: INSPECTION OF PILING WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+# INSPECTION OF PILING WORKS
+8.69 The  Contractor  shall  allow  the  Engineer's  Representative  (ER)  to  inspect excavations for piles before placing concrete in the pile and at other times required by the Engineer.    The ER shall decide on the most suitable method to be used for inspecting excavations (and the bases) and dipping the depth of  the  drilled  hole  personally  and  the  Contractor  shall  provide  all  the necessary  facilities  and  equipment  to  enable  the  ER  to  carry  out  the inspection/dipping in a safe manner.    After the base of excavation has been cleaned as required by the Engineer, the Contractor shall inform the Engineer 24  hours,  or  such  shorter  period  agreed  by  the  Engineer,  before  placing concrete in piles.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 94
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Inspection of installed 8.70
+────────────────────────────────────────────────────────────────────────────────
+
+# Inspection of installed 8.70
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 95
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: piles
+────────────────────────────────────────────────────────────────────────────────
+
+# piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 96
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Tolerances: steel bearing piles
+────────────────────────────────────────────────────────────────────────────────
+
+# Tolerances: steel bearing piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 97
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Tolerances: precast
+────────────────────────────────────────────────────────────────────────────────
+
+# Tolerances: precast
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 98
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: concrete piles
+────────────────────────────────────────────────────────────────────────────────
+
+# concrete piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 99
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TOLERANCES
+────────────────────────────────────────────────────────────────────────────────
+
+# TOLERANCES
+8.71 Dimensional tolerances of steel bearing pile sections shall comply with the relevant BS stated in Clause 18.04.    Fabrication tolerances for steel bearing piles and related steelwork shall comply with BS 5950:Part 2.
+8.72 The manufacturing tolerances for precast concrete piles shall comply  with the following requirements:
+(a) The  external  cross-sectional  dimensions  shall  be  within  0  mm and +6 mm of the specified dimensions.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 100
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Tolerances: hand-dug caissons
+────────────────────────────────────────────────────────────────────────────────
+
+# Tolerances: hand-dug caissons
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 101
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Tolerances: pile installations
+────────────────────────────────────────────────────────────────────────────────
+
+# Tolerances: pile installations
+(b) The wall thickness of hollow spun concrete piles shall be within 0 mm and +25 mm of the specified thickness.
+(c) There shall be no irregularity exceeding 6 mm in a 3 m length along the face of the pile measured using a 3 m straight edge.
+(d) There shall be no irregularity exceeding 25 mm in a 3 m length along the internal  face  of hollow  spun  concrete  piles  measured using a 3 m straight edge.
+(e) The centroid of any cross-section of the pile shall not be more than 12 mm from the straight line connecting the centroids of the end  faces  of  the  pile.    For  the  purpose  of  determining  the centroid, the centroid of any cross-section of a hollow pile shall be determined by assuming that the pile has a solid section.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 102
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Tolerances: pile installations
+────────────────────────────────────────────────────────────────────────────────
+
+|                                                                                        | Tolerance                                                                           | Tolerance                                                                           |
+|----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| Description                                                                            | Land piles                                                                          | Marine piles                                                                        |
+| Deviation from specified position in plan, measured at cut-off level                   | 75mm 15 mmfor minipiles                                                             | 150mm                                                                               |
+| Deviation from vertical                                                                | 1 in 75 1 in 100 for minipiles Amd 1/2008                                           | 1 in 25                                                                             |
+| Deviation of raking piles from specified batter Deviation from specified cut-off level | 1 in 25 25mm                                                                        | 1 in 25 25mm                                                                        |
+| The diameter of cast in-situ piles shall be at least 97% of the specified diameter.    | The diameter of cast in-situ piles shall be at least 97% of the specified diameter. | The diameter of cast in-situ piles shall be at least 97% of the specified diameter. |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 103
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Records of piles delivered/constructed in situ
+────────────────────────────────────────────────────────────────────────────────
+
+# Records of piles delivered/constructed in situ
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 104
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Records of pile driving 8.76
+────────────────────────────────────────────────────────────────────────────────
+
+# Records of pile driving 8.76
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 105
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Records of bentonite 8.77
+────────────────────────────────────────────────────────────────────────────────
+
+# Records of bentonite 8.77
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 106
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: slurry
+────────────────────────────────────────────────────────────────────────────────
+
+# slurry
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 107
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Records of load tests on 8.78
+────────────────────────────────────────────────────────────────────────────────
+
+# Records of load tests on 8.78
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 108
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: piles
+────────────────────────────────────────────────────────────────────────────────
+
+# piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 109
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Records of integrity tests on piles 8.79
+────────────────────────────────────────────────────────────────────────────────
+
+# Records of integrity tests on piles 8.79
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 110
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Record drawings 8.80
+────────────────────────────────────────────────────────────────────────────────
+
+# Record drawings 8.80
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 111
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: RECORDS OF PILING WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+# RECORDS OF PILING WORKS
+Records of prefabricated piles shall be kept by the Contractor on the Site and submitted to the Engineer at the time the piles are delivered to the Site. The records shall include test certificates, analyses and mill sheets for steel piles and proprietary piles.    Records of cast-in-situ piles shall be signed by the Engineer after he has carried out the inspection/verification personally.
+Records  of  pile  driving  shall  be  kept  by  the  Contractor  on  the  Site  and submitted to the Engineer within 24 hours after the driving or installation of each  pile  has  been  completed.    The  records  shall  be  kept  on  standard forms  as  shown  in  Appendices  8.2  to  8.5  and  shall  be  available  for inspection by the Engineer.
+Records of tests on bentonite slurry shall be kept by the Contractor on the Site and a report shall be submitted to the Engineer at times agreed by the Engineer.    The  records  shall  be  kept  on  standard  forms  as  shown  in Appendix 8.6 and shall be available for inspection by the Engineer.
+Records of load tests on piles shall be kept by the Contractor on the Site and a report shall be submitted to the Engineer within 48 hours after the test has  been  completed.    The  records  shall  be  kept  on  standard  forms  as shown  in  Appendix  8.7  and  shall  be  available  to  the  Engineer  for inspection.    The records shall include graphs showing load and settlement versus time, plotted in the format shown in BS 8004, Figure 15(a).
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 112
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: RECORDS OF PILING WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+(a) Details stated in Clause 1.42,
+(b) Pile reference numbers,
+(c) Measured pile length,
+(d) Defects such as cracks, fractures or discontinuities, and
+(e) Pile stiffness.
+Record drawings of installed piles shall be prepared by the Contractor and two copies shall be submitted to the Engineer within 14 days of completing the  piles,  including  cutting  and  trimming,  in  each  pile  group  or  building block.    The  drawings  shall  include  the  as-constructed  co-ordinates  of the centre of each pile at cut-off level, the final depth and cut-off level of each pile and other information required by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 113
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Record of piling works
+────────────────────────────────────────────────────────────────────────────────
+
+# Record of piling works
+8.81 Within 14 days of completing the piles in each pile group or building block for  minipiles,  socketted  steel  H-piles  and  small-diameter  bored  piles,  the Contractor shall submit to the Engineer a piling record plan showing the following:
+(a) The top levels of the rock sockets;
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 114
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Testing: load tests on piles 8.82
+────────────────────────────────────────────────────────────────────────────────
+
+# Testing: load tests on piles 8.82
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 115
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Compliance criteria: load tests on piles 8.83
+────────────────────────────────────────────────────────────────────────────────
+
+# Compliance criteria: load tests on piles 8.83
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 116
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Non-compliance: load tests on piles 8.84
+────────────────────────────────────────────────────────────────────────────────
+
+# Non-compliance: load tests on piles 8.84
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 117
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Proof drilling 8.85
+────────────────────────────────────────────────────────────────────────────────
+
+# Proof drilling 8.85
+(b) The bottom levels of the rock sockets;
+(c) The lengths of the rock sockets; and
+(d) The contours of the rock-head inferred from drill hole logs.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 118
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TESTING: LOAD TESTS ON PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# TESTING: LOAD TESTS ON PILES
+(a) The  settlement at any  load shall be less than twice the settlement at 90% of that load (Brinch Hansen's criteria),
+(b) Under  working  load  the  gross  pile  head  settlement  shall  not exceed 20 mm for buildings and 10 mm for other structures, and
+(c) The preliminary pile shall have a factor of safety of at least 2.
+Proof drilling shall be carried out on every large-diameter bored pile to check the condition at the concrete/rock interface. A base coring tube of at  least  150  mm  diameter  shall  be  left  at  about  1000  mm  above  the founding level of the pile. The core-drilling shall be carried out to 1000 mm below the concrete/rock interface.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 119
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TESTING: CONCRETE CORES FROM PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# TESTING: CONCRETE CORES FROM PILES
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 120
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Testing: concrete cores from piles 8.87
+────────────────────────────────────────────────────────────────────────────────
+
+# Testing: concrete cores from piles 8.87
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 121
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Compliance criteria: 8.88
+────────────────────────────────────────────────────────────────────────────────
+
+# Compliance criteria: 8.88
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 122
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: concrete cores from piles
+────────────────────────────────────────────────────────────────────────────────
+
+# concrete cores from piles
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 123
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Non-compliance: concrete cores from piles 8.89
+────────────────────────────────────────────────────────────────────────────────
+
+# Non-compliance: concrete cores from piles 8.89
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 124
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Testing: non-destructive tests on welds in piles 8.90
+────────────────────────────────────────────────────────────────────────────────
+
+# Testing: non-destructive tests on welds in piles 8.90
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 125
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Non-compliance: non-destructive tests on welds in piles 8.91
+────────────────────────────────────────────────────────────────────────────────
+
+# Non-compliance: non-destructive tests on welds in piles 8.91
+Concrete cores shall be 100 mm diameter.
+The method of taking concrete cores shall be in accordance with CS1.
+Holes formed by taking concrete cores from piles shall be reinstated using an approved concrete mix or an approved grout mix.
+Prestressed  precast  concrete  piles  from  which  concrete  cores  have been taken shall be abandoned.
+Each  concrete  core  from  a  pile  shall  be  inspected  for  evidence  of segregation  of  the  constituents  and  for  the  presence  of  voids.  Specimens selected  from  each  core  shall  be  tested  to  determine  the  compressive strength.    Each concrete core from a pile shall be inspected for evidence of segregation  of  the  constituents  and  for  the  presence  of  voids.  Specimens selected  from  each  core  shall  be  tested  to  determine  the  compressive strength.
+The method of preparing, inspecting and testing concrete cores shall be as stated in Clause 16.64(2).
+The compliance criteria for concrete cores from piles shall be as stated in Clause 16.65.
+If  the  result  of  any  test  on  a  concrete  core  from  a  pile  does  not comply with Clause 16.65 additional cores shall  be taken  from  the  same pile and additional tests shall be carried out.
+Additional concrete cores shall be 100 mm diameter for concrete of 20  mm  nominal  maximum  aggregate  size  and  150  mm  diameter  for concrete  of  40  mm  nominal  maximum  aggregate  size.  The  number  of additional cores shall be as instructed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 126
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TESTING: NON-DESTRUCTIVE TESTS ON WELDS IN PILES
+────────────────────────────────────────────────────────────────────────────────
+
+# TESTING: NON-DESTRUCTIVE TESTS ON WELDS IN PILES
+The number and type of non-destructive tests on welds in piles shall be as stated in the Contract or instructed by the Engineer.
+Radiographic tests shall comply with BS 2600:Part 1 and ultrasonic tests shall comply with BS 3923:Part 2.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 127
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Testing: integrity testing non-destructive integrity 8.92
+────────────────────────────────────────────────────────────────────────────────
+
+# Testing: integrity testing non-destructive integrity 8.92
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 128
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: on piles and testing
+────────────────────────────────────────────────────────────────────────────────
+
+# on piles and testing
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 129
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TESTING: INTEGRITY TESTS
+────────────────────────────────────────────────────────────────────────────────
+
+# TESTING: INTEGRITY TESTS
+The number and type of integrity tests to be carried out on piles shall be as stated in the Contract.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 130
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Non-compliance:
+────────────────────────────────────────────────────────────────────────────────
+
+# Non-compliance:
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 131
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: integrity tests on piles
+────────────────────────────────────────────────────────────────────────────────
+
+# integrity tests on piles
+8.93 If  the  result  of  any  integrity  test  on  a  pile  does  not  comply  with  the specified requirements, additional tests shall be carried out.    The number of additional tests shall be as instructed by the Engineer.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 132
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Sonic tests on bored cast-in-situ piles 8.94
+────────────────────────────────────────────────────────────────────────────────
+
+# Sonic tests on bored cast-in-situ piles 8.94
+Before concreting, the Contractor shall install 4 nos. (which may be reduced to 3 nos. if the pile shaft is too congested to accommodate 4 nos.) watertight  steel  tubes  of thickness  not  less  than  2.5  mm  and  internal diameter not less than 42 mm and without internal projections over the full depth of each of the bored cast-in-situ piles. Amd 1/2010
+The Contractor shall ensure that the probe matches the tube diameter
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 133
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Samples: bentonite slurry 8.95
+────────────────────────────────────────────────────────────────────────────────
+
+# Samples: bentonite slurry 8.95
+Compliance criteria: bentonite slurry 8.97
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 134
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TESTING: BENTONITE SLURRY
+────────────────────────────────────────────────────────────────────────────────
+
+# TESTING: BENTONITE SLURRY
+Each  sample  of  bentonite  slurry  shall  be  tested  to  determine  the properties as stated in Tables 8.2A, 8.2B, 8.2C and 8.2D.              Amd 1/2010
+The method of testing shall be as stated in Table 8.2.
+The  measuring  device  for  testing  density  shall  be  readable  and accurate to ± 0.005 g/mL.
+Samples to be tested for viscosity using the Fann viscometer shall be screened before testing using a 300 µ m BS test sieve.
+The results of tests on bentonite slurry shall be as stated in Table 8.2.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 135
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: TESTING: BENTONITE SLURRY
+────────────────────────────────────────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 136
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Table 8.2(A) Fresh Bentonite
+────────────────────────────────────────────────────────────────────────────────
+
+# Table 8.2(A) Fresh Bentonite
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 137
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Table 8.2(A) Fresh Bentonite
+────────────────────────────────────────────────────────────────────────────────
+
+| Property    | Test Results   | Method of Testing                                |
+|-------------|----------------|--------------------------------------------------|
+| Density     | ＞ 1.015 g/mL   | Mud density balance                              |
+| Fluid loss  | ≤ 25 mL        | Refer to API Recommended Practice: RP13B-1       |
+| Viscosity   | ≤ 35 s         | Marsh cone method                                |
+| pH value    | 8.5-10.5       | pH indicator paper strips or electrical pH meter |
+| Filter cake | ≤ 1mm          | Refer to API Recommended Practice: RP13B-1       |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 138
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Table 8.2(B) Bentonite during excavation
+────────────────────────────────────────────────────────────────────────────────
+
+# Table 8.2(B) Bentonite during excavation
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 139
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Table 8.2(B) Bentonite during excavation
+────────────────────────────────────────────────────────────────────────────────
+
+| Property    | Test Results   | Method of Testing                                |
+|-------------|----------------|--------------------------------------------------|
+| Density     | 1.08-1.15 g/mL | Mud density balance                              |
+| Fluid loss  | ＜ 45 mL        | Refer to API Recommended Practice: RP13B-1       |
+| pH value    | 8-11           | pH indicator paper strips or electrical pH meter |
+| Filter cake | ≤ 5mm          | Refer to API Recommended Practice: RP13B-1       |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 140
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Table 8.2(C)Bentonite prior to concreting
+────────────────────────────────────────────────────────────────────────────────
+
+# Table 8.2(C)Bentonite prior to concreting
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 141
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Table 8.2(C)Bentonite prior to concreting
+────────────────────────────────────────────────────────────────────────────────
+
+| Property     | Test Results   | Method of Testing                                |
+|--------------|----------------|--------------------------------------------------|
+| Density      | ≤ 1.15 g/mL    | Mud density balance                              |
+| Fluid loss   | ≤ 40 mL        | Refer to API Recommended Practice: RP13B-1       |
+| Viscosity    | ≤ 40 s         | Marsh cone method                                |
+| pH value     | 8-11           | pH indicator paper strips or electrical pH meter |
+| Filter cake  | ≤ 5mm          | Refer to API Recommended Practice: RP13B-1       |
+| Sand content | ≤ 3%           | Refer to API Recommended Practice: RP13B-1       |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 142
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Table 8.2(C)Bentonite prior to concreting
+────────────────────────────────────────────────────────────────────────────────
+
+| Property    | Test Results   | Method of Testing                                |
+|-------------|----------------|--------------------------------------------------|
+| Density     | ≤ 1.3 g/mL     | Mud density balance                              |
+| Fluid loss  | ≤ 50 mL        | Refer to API Recommended Practice: RP13B-1       |
+| Viscosity   | ≤ 50 s         | Marsh cone method                                |
+| pH value    | 7.5-11.5       | pH indicator paper strips or electrical pH meter |
+| Filter cake | ≤ 5mm          | Refer to API Recommended Practice: RP13B-1       |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 143
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: APPENDIX 8.1
+────────────────────────────────────────────────────────────────────────────────
+
+# APPENDIX 8.1
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 144
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: DETERMINATION OF THE SETTLEMENT OF PILES BY LOAD TEST
+────────────────────────────────────────────────────────────────────────────────
+
+# DETERMINATION OF THE SETTLEMENT OF PILES BY LOAD TEST
+8.1.1 This method covers the determination of the settlement of piles by means of a load test.
+8.1.2 The following equipment is required:
+(a) Kentledge, anchor piles or other anchorages supported or installed at  suitable  locations  to  provide  adequate  reactions against jacking.
+(b) A load-measuring device which shall consist of a load column, pressure cell, or other appropriate system, calibrated before and after  each  series  of  tests,  or  whenever  adjustments  are  made  to the device, or at time intervals recommended by the manufacturer of the equipment.
+(c) Four deflectometers accurate to 0.025 mm.
+(d) Precision levelling equipment accurate to 0.25 mm.
+(e) A reference frame for supporting deflectometers and providing a datum for deflectometer measurements.
+(f) Working platforms.
+(g) Screens and protection from exposure to conditions which may affect the test.
+(h) Hydraulic loading equipment.
+8.1.3 The procedure before testing shall be as follows:
+(a) The kentledge, anchor piles or other anchorages shall be installed.    The centre of each anchor pile shall be at least 2 m or three  times  the  pile  diameter,  whichever  is  greater,  from  the centre of the pile to be tested and from the centre of any adjacent pile.
+(b) If  required,  the  pile  to  be  tested  shall  be  extended  from  cut-off level to ground level.    The strength of piles at joints shall not be less than any normal section of the pile.
+(c) A temporary square pile cap designed by the Contractor shall be constructed.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 145
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: DETERMINATION OF THE SETTLEMENT OF PILES BY LOAD TEST
+────────────────────────────────────────────────────────────────────────────────
+
+(d) Working platforms, screens and protection shall be installed.
+(e) The reference frame shall be set up on supports which are at least 2 m or three times the pile diameter, whichever is greater, from the  test  pile  and  anchor  pile.    The  four  deflectometers  shall  be mounted on the reference frame to measure the deflection of the four corners of the temporary pile cap.
+(a) Preliminary  piles  shall  be  tested  to  not  less  than  twice  the working  load  of  the  pile  or  other  loads  stated  in  the  Contract. Working piles shall be tested to not less than 1.8 times working load. Reductions for group or boundary effects shall not be made in determining the test loads.
+(b) Test loads shall be applied and removed in three stages as stated in Table 8.1.1.
+(c) Unless otherwise permitted by the Engineer, the test loads shall be applied in increments, and removed in decrements, of 25% of the working load.    Increments of load shall not be applied until the  rate  of  settlement  of  the  pile  is  less  than  0.1  mm  in  20 minutes.
+(d) The full test loads for Stage I shall be applied in increments and shall  then  be  maintained  for  at  least  24  hours  after  the  rate  of settlement  has  reduced  to  less  than  0.1  mm  per  hour.  The  test loads shall be removed in decrements and the recovery of the pile determined before loading is resumed.
+(e) The  procedure  stated  in  Clause 8.1.4(d)  shall  be  repeated  for Stage II loading.
+(f) The  procedure  stated  in  Clause  8.1.4(d)  shall  be  repeated  for Stage III loading unless the Engineer instructs the loading to be maintained for a longer period.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 146
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: DETERMINATION OF THE SETTLEMENT OF PILES BY LOAD TEST
+────────────────────────────────────────────────────────────────────────────────
+
+(g) The settlement of the pile shall be measured at hourly intervals or other intervals agreed by the Engineer. The settlement of the pile under each increment and decrement of loading shall be measured.    The exact times at which increments are applied and decrements are removed shall be recorded. Settlements shall be measured  and  times  shall  be  recorded  in  the  presence  of  the Engineer.
+(h) The  level  of  the  reference  beam  shall  be  checked  at  regular intervals agreed by the Engineer during the test.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 147
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: DETERMINATION OF THE SETTLEMENT OF PILES BY LOAD TEST
+────────────────────────────────────────────────────────────────────────────────
+
+| Stage   | Test load              |
+|---------|------------------------|
+| I       | 25% of max. test load  |
+| II      | 50% of max. test load  |
+| III     | 100% of max. test load |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 148
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Procedure: after testing
+────────────────────────────────────────────────────────────────────────────────
+
+# Procedure: after testing
+8.1.5 After  testing,  equipment  shall  be  removed,  temporary  pile  caps  shall  be demolished and pile extensions shall be removed to cut-off level.    Unless otherwise permitted by the Engineer, anchor piles shall be withdrawn.
+Reporting of results 8.1.6 The following shall be reported:
+(a) The loads applied to the nearest 0.05 t.
+(b) The  settlement  of  the  pile  to  the  nearest  0.05  mm  at  hourly intervals and under each increment and decrement of loading.
+(c) The exact times at which increments were applied and decrements removed.
+(d) The levels of the reference beam, to the nearest 0.05 mm.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 149
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: APPENDIX 8.2
+────────────────────────────────────────────────────────────────────────────────
+
+# APPENDIX 8.2
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 150
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PILE DRIVING RECORD
+────────────────────────────────────────────────────────────────────────────────
+
+# PILE DRIVING RECORD
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 151
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Pile data
+────────────────────────────────────────────────────────────────────────────────
+
+# Pile data
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 152
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Drive system data
+────────────────────────────────────────────────────────────────────────────────
+
+# Drive system data
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 153
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Levels
+────────────────────────────────────────────────────────────────────────────────
+
+# Levels
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 154
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: Levels
+────────────────────────────────────────────────────────────────────────────────
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 155
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SECTION 11
+────────────────────────────────────────────────────────────────────────────────
+
+# SECTION 11
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 156
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: MISCELLANEOUS ROADWORKS
+────────────────────────────────────────────────────────────────────────────────
+
+# MISCELLANEOUS ROADWORKS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 157
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PART 1: GENERAL REQUIREMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+# PART 1: GENERAL REQUIREMENTS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 158
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: GENERAL
+────────────────────────────────────────────────────────────────────────────────
+
+# GENERAL
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 159
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: GENERAL
+────────────────────────────────────────────────────────────────────────────────
+
+| General requirements                       |   11.01 | The works and materials specified in Clauses 11.02 to 11.08 shall comply with the sections stated, unless otherwise stated in this Section.   |
+|--------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| Earthworks                                 |   11.02 | Earthworks shall comply with Section 6.                                                                                                       |
+| Sub-base material and bituminous materials |   11.03 | Sub-base material and bituminous materials shall comply with Section 9.                                                                       |
+| Joints in concrete                         |   11.04 | Joints in concrete shall comply with Section 10.                                                                                              |
+| Formwork                                   |   11.05 | Formwork and finishes to concrete shall comply with Section 14.                                                                               |
+| Reinforcement                              |   11.06 | Steel reinforcement shall comply with Section 15.                                                                                             |
+| Concrete                                   |   11.07 | Concrete shall comply with Section 16.                                                                                                        |
+| Steelwork                                  |   11.08 | Steelwork shall comply with Section 18.                                                                                                       |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 160
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+# MATERIALS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 161
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+| Cement mortar         |   11.09 | Cement mortar shall consist of one part of cement to three parts of fine aggregate by volume together with the minimum amount of water necessary to achieve a consistency suitable for the required work. Fine aggregates shall be sand or crushed rock to BS 1200 and shall pass a 5 mm BS test sieve.   |
+|-----------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Polyethylene sheeting |    11.1 | Polyethylene sheeting shall be impermeable and shall have a nominal thickness of 0.125 mm.                                                                                                                                                                                                                |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 162
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: PART 2: CONCRETE PROFILE BARRIERS
+────────────────────────────────────────────────────────────────────────────────
+
+# PART 2: CONCRETE PROFILE BARRIERS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 163
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+# MATERIALS
+11.11 Concrete for concrete profile barriers shall be Grade 30/20.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 164
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: SUBMISSIONS
+────────────────────────────────────────────────────────────────────────────────
+
+# SUBMISSIONS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 165
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Trial length
+────────────────────────────────────────────────────────────────────────────────
+
+# Trial length
+concrete profile barriers shall be submitted to the Engineer:
+(a) Particulars  of  formwork  as  stated  in  Clause  14.21  for  in-situ construction using fixed forms,
+(b) Details  of  slip-form  machine  for  in-situ  construction  between sliding forms, and
+(c) Methods of manufacture, handling, transport, storage and fixing in position of precast units.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 166
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TRIALS
+────────────────────────────────────────────────────────────────────────────────
+
+# TRIALS
+11.13 (1) A  trial  length  of  concrete  profile  barrier  shall  be  constructed  to demonstrate that the proposed materials, mix design, methods of production and  methods of construction will produce a concrete profile barrier which complies with the specified requirements.    If it is not stated in the Contract that  the  trial  length  is  to  be  constructed  in  a  location  separate  from  the permanent concrete profile barrier, the trial length shall be the first 25 m of the permanent barrier.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 167
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Testing: concrete cores from trial lengths 11.26
+────────────────────────────────────────────────────────────────────────────────
+
+# Testing: concrete cores from trial lengths 11.26
+(e) The level of the top of the barriers shall be within 10 mm of the specified level.
+(f) The barriers shall form a smooth alignment.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 168
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: TESTING: CONCRETE CORES FROM TRIAL LENGTHS
+────────────────────────────────────────────────────────────────────────────────
+
+# TESTING: CONCRETE CORES FROM TRIAL LENGTHS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 169
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: additional requirements 11.71
+────────────────────────────────────────────────────────────────────────────────
+
+# additional requirements 11.71
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 170
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: Laying units
+────────────────────────────────────────────────────────────────────────────────
+
+# Laying units
+Samples of each type of Grade A units showing the actual size, colour, variation in colour, finish/texture as specified, and general characteristics of the appearance shall be submitted to the Engineer for approval at the time as particulars of the units are submitted.
+Samples  submitted  to  the  Engineer  shall  be  subject  to  a  visual inspection by the Engineer and shall comply with the following requirements:
+(a) When examined in accordance with BS 6717, there shall not be significant visible differences in colour and texture between any samples;
+(b) When examined in accordance with BS 6717, the samples shall not  exhibit  defects  such  as  cracking,  flaking  or  dislodging  of aggregates;
+(c) Fine materials shall not be easily dislodged from the surfaces of any samples during gentle manual handling; and
+(d) The edges of all samples shall be sharp and straight without any defect.
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 171
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: HANDLING AND STORAGE OF MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+# HANDLING AND STORAGE OF MATERIALS
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 172
+────────────────────────────────────────────────────────────────────────────────
+Index: rule | Page: None | Clause: unknown | Type: table
+Title: HANDLING AND STORAGE OF MATERIALS
+────────────────────────────────────────────────────────────────────────────────
+
+| Handling and storage of units   |   11.72 | Units shall be handled and stored on pallets to avoid damage to corners and chamfer edges. Pallets shall be stored on a levelled, well drained and maintained hard-standing ground and in a manner which will not result in damage or contamination to the units. The units shall be protected from damage and damaged units shall not be used unless permitted by the Engineer.   |
+|---------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Storage of sand                 |   11.73 | Sand for filling joints between units shall be stored off ground in waterproof bags and shall be kept under cover on a levelled, well drained and maintained hard-standing ground on level supports until use.                                                                                                                                                                     |
+
+────────────────────────────────────────────────────────────────────────────────
+CHUNK 173
+────────────────────────────────────────────────────────────────────────────────
+Index: section | Page: None | Clause: unknown | Type: clause_text
+Title: LAYING UNITS
+────────────────────────────────────────────────────────────────────────────────
+
+# LAYING UNITS
+11.74 (1) Units shall not be laid until the layout of the units within the paved area has been approved by the Engineer.
+Kerbs and edgings shall be completed before the units are laid.      The compressive  strength  of  the  concrete  used  for  in-situ  concrete  kerbs  and edgings shall be at least 20 MPa before units are laid.
+Measures shall be taken to prevent water draining across or through the area during laying, bedding and compaction of the units.
+Laying of units shall start as soon as practicable after the formation has  been  completed.  The  formation  shall  be  protected  as  stated  in  Clause 6.55 until laying starts.
+Paving blocks for carriageways and paved areas to which vehicles will
+Laying sand 11.75
+Bedding paving blocks and setts 11.77
+A layer of sand shall be laid and shall be screeded and tamped to a uniform depth over the complete width of the area to be paved. The quantity and thickness of sand shall be appropriate to the methods of preparation of the sand layer, and shall be sufficient to give the required nominal thickness of the sand layer after compaction of the sand and units.
+Bedding paving slabs 11.76 (1) Paving slabs shall be laid on the prepared sand layer immediately after screeding and tamping in such a manner that the sand is not disturbed.
+Damaged paving slabs shall be immediately removed and replaced.
+

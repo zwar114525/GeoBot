@@ -5,11 +5,67 @@ import os
 
 sys.path.insert(0, str(Path(__file__).parent))
 
+# ─── Startup validation (run on every device before app loads) ───
+_PIP_DEPS = [
+    ("streamlit", "streamlit"),
+    ("qdrant_client", "qdrant-client"),
+    ("loguru", "loguru"),
+    ("sentence_transformers", "sentence-transformers"),
+]
+# Project modules that must exist (avoid deep imports to keep errors clear)
+_PROJECT_MODULES = [
+    "src.ingestion.ingest",
+    "src.utils.llm_client",
+    "src.utils.session_persistence",
+]
+
+
+def _ensure_ready():
+    # 1. Check pip packages
+    missing_pip = []
+    for module, package in _PIP_DEPS:
+        try:
+            __import__(module)
+        except ModuleNotFoundError:
+            missing_pip.append(package)
+    if missing_pip:
+        cmd = "pip install -r requirements.txt"
+        print("\n" + "=" * 60, file=sys.stderr)
+        print("  MISSING DEPENDENCIES", file=sys.stderr)
+        print("=" * 60, file=sys.stderr)
+        print(f"\n  Missing: {', '.join(missing_pip)}", file=sys.stderr)
+        print("\n  Run:  pip install -r requirements.txt", file=sys.stderr)
+        print("  Or:   setup.bat (Windows) / ./setup.sh (Mac/Linux)", file=sys.stderr)
+        print("=" * 60 + "\n", file=sys.stderr)
+        sys.exit(1)
+
+    # 2. Check project modules (catches incomplete repo / wrong structure)
+    for mod in _PROJECT_MODULES:
+        try:
+            __import__(mod)
+        except ModuleNotFoundError as e:
+            print("\n" + "=" * 60, file=sys.stderr)
+            print("  MISSING PROJECT MODULE", file=sys.stderr)
+            print("=" * 60, file=sys.stderr)
+            print(f"\n  Module: {mod}", file=sys.stderr)
+            print(f"  Error: {e}", file=sys.stderr)
+            print("\n  Ensure the repo is fully cloned and run from project root.", file=sys.stderr)
+            print("  See SETUP.md for setup steps.", file=sys.stderr)
+            print("=" * 60 + "\n", file=sys.stderr)
+            sys.exit(1)
+
+
+_ensure_ready()
+
 import streamlit as st
+import plotly.graph_objects as go
 from src.agents.qa_agent import QAAgent
 from src.agents.designer_agent import DesignerAgent
 from src.agents.validator_agent import ValidatorAgent
-from src.ingestion.ingest import ingest_document, ingest_document_dual_index
+from src.ingestion.ingest import ingest_document_dual_index
+from src.programme.xer_parser import XERParser
+from src.programme.chart_generator import ChartGenerator
+from src.programme.programme_agent import ProgrammeAgent
 from src.utils.llm_client import (
     set_runtime_llm_config,
     get_runtime_llm_config,
@@ -20,14 +76,11 @@ from src.utils.session_persistence import save_session, load_session, list_sessi
 
 st.set_page_config(page_title="Geotech AI Agent", page_icon="🏗️", layout="wide", initial_sidebar_state="expanded")
 
-if "qa_agent" not in st.session_state:
-    st.session_state.qa_agent = QAAgent(use_local_db=True)
-if "designer_agent" not in st.session_state:
-    st.session_state.designer_agent = None
-if "validator_agent" not in st.session_state:
-    st.session_state.validator_agent = ValidatorAgent(use_local_db=True)
+# Lightweight session state first
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "designer_agent" not in st.session_state:
+    st.session_state.designer_agent = None
 if "designer_messages" not in st.session_state:
     st.session_state.designer_messages = []
 if "llm_models" not in st.session_state:
@@ -36,6 +89,12 @@ if "llm_connected" not in st.session_state:
     st.session_state.llm_connected = False
 if "session_id" not in st.session_state:
     st.session_state.session_id = "default"
+if "programme_agent" not in st.session_state:
+    st.session_state.programme_agent = None
+if "programme_data" not in st.session_state:
+    st.session_state.programme_data = None
+if "programme_chat_history" not in st.session_state:
+    st.session_state.programme_chat_history = []
 
 # Load saved session on startup (simple approach without fragment)
 if "session_loaded" not in st.session_state:
@@ -71,12 +130,33 @@ with st.sidebar:
 
     mode = st.radio(
         "Select Mode",
-        ["📚 Knowledge Q&A", "📝 Report Generator", "✅ Submission Checker", "📂 Document Manager", "⚙️ LLM Settings"],
+        ["📚 Knowledge Q&A", "📝 Report Generator", "✅ Submission Checker", "📂 Document Manager", "📅 Programme Manager", "⚙️ LLM Settings"],
         index=0,
     )
 
+# Lazy-load heavy agents (embedding model) with visible feedback
+if "qa_agent" not in st.session_state or "validator_agent" not in st.session_state:
+    with st.spinner("Loading AI agents (embedding model)... First run may take 1–2 minutes."):
+        st.session_state.qa_agent = QAAgent(use_local_db=True)
+        st.session_state.validator_agent = ValidatorAgent(use_local_db=True)
+
 if mode == "📚 Knowledge Q&A":
-    st.header("📚 Knowledge Base Q&A")
+    col_title, col_clear = st.columns([1, 0.15])
+    with col_title:
+        st.header("📚 Knowledge Base Q&A")
+    with col_clear:
+        st.write("")
+        st.write("")
+        if st.button("🗑️ Clear", help="Clear chat history and conversation context so the next question is answered independently"):
+            st.session_state.chat_history = []
+            if st.session_state.qa_agent:
+                st.session_state.qa_agent.conversation_history = []
+            save_session(
+                st.session_state.session_id,
+                st.session_state.chat_history,
+                st.session_state.designer_messages,
+            )
+            st.rerun()
     equation_mode = st.toggle(
         "Equation-focused mode",
         value=False,
@@ -252,36 +332,137 @@ elif mode == "📂 Document Manager":
     else:
         st.info("No documents ingested yet.")
     st.divider()
-    uploaded = st.file_uploader("Upload a PDF document", type=["pdf"], key="ingest_upload")
+    uploaded = st.file_uploader("Upload PDF documents", type=["pdf"], accept_multiple_files=True, key="ingest_upload")
     if uploaded:
+        files = uploaded if isinstance(uploaded, list) else [uploaded]
+        st.write(f"**{len(files)} file(s) selected**")
         col1, col2 = st.columns(2)
         with col1:
-            doc_name = st.text_input("Document Name", value=uploaded.name.replace(".pdf", ""))
-            doc_id = st.text_input("Document ID", value=uploaded.name.replace(".pdf", "").lower().replace(" ", "_"))
-        with col2:
             doc_type = st.selectbox("Document Type", ["code", "manual", "guideline", "report", "drawing"])
-        if st.button("📥 Ingest Document", type="primary"):
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(uploaded.getbuffer())
-                tmp_path = tmp.name
-            try:
-                with st.spinner(f"Processing {doc_name} with dual-index strategy..."):
-                    result = ingest_document_dual_index(
-                        pdf_path=tmp_path,
-                        document_id=doc_id,
-                        document_name=doc_name,
-                        document_type=doc_type,
-                        use_local_db=True,
-                    )
-                st.success(f"Successfully ingested '{doc_name}' - Section: {result['section_count']}, Rule: {result['rule_count']}")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Ingestion failed: {e}")
-                import traceback
-                with st.expander("Error details"):
-                    st.code(traceback.format_exc())
-            finally:
-                os.unlink(tmp_path)
+        with col2:
+            st.write("")  # alignment
+            st.write("")
+            if st.button("📥 Ingest All Documents", type="primary"):
+                results = []
+                progress_bar = st.progress(0)
+                for i, f in enumerate(files):
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                        tmp.write(f.getbuffer())
+                        tmp_path = tmp.name
+                    try:
+                        doc_name = f.name.replace(".pdf", "")
+                        doc_id = doc_name.lower().replace(" ", "_")
+                        with st.spinner(f"Processing {f.name} (Docling + dual-index)..."):
+                            result = ingest_document_dual_index(
+                                pdf_path=tmp_path,
+                                document_id=doc_id,
+                                document_name=doc_name,
+                                document_type=doc_type,
+                                use_local_db=True,
+                            )
+                        total = result["section_count"] + result["rule_count"]
+                        results.append({"file": f.name, "result": result, "total": total, "success": True})
+                    except Exception as e:
+                        results.append({"file": f.name, "error": str(e), "success": False})
+                    finally:
+                        os.unlink(tmp_path)
+                    progress_bar.progress((i + 1) / len(files))
+                # Show results
+                success_count = sum(1 for r in results if r["success"])
+                st.success(f"Successfully ingested {success_count}/{len(files)} documents")
+                for r in results:
+                    if r["success"]:
+                        res = r["result"]
+                        st.write(f"  - {r['file']}: Section {res['section_count']}, Rule {res['rule_count']} (chunked → chunked_files/)")
+                    else:
+                        st.error(f"  - {r['file']}: {r['error']}")
+                if success_count > 0:
+                    st.rerun()
+
+elif mode == "📅 Programme Manager":
+    st.header("📅 Construction Programme Manager")
+
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        xer_file = st.file_uploader("Upload Primavera P6 XER Schedule File", type=["xer"])
+    with col2:
+        st.write("")
+        st.write("")
+        if st.button("Load Demo Data", use_container_width=True):
+            st.session_state.programme_data = XERParser(use_simulated=True)
+            st.session_state.programme_agent = ProgrammeAgent()
+            st.session_state.programme_agent.load_schedule(
+                st.session_state.programme_data.tasks,
+                st.session_state.programme_data.resources,
+                st.session_state.programme_data.relationships
+            )
+            st.session_state.programme_chat_history = []
+            st.rerun()
+
+    if xer_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xer") as tmp:
+            tmp.write(xer_file.getbuffer())
+            tmp_path = tmp.name
+        try:
+            with st.spinner("Parsing XER file..."):
+                st.session_state.programme_data = XERParser(file_path=tmp_path)
+                st.session_state.programme_agent = ProgrammeAgent()
+                st.session_state.programme_agent.load_schedule(
+                    st.session_state.programme_data.tasks,
+                    st.session_state.programme_data.resources,
+                    st.session_state.programme_data.relationships
+                )
+                st.session_state.programme_chat_history = []
+            st.success(f"Loaded {len(st.session_state.programme_data.tasks)} tasks from XER file")
+        except Exception as e:
+            st.error(f"Error parsing XER file: {e}")
+        finally:
+            os.unlink(tmp_path)
+
+    if st.session_state.programme_data is not None:
+        summary = st.session_state.programme_data.get_schedule_summary()
+
+        st.subheader("Schedule Overview")
+        col1, col2, col3, col4, col5 = st.columns(5)
+        col1.metric("Total Tasks", summary.get("total_tasks", 0))
+        col2.metric("Completed", summary.get("completed", 0))
+        col3.metric("In Progress", summary.get("in_progress", 0))
+        col4.metric("Critical Tasks", summary.get("critical_tasks", 0))
+        col5.metric("Budget", f"${summary.get('total_budget', 0):,.0f}")
+
+        tab1, tab2, tab3, tab4 = st.tabs(["📊 Gantt Chart", "👷 Resources", "💰 Budget", "💬 Q&A"])
+
+        with tab1:
+            chart_gen = ChartGenerator()
+            gantt_fig = chart_gen.create_gantt_chart(st.session_state.programme_data.tasks)
+            st.plotly_chart(gantt_fig, use_container_width=True)
+
+        with tab2:
+            res_fig = chart_gen.create_resource_chart(st.session_state.programme_data.tasks)
+            st.plotly_chart(res_fig, use_container_width=True)
+            progress_fig = chart_gen.create_progress_pie(st.session_state.programme_data.tasks)
+            st.plotly_chart(progress_fig, use_container_width=True)
+
+        with tab3:
+            budget_fig = chart_gen.create_budget_chart(st.session_state.programme_data.tasks)
+            st.plotly_chart(budget_fig, use_container_width=True)
+
+        with tab4:
+            st.subheader("Ask about your construction schedule")
+
+            for msg in st.session_state.programme_chat_history:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
+
+            if prompt := st.chat_input("Ask about tasks, progress, critical path, delays..."):
+                st.session_state.programme_chat_history.append({"role": "user", "content": prompt})
+                with st.chat_message("assistant"):
+                    with st.spinner("Analyzing schedule..."):
+                        result = st.session_state.programme_agent.ask(prompt)
+                    st.markdown(result["answer"])
+                st.session_state.programme_chat_history.append({"role": "assistant", "content": result["answer"]})
+    else:
+        st.info("Upload an XER file or click 'Load Demo Data' to get started.")
 
 elif mode == "⚙️ LLM Settings":
     st.header("⚙️ LLM Provider Configuration")

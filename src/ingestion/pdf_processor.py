@@ -67,13 +67,15 @@ class CoPChunker:
                 header_text = self._item_text(item)
                 clause_id = self._extract_clause_id(header_text)
                 current_metadata = self._base_metadata(document_id, document_name, document_type)
+                pg = self._item_page(item)
                 current_metadata.update(
                     {
                         "clause_id": clause_id,
                         "clause_title": header_text,
                         "hierarchy_level": level,
                         "content_type": "clause_text",
-                        "page_no": self._item_page(item),
+                        "page_no": pg,
+                        "page_number": pg,
                         "section_title": header_text,
                     }
                 )
@@ -85,16 +87,19 @@ class CoPChunker:
                 self._flush_text_chunk(processed, current_chunk_lines, current_metadata, max_chunk_chars)
                 table_text = self._table_to_markdown(item)
                 table_meta = dict(current_metadata)
+                pg = self._item_page(item)
                 table_meta.update(
                     {
                         "content_type": "table",
-                        "page_no": self._item_page(item),
+                        "page_no": pg,
+                        "page_number": pg,
                         "table_caption": self._table_caption(item),
                     }
                 )
                 table_struct = self._table_to_dict(item)
                 if table_struct is not None:
                     table_meta["table_struct"] = table_struct
+                table_meta.setdefault("sub_chunk_index", 0)
                 table_meta["regulatory_strength"] = self._detect_regulatory_strength(table_text)
                 table_meta["cross_references"] = self._extract_cross_references(table_text)
                 table_meta["char_count"] = len(table_text)
@@ -107,7 +112,9 @@ class CoPChunker:
                     if item_type == "FORMULA":
                         current_metadata["formula_latex"] = text
                     current_chunk_lines.append(text)
-                    current_metadata["page_no"] = self._item_page(item) or current_metadata.get("page_no")
+                    pg = self._item_page(item) or current_metadata.get("page_no")
+                    current_metadata["page_no"] = pg
+                    current_metadata["page_number"] = pg
                     if len("\n".join(current_chunk_lines)) >= max_chunk_chars:
                         self._flush_text_chunk(processed, current_chunk_lines, current_metadata, max_chunk_chars)
 
@@ -143,11 +150,18 @@ class CoPChunker:
         if page_no is not None:
             return page_no
         prov = getattr(item, "prov", None)
-        if prov:
-            pages = getattr(prov, "pages", None)
-            if pages:
-                first = pages[0]
+        if prov is None:
+            return None
+        # Docling: prov is a list of ProvenanceItem, each has page_no
+        try:
+            if hasattr(prov, "__getitem__") and len(prov) > 0:
+                first = prov[0]
                 return getattr(first, "page_no", None)
+            pages = getattr(prov, "pages", None)
+            if pages and len(pages) > 0:
+                return getattr(pages[0], "page_no", None)
+        except (IndexError, TypeError):
+            pass
         return None
 
     def _extract_clause_id(self, header_text: str) -> str:
@@ -193,8 +207,12 @@ class CoPChunker:
         if not text:
             current_chunk_lines.clear()
             return
+        pg = current_metadata.get("page_no") or current_metadata.get("page_number")
         if len(text) <= max_chunk_chars:
             metadata = dict(current_metadata)
+            if pg is not None and "page_number" not in metadata:
+                metadata["page_number"] = pg
+            metadata.setdefault("sub_chunk_index", 0)
             metadata["regulatory_strength"] = self._detect_regulatory_strength(text)
             metadata["cross_references"] = self._extract_cross_references(text)
             metadata["char_count"] = len(text)
@@ -203,6 +221,8 @@ class CoPChunker:
             for idx, sub_text in enumerate(self._split_large_text_by_paragraph(text, max_chunk_chars)):
                 metadata = dict(current_metadata)
                 metadata["sub_chunk_index"] = idx
+                if pg is not None and "page_number" not in metadata:
+                    metadata["page_number"] = pg
                 metadata["regulatory_strength"] = self._detect_regulatory_strength(sub_text)
                 metadata["cross_references"] = self._extract_cross_references(sub_text)
                 metadata["char_count"] = len(sub_text)

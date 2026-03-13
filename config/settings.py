@@ -67,7 +67,7 @@ CHUNK_SIZE = 800  # tokens
 CHUNK_OVERLAP = 100  # tokens
 CHUNK_MAX_CHARS = int(os.getenv("CHUNK_MAX_CHARS", "1500"))
 USE_STRUCTURE_ASSEMBLY = os.getenv("USE_STRUCTURE_ASSEMBLY", "true").lower() == "true"
-DOCLING_MAX_PAGES = int(os.getenv("DOCLING_MAX_PAGES", "300"))
+DOCLING_MAX_PAGES = int(os.getenv("DOCLING_MAX_PAGES", "800"))
 
 # ─── OCR Configuration ───
 OCR_ENABLED = os.getenv("OCR_ENABLED", "true").lower() == "true"

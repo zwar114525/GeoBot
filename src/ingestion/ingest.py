@@ -1,11 +1,50 @@
 import sys
 from pathlib import Path
+from typing import List
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.ingestion.pdf_processor import parse_pdf_with_structure
+from src.ingestion.pdf_processor import parse_pdf_with_structure, DocumentChunk, ProcessedDocument
 from src.vectordb.qdrant_store import GeoVectorStore
+
+def save_chunks_to_text_file(
+    chunks: List[DocumentChunk],
+    document_name: str,
+    output_dir: str | Path | None = None,
+) -> str:
+    """Save parsed chunks to chunked_files/ for inspection."""
+    if output_dir is None:
+        output_dir = Path(__file__).parent.parent.parent / "chunked_files"
+    else:
+        output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = "".join(c if c.isalnum() or c in (" ", "-", "_") else "_" for c in document_name)
+    safe_name = safe_name.strip().replace(" ", "_")
+    output_path = output_dir / f"{safe_name}.txt"
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(f"Document: {document_name}\n")
+        f.write(f"Total Chunks: {len(chunks)}\n")
+        f.write("=" * 80 + "\n\n")
+        for i, chunk in enumerate(chunks, 1):
+            meta = chunk.metadata
+            target = meta.get("target_index", "N/A")
+            page = meta.get("page_number") or meta.get("page_no", "N/A")
+            clause = meta.get("clause_id", "N/A")
+            title = meta.get("clause_title", "") or meta.get("section_title", "")
+            content_type = meta.get("content_type", "N/A")
+            f.write(f"{'─' * 80}\n")
+            f.write(f"CHUNK {i}\n")
+            f.write(f"{'─' * 80}\n")
+            f.write(f"Index: {target} | Page: {page} | Clause: {clause} | Type: {content_type}\n")
+            if title:
+                f.write(f"Title: {title}\n")
+            f.write(f"{'─' * 80}\n\n")
+            f.write(chunk.text.strip())
+            f.write("\n\n")
+    logger.info(f"Saved {len(chunks)} chunks to {output_path}")
+    return str(output_path)
+
 
 _INGEST_LOG_SINK_ID = None
 
@@ -45,6 +84,8 @@ def ingest_document(
         logger.error(f"Failed to extract meaningful chunks from {pdf_path}")
         return 0
     logger.info("Step 2/3: Chunking complete")
+    saved_path = save_chunks_to_text_file(processed_doc.chunks, document_name)
+    logger.info(f"Chunks saved to: {saved_path}")
     logger.info("Step 3/3: Embedding and storing in vector database")
     store = GeoVectorStore(use_local=use_local_db)
     num_stored = store.add_document(processed_doc)
@@ -70,6 +111,78 @@ def ingest_directory(directory: str, document_type: str = "code", use_local_db: 
             )
         except Exception as e:
             logger.error(f"Failed to ingest {pdf_file.name}: {e}")
+
+
+def ingest_document_dual_index(
+    pdf_path: str,
+    document_id: str,
+    document_name: str,
+    document_type: str = "code",
+    use_local_db: bool = False,
+) -> dict:
+    """
+    Ingest using Docling + dual-index strategy.
+    Chunks go to: Section index (overviews) and Rule index (tables, equations).
+    Also saves chunks to chunked_files/ for inspection.
+    """
+    setup_ingestion_logging()
+    logger.info(f"Dual-index ingestion: {pdf_path}")
+    logger.info("Step 1/4: Parsing PDF (Docling/pymupdf4llm)")
+    processed_doc = parse_pdf_with_structure(
+        pdf_path=pdf_path,
+        document_id=document_id,
+        document_name=document_name,
+        document_type=document_type,
+    )
+    logger.info("Step 2/4: Classifying chunks for dual-index")
+    for chunk in processed_doc.chunks:
+        content_type = chunk.metadata.get("content_type", "clause_text")
+        hierarchy_level = chunk.metadata.get("hierarchy_level", 2)
+        if content_type in ("table", "equation", "definition"):
+            chunk.metadata["target_index"] = "rule"
+        elif hierarchy_level <= 2:
+            chunk.metadata["target_index"] = "section"
+        else:
+            chunk.metadata["target_index"] = "rule"
+    if not processed_doc.chunks:
+        logger.error(f"Failed to extract chunks from {pdf_path}")
+        return {"section_count": 0, "rule_count": 0}
+    saved_path = save_chunks_to_text_file(processed_doc.chunks, document_name)
+    logger.info(f"Chunks saved to: {saved_path}")
+    section_chunks = []
+    rule_chunks = []
+    for chunk in processed_doc.chunks:
+        target = chunk.metadata.get("target_index", "rule")
+        if target == "section":
+            section_chunks.append(chunk)
+        else:
+            rule_chunks.append(chunk)
+    logger.info(f"Step 3/4: Distributing to indices - Section: {len(section_chunks)}, Rule: {len(rule_chunks)}")
+    store = GeoVectorStore(use_local=use_local_db)
+    store.create_section_index()
+    store.create_rule_index()
+    section_store = store.get_section_store()
+    rule_store = store.get_rule_store()
+    section_count = 0
+    if section_chunks:
+        section_doc = ProcessedDocument(
+            document_id=document_id,
+            document_name=document_name,
+            document_type=document_type,
+            chunks=section_chunks,
+        )
+        section_count = section_store.add_document(section_doc)
+    rule_count = 0
+    if rule_chunks:
+        rule_doc = ProcessedDocument(
+            document_id=document_id,
+            document_name=document_name,
+            document_type=document_type,
+            chunks=rule_chunks,
+        )
+        rule_count = rule_store.add_document(rule_doc)
+    logger.info(f"Step 4/4: Dual-index ingestion complete - Section: {section_count}, Rule: {rule_count}")
+    return {"section_count": section_count, "rule_count": rule_count}
 
 
 if __name__ == "__main__":
