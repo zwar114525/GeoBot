@@ -145,7 +145,7 @@ class TestParameterExtraction:
                 assert agent.project.design_parameters.get("unit_weight_kn_m3") is None
     
     def test_extract_handles_invalid_response(self):
-        """Test extraction handles invalid response."""
+        """Test extraction handles invalid response - goes back to ask for more params."""
         with patch('src.agents.designer_agent.GeoVectorStore'):
             with patch('src.agents.designer_agent.call_llm') as mock_llm:
                 mock_llm.return_value = "Invalid response"
@@ -153,8 +153,9 @@ class TestParameterExtraction:
                 agent = DesignerAgent()
                 result = agent._handle_parameter_input("Some input")
                 
-                # Should not crash, should continue with empty params
-                assert agent.state == AgentState.IDENTIFYING_SKILLS
+                # Should not crash - goes back to COLLECTING_PARAMETERS since no params extracted
+                assert agent.state == AgentState.COLLECTING_PARAMETERS
+                assert "questions" in result
 
 
 class TestSkillIdentification:
@@ -163,37 +164,43 @@ class TestSkillIdentification:
     def test_identify_building_skills(self):
         """Test skill identification for building project."""
         with patch('src.agents.designer_agent.GeoVectorStore'):
-            agent = DesignerAgent()
-            agent.project.project_type = "building"
-            agent.project.design_parameters = {
-                "soil_cohesion_kpa": 10,
-                "soil_friction_angle_deg": 32,
-                "soil_unit_weight": 19,
-                "foundation_width": 2,
-                "foundation_length": 2,
-                "foundation_depth": 1.5,
-            }
-            
-            result = agent._identify_required_skills()
-            
-            assert "shallow_bearing_capacity" in agent.selected_skills
+            with patch('src.agents.designer_agent.call_llm') as mock_llm:
+                mock_llm.return_value = "Mock report content"
+                
+                agent = DesignerAgent()
+                agent.project.project_type = "building"
+                agent.project.design_parameters = {
+                    "soil_cohesion_kpa": 10,
+                    "soil_friction_angle_deg": 32,
+                    "soil_unit_weight": 19,
+                    "foundation_width": 2,
+                    "foundation_length": 2,
+                    "foundation_depth": 1.5,
+                }
+                
+                result = agent._identify_required_skills()
+                
+                assert "shallow_bearing_capacity" in agent.selected_skills
     
     def test_identify_slope_skills(self):
         """Test skill identification for slope project."""
         with patch('src.agents.designer_agent.GeoVectorStore'):
-            agent = DesignerAgent()
-            agent.project.project_type = "slope"
-            agent.project.design_parameters = {
-                "slope_angle_deg": 30,
-                "friction_angle_deg": 35,
-                "cohesion_kpa": 5,
-                "unit_weight": 18,
-                "depth_to_slip_m": 2,
-            }
-            
-            result = agent._identify_required_skills()
-            
-            assert "slope_stability_infinite" in agent.selected_skills
+            with patch('src.agents.designer_agent.call_llm') as mock_llm:
+                mock_llm.return_value = "Mock report content"
+                
+                agent = DesignerAgent()
+                agent.project.project_type = "slope"
+                agent.project.design_parameters = {
+                    "slope_angle_deg": 30,
+                    "friction_angle_deg": 35,
+                    "cohesion_kpa": 5,
+                    "unit_weight": 18,
+                    "depth_to_slip_m": 2,
+                }
+                
+                result = agent._identify_required_skills()
+                
+                assert "slope_stability_infinite" in agent.selected_skills
 
 
 class TestClarifyingQuestions:

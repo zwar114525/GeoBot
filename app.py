@@ -9,13 +9,14 @@ import streamlit as st
 from src.agents.qa_agent import QAAgent
 from src.agents.designer_agent import DesignerAgent
 from src.agents.validator_agent import ValidatorAgent
-from src.ingestion.ingest import ingest_document
+from src.ingestion.ingest import ingest_document, ingest_document_dual_index
 from src.utils.llm_client import (
     set_runtime_llm_config,
     get_runtime_llm_config,
     list_openai_models,
     list_google_models,
 )
+from src.utils.session_persistence import save_session, load_session, list_sessions, delete_session
 
 st.set_page_config(page_title="Geotech AI Agent", page_icon="🏗️", layout="wide", initial_sidebar_state="expanded")
 
@@ -33,10 +34,41 @@ if "llm_models" not in st.session_state:
     st.session_state.llm_models = []
 if "llm_connected" not in st.session_state:
     st.session_state.llm_connected = False
+if "session_id" not in st.session_state:
+    st.session_state.session_id = "default"
+
+# Load saved session on startup (simple approach without fragment)
+if "session_loaded" not in st.session_state:
+    saved = load_session(st.session_state.session_id)
+    if saved:
+        if saved.get("chat_history") and not st.session_state.chat_history:
+            st.session_state.chat_history = saved["chat_history"]
+        if saved.get("designer_messages") and not st.session_state.designer_messages:
+            st.session_state.designer_messages = saved["designer_messages"]
+    st.session_state.session_loaded = True
 
 with st.sidebar:
     st.title("🏗️ Geotech AI Agent")
     st.caption("AI-powered geotechnical engineering assistant")
+
+    # Dark mode toggle
+    if "theme" not in st.session_state:
+        st.session_state.theme = "light"
+
+    theme = st.toggle("🌙 Dark Mode", value=st.session_state.theme == "dark")
+    st.session_state.theme = "dark" if theme else "light"
+
+    # Apply theme
+    if theme:
+        st.markdown("""
+            <style>
+            .stApp {background-color: #1e1e1e; color: #e0e0e0;}
+            .stChatMessage {background-color: #2d2d2d;}
+            </style>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
     mode = st.radio(
         "Select Mode",
         ["📚 Knowledge Q&A", "📝 Report Generator", "✅ Submission Checker", "📂 Document Manager", "⚙️ LLM Settings"],
@@ -94,6 +126,12 @@ if mode == "📚 Knowledge Q&A":
                     for s in result["sources"]:
                         st.caption(f"• {s['document']} | {s['section']} (score: {s['relevance_score']})")
         st.session_state.chat_history.append({"role": "assistant", "content": result["answer"], "sources": result["sources"]})
+        # Auto-save session
+        save_session(
+            st.session_state.session_id,
+            st.session_state.chat_history,
+            st.session_state.designer_messages,
+        )
 
 elif mode == "📝 Report Generator":
     st.header("📝 Geotechnical Report Generator")
@@ -185,10 +223,12 @@ elif mode == "📂 Document Manager":
                 st.warning("No chunk samples found.")
             for i, s in enumerate(samples, 1):
                 st.markdown(f"**Chunk {i}**")
+                page_val = s['metadata'].get('page_number') or s['metadata'].get('page_no')
                 st.caption(
                     f"Section: {s['metadata'].get('section_title', 'N/A')} | "
-                    f"Page: {s['metadata'].get('page_number', 'N/A')} | "
-                    f"Sub-chunk: {s['metadata'].get('sub_chunk_index', 'N/A')}"
+                    f"Page: {page_val or 'N/A'} | "
+                    f"Sub-chunk: {s['metadata'].get('sub_chunk_index', 'N/A')} | "
+                    f"Index: {s['metadata'].get('target_index', 'N/A')}"
                 )
                 st.code(s["text"][:1200], language="text")
         st.subheader("Semantic Retrieval Check")
@@ -225,16 +265,21 @@ elif mode == "📂 Document Manager":
                 tmp.write(uploaded.getbuffer())
                 tmp_path = tmp.name
             try:
-                with st.spinner(f"Processing {doc_name}..."):
-                    num_chunks = ingest_document(
+                with st.spinner(f"Processing {doc_name} with dual-index strategy..."):
+                    result = ingest_document_dual_index(
                         pdf_path=tmp_path,
                         document_id=doc_id,
                         document_name=doc_name,
                         document_type=doc_type,
                         use_local_db=True,
                     )
-                st.success(f"Successfully ingested '{doc_name}' ({num_chunks} chunks)")
+                st.success(f"Successfully ingested '{doc_name}' - Section: {result['section_count']}, Rule: {result['rule_count']}")
                 st.rerun()
+            except Exception as e:
+                st.error(f"Ingestion failed: {e}")
+                import traceback
+                with st.expander("Error details"):
+                    st.code(traceback.format_exc())
             finally:
                 os.unlink(tmp_path)
 

@@ -1,248 +1,1094 @@
-1. Core Philosophy: Structure Assembly vs. Text Splitting
-Traditional RAG
-Docling-First Strategy
-Splits text by character count (e.g., 500 tokens).
-Assembles chunks by document logic (Clause → Sub-clause → Content).
-Tables are often broken into text rows.
-Tables are atomic objects (Markdown/JSON) preserved intact.
-Headers are just text lines.
-Headers are structural anchors used for metadata & hierarchy.
-Equations are often garbled OCR text.
-Equations are recognized (LaTeX/Image) and linked to context.
-2. Updated Pipeline Architecture
+Best Strategy for "How to Design X" Queries
+For your use case—comprehensive design queries with complete components and accurate citations—the optimal solution is a Hybrid Hierarchical Graph Retrieval approach.
+This combines:
+✅ Hierarchical Query Routing (find the right sections first)
+✅ Dual Indexing (overview + atomic components)
+✅ Graph Expansion (fetch referenced tables/equations dynamically)
+✅ Citation-Preserving Metadata (never lose source location)
 graph TD
-    A[CoP PDF] --> B[Docling Converter]
-    B --> C[DoclingDocument Object]
-    C --> D[Iterate Items Loop]
+    Q[User Query: "How to design a concrete beam?"] --> R[Query Router]
     
-    subgraph Chunking Logic
-    D --> E{Item Type?}
-    E -->|SectionHeader| F[Start New Clause Chunk]
-    E -->|Table| G[Create Atomic Table Chunk]
-    E -->|Paragraph/Formula| H[Append to Current Clause]
-    end
+    R --> S1[Section Index: Find relevant clauses]
+    R --> S2[Keyword Index: Find beam/flexure/shear terms]
     
-    F & G & H --> I[Enrich Metadata]
-    I --> J[Clause ID Regex Extraction]
-    I --> K[Regulatory Strength Detection]
-    K --> L[Vector Store]
+    S1 --> H[Hierarchical Filter: clause_id LIKE "6.%"]
+    S2 --> V[Vector Search: semantic similarity]
+    
+    H & V --> M[Merge & Deduplicate Results]
+    
+    M --> G[Graph Expansion: Fetch referenced tables/equations]
+    
+    G --> C[Citation Enrichment: Tag each piece with canonical source]
+    
+    C --> L[LLM Context Assembly]
+    
+    L --> A[Answer + Verified Citations + PDF Links]
 
-3. Implementation Guide
-Step 1: Installation & Setup
-# Install Docling and dependencies
-pip install docling pdfplumber pandas
+📦 Data Structure: The "Design Concept" Chunk
+Each chunk represents a complete design concept, not just text:
+{
+  "chunk_id": "beam_flexure_001",
+  "content_type": "design_procedure",
+  "canonical_source": {
+    "clause_id": "6.1.2",
+    "clause_title": "Flexural Design of Beams",
+    "page_number": 38,
+    "pdf_anchor": "#page=38"
+  },
+  "content": {
+    "theory": "Beams shall be designed to resist bending moments...",
+    "equations": [
+      {
+        "formula": "M_u ≤ φ * M_n",
+        "variables": {"M_u": "factored moment", "φ": "strength reduction factor"},
+        "source": "Eq. 6.1",
+        "canonical_clause": "6.1.2"
+      }
+    ],
+    "tables": [],
+    "figures": ["Fig_6.1: Beam strain distribution"],
+    "design_steps": [
+      "1. Calculate factored loads",
+      "2. Determine required M_n",
+      "3. Select reinforcement..."
+    ]
+  },
+  "dependencies": {
+    "references": ["Table_6.1", "Eq_3.5", "Clause_4.2.1"],
+    "referenced_by": ["6.1.3", "6.2.1"]
+  },
+  "metadata": {
+    "applicable_elements": ["beam", "slab", "column"],
+    "design_stage": ["preliminary", "detailed"],
+    "regulatory_strength": "mandatory"
+  }
+}
 
-# Optional: For better OCR/Formula recognition
-pip install docling[ocr]
+ Retrieval Pipeline: Step-by-Step
+Step 1: Query Understanding & Routing
 
-Step 2: Docling Parsing & Custom Chunking
-This script replaces generic splitters with a structure-aware iterator.
+def route_design_query(query: str) -> Dict:
+    """
+    Classify query and determine retrieval strategy
+    """
+    query_lower = query.lower()
+    
+    # Detect query type
+    if any(term in query_lower for term in ["how to design", "design procedure", "steps for"]):
+        return {
+            "type": "comprehensive_design",
+            "strategy": "hierarchical_graph",
+            "target_elements": extract_elements(query),  # ["beam", "concrete"]
+            "target_actions": extract_actions(query)      # ["design", "calculate"]
+        }
+    elif any(term in query_lower for term in ["what is", "define", "meaning of"]):
+        return {"type": "definition", "strategy": "atomic_lookup"}
+    elif any(term in query_lower for term in ["table", "value", "coefficient"]):
+        return {"type": "data_lookup", "strategy": "table_first"}
+    
+    return {"type": "general", "strategy": "semantic_search"}
+
+Step 2: Hierarchical + Semantic Retrieval
+
+def retrieve_design_components(query: str, route: Dict, vector_store, k=5):
+    """
+    Multi-stage retrieval for comprehensive design queries
+    """
+    results = []
+    
+    # Stage 1: Find relevant SECTIONS (broad context)
+    if route["type"] == "comprehensive_design":
+        # Search section overview index
+        section_chunks = vector_store["section_index"].similarity_search(
+            query, 
+            k=3,
+            filter={"content_type": "section_overview"}
+        )
+        relevant_clauses = [c.metadata["clause_id"] for c in section_chunks]
+        
+        # Stage 2: Find specific DESIGN RULES within those sections
+        design_chunks = vector_store["rule_index"].similarity_search(
+            query,
+            k=k,
+            filter={"clause_id": {"$in": relevant_clauses}}  # Hierarchical filter
+        )
+        results.extend(design_chunks)
+    
+    # Stage 3: Fallback - direct semantic search for missed items
+    if len(results) < k:
+        fallback = vector_store["rule_index"].similarity_search(
+            query, k=k - len(results)
+        )
+        results.extend(fallback)
+    
+    return deduplicate_by_clause(results)
+
+Step 3: Graph Expansion (Fetch Dependencies)
+
+def expand_with_dependencies(chunks: List, vector_store, max_depth=1):
+    """
+    Fetch referenced tables, equations, definitions dynamically
+    """
+    expanded = []
+    fetched_ids = set()
+    
+    for chunk in chunks:
+        # Keep original chunk with its canonical source
+        expanded.append({
+            "content": chunk.text,
+            "source": chunk.metadata["canonical_source"],
+            "role": "primary"
+        })
+        fetched_ids.add(chunk.metadata["chunk_id"])
+        
+        # Fetch referenced components (tables, equations, definitions)
+        for ref_id in chunk.metadata.get("dependencies", {}).get("references", []):
+            if ref_id in fetched_ids:
+                continue
+                
+            ref_chunk = vector_store.get_by_id(ref_id)
+            if ref_chunk:
+                expanded.append({
+                    "content": ref_chunk.text,
+                    "source": ref_chunk.metadata["canonical_source"],  # Original location!
+                    "role": "reference",
+                    "referenced_from": chunk.metadata["canonical_source"]["clause_id"]
+                })
+                fetched_ids.add(ref_id)
+    
+    return expanded
+
+Step 4: Citation-Aware Context Assembly
+
+def assemble_llm_context(retrieved_items: List[Dict], query: str) -> str:
+    """
+    Format context with clear source attribution for the LLM
+    """
+    context = f"Query: {query}\n\n"
+    context += "## Retrieved Design Information\n\n"
+    
+    # Group by source clause for organized output
+    by_clause = {}
+    for item in retrieved_items:
+        clause = item["source"]["clause_id"]
+        if clause not in by_clause:
+            by_clause[clause] = {
+                "title": item["source"]["clause_title"],
+                "page": item["source"]["page_number"],
+                "items": []
+            }
+        by_clause[clause]["items"].append(item)
+    
+    # Format each clause group
+    for clause_id, group in by_clause.items():
+        context += f"### [{clause_id}] {group['title']} (Page {group['page']})\n"
+        
+        for item in group["items"]:
+            if item["role"] == "primary":
+                context += f"{item['content']}\n\n"
+            elif item["role"] == "reference":
+                # Clearly mark referenced content with ITS original source
+                ref_clause = item["source"]["clause_id"]
+                context += f"> *Referenced from {ref_clause}:*\n"
+                context += f"> {item['content']}\n\n"
+    
+    # Add citation instructions
+    context += """
+## Citation Instructions
+- When stating a design rule, cite the clause where it appears: [Clause X.Y.Z]
+- When using a table value, cite the table's original clause, not where it was referenced
+- When quoting an equation, include its equation number and source clause
+- Include page numbers for PDF verification: (p. XX)
+"""
+    
+    return context
+
+🎯 Example: "How to design a concrete beam"
+Retrieved Components (with sources):
+
+✅ Primary Rules:
+   • [6.1.2] Flexural Design Theory (p. 38)
+   • [6.2.1] Shear Design Requirements (p. 42)
+   • [6.3.1] Deflection Limits (p. 45)
+
+✅ Equations (with variable definitions):
+   • Eq. 6.1: M_u ≤ φ*M_n [Source: 6.1.2]
+   • Eq. 6.5: V_c = 0.17*λ*√(f'c)*b_w*d [Source: 6.2.2]
+
+✅ Tables (fetched via graph expansion):
+   • Table 6.1: Strength reduction factors φ [Source: 6.1.1, p. 37]
+   • Table 6.3: Concrete shear stress values [Source: 6.2.3, p. 43]
+
+✅ Figures:
+   • Fig. 6.1: Beam strain distribution [Source: 6.1.2, p. 39]
+   • Fig. 6.4: Shear reinforcement details [Source: 6.2.4, p. 44]
+
+✅ Definitions:
+   • "Effective depth d" [Source: Clause 1.4.3, p. 12]
+   • "Factored load" [Source: Clause 2.3.1, p. 18]
+
+LLM Output Example:
+
+## Design Procedure for Concrete Beams
+
+### 1. Flexural Design [Clause 6.1.2, p. 38]
+Beams shall be designed such that:  
+> *M_u ≤ φ × M_n*  [Eq. 6.1, Clause 6.1.2]
+
+Where:  
+- *M_u* = factored bending moment  
+- *φ* = strength reduction factor (see Table 6.1 below)  
+- *M_n* = nominal moment capacity  
+
+**Strength Reduction Factors** [Table 6.1, Clause 6.1.1, p. 37]:  
+| Condition | φ value |
+|-----------|---------|
+| Tension-controlled | 0.90 |
+| Compression-controlled | 0.65 |
+
+### 2. Shear Design [Clause 6.2.1, p. 42]
+...
+
+### 3. Verify Deflection [Clause 6.3.1, p. 45]
+...
+
+> 📋 **Verification**: All clauses and tables can be verified in the original CoP PDF using the page numbers provided.
+
+🛠️ Implementation Checklist
+
+[ ] Parse document with Docling (structure-aware)
+[ ] Create "Design Concept" chunks with rich metadata
+[ ] Build two indexes: 
+    - section_index (for hierarchical routing)
+    - rule_index (for detailed retrieval)
+[ ] Extract and store cross-references as graph edges
+[ ] Implement query router to detect "comprehensive design" queries
+[ ] Implement graph expansion to fetch dependencies dynamically
+[ ] Format context with clear source attribution tags
+[ ] Add citation instructions to LLM prompt
+[ ] Test with engineering queries:
+    - "How to design a concrete beam?"
+    - "What tables do I need for shear design?"
+    - "Where is the deflection limit specified?"
+[ ] Validate citations point to canonical sources, not reference locations
+
+🧪 Testing: Citation Accuracy Validation
+
+Test Query
+Expected Primary Source
+Expected Referenced Sources
+Pass Criteria
+"How to design beam for flexure?"
+Clause 6.1.2
+Table 6.1 (6.1.1), Eq. 3.5 (3.2.1)
+Citations match canonical clauses
+"What is φ for tension-controlled?"
+Table 6.1
+—
+Cites Clause 6.1.1, not 6.1.2
+"Shear formula and concrete strength values?"
+Clause 6.2.2
+Table 6.3 (6.2.3)
+Formula cites 6.2.2; table cites 6.2.3
+"Define effective depth d"
+Clause 1.4.3
+—
+Cites glossary clause, not usage clause
+
+🚀 Why This Hybrid Approach Wins
+
+Requirement
+How This Strategy Delivers
+Complete design info
+Graph expansion fetches all dependencies (tables, equations, definitions)
+Proper source location
+Every piece retains canonical_source; references are dynamically fetched, not statically copied
+Hierarchical understanding
+Section index + clause filtering respects document structure
+Efficient retrieval
+Two-stage search (broad → specific) reduces noise
+LLM-ready context
+Formatted with clear attribution tags and citation instructions
+Verifiable output
+Page numbers + clause IDs enable PDF cross-checking
+
+💡 Pro Tips for Engineering RAG
+Never merge canonical sources: If Table 6.3 is referenced in Clause 6.1.5, keep them as separate chunks. Fetch both at retrieval time.
+Use metadata filtering aggressively: Filter by content_type: "table" when the query asks for values; filter by regulatory_strength: "mandatory" for compliance checks.
+Cache graph traversals: Pre-compute "design concept graphs" (e.g., "beam design" = clauses 6.1.2 + 6.2.1 + 6.3.1 + referenced tables) to speed up common queries.
+Add a "citation validator" post-processor: After the LLM generates an answer, programmatically verify that each cited clause/table actually contains the claimed information.
+Expose PDF anchors: Store pdf_anchor: "#page=38&zoom=100,120,450" so users can click a citation and jump directly to the relevant location in the original PDF.
+
+🎯 Bottom Line
+For "how to design X" queries in engineering manuals:
+
+✅ Use Hierarchical Graph Retrieval
+✅ Keep canonical sources separate from references
+✅ Fetch dependencies dynamically at query time
+✅ Format context with explicit source attribution
+✅ Test citation accuracy, not just answer quality
+
+This ensures your system returns complete, actionable design guidance where every formula, table, and rule is traceable to its authoritative source—critical for engineering compliance and professional liability.
+Would you like me to provide a complete code template for the DesignConceptChunker class that implements this strategy with Docling? 🛠️
+
+🔍 How Hybrid Hierarchical Graph Retrieval Works
+Let me walk you through the complete end-to-end flow with a concrete example. This will show exactly how information moves from PDF to answer while preserving citations.
+
+📊 System Overview Diagram
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        PHASE 1: INDEXING (Offline)                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  PDF → Docling → Structured Items → Design Chunks → 2 Indexes + Graph      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       PHASE 2: RETRIEVAL (Query Time)                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Query → Router → Section Search → Rule Search → Graph Expand → Assemble   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PHASE 3: GENERATION (LLM)                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Context + Citation Instructions → LLM → Answer with Verified Sources      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🏗️ PHASE 1: Indexing (Building the Knowledge Base)
+Step 1.1: Parse PDF with Docling
+Docling reads the PDF and identifies structured elements, not just text.
+
+Input: CoP_SUC2013e.pdf
+
+Docling Output:
+┌──────────────────────────────────────────────────────────────────┐
+│ Item 1: SECTION_HEADER → "6.1.2 Flexural Design of Beams"       │
+│ Item 2: PARAGRAPH → "Beams shall be designed to resist..."      │
+│ Item 3: FORMULA → "M_u ≤ φ * M_n" (Eq. 6.1)                     │
+│ Item 4: TABLE → "Table 6.1: Strength Reduction Factors"         │
+│ Item 5: FIGURE → "Fig. 6.1: Beam strain distribution"           │
+│ Item 6: PARAGRAPH → "See Clause 6.2.1 for shear requirements"   │
+└──────────────────────────────────────────────────────────────────┘
+
+Step 1.2: Assemble Design Concept Chunks
+Instead of splitting by token count, we group by engineering logic:
+
+# Chunk Assembly Logic
+if item.type == "SECTION_HEADER":
+    start_new_chunk()
+    chunk.metadata["clause_id"] = extract_id(item.text)
+    
+elif item.type in ["PARAGRAPH", "FORMULA"]:
+    add_to_current_chunk(item)
+    
+elif item.type == "TABLE":
+    # Keep table atomic but link to current clause
+    create_separate_table_chunk()
+    link_to_clause(current_clause_id)
+
+Result: Two Types of Chunks
+Chunk Type
+Content
+Example
+Rule Chunk
+Theory + Equations + Design Steps
+Clause 6.1.2: Flexural Design
+Reference Chunk
+Tables + Definitions + Figures
+Table 6.1, Clause 1.4.3
+Step 1.3: Extract Cross-References (Build the Graph)
+Scan every chunk for reference patterns and store as graph edges:
+
+# Reference Extraction
+text = "See Clause 6.2.1 for shear requirements and Table 6.1 for φ values"
+
+references = {
+    "clause_refs": ["6.2.1"],
+    "table_refs": ["Table_6.1"],
+    "equation_refs": ["Eq_6.1"],
+    "figure_refs": ["Fig_6.1"]
+}
+
+# Store in metadata
+chunk.metadata["dependencies"] = {
+    "references": ["6.2.1", "Table_6.1"],
+    "referenced_by": []  # Will be populated by reverse lookup
+}
+
+Graph Structure Created:
+                    ┌─────────────────┐
+                    │  Clause 6.1.2   │
+                    │  (Flexure)      │
+                    └────────┬────────┘
+                             │ references
+              ┌──────────────┼──────────────┐
+              ↓              ↓              ↓
+    ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+    │  Clause 6.2.1│ │  Table 6.1   │ │  Eq. 3.5     │
+    │  (Shear)     │ │  (φ values)  │ │  (Materials) │
+    └──────────────┘ └──────────────┘ └──────────────┘
+
+Step 1.4: Store in Two Indexes
+
+Index
+Purpose
+Content
+Section Index
+Broad queries, hierarchical routing
+One chunk per major section (e.g., "Section 6: Shear & Flexure")
+Rule Index
+Specific design rules, tables, equations
+Individual clauses, tables, definitions
+
+# Section Index Entry
+{
+    "chunk_id": "section_6_overview",
+    "clause_id": "6",
+    "content": "Section 6 covers ultimate limit state design including flexure, shear, and deflection...",
+    "child_clauses": ["6.1.1", "6.1.2", "6.2.1", "6.3.1"]
+}
+
+# Rule Index Entry
+{
+    "chunk_id": "rule_6.1.2",
+    "clause_id": "6.1.2",
+    "content": "Beams shall be designed such that M_u ≤ φ*M_n...",
+    "dependencies": {"references": ["Table_6.1", "6.2.1"]}
+}
+
+🔍 PHASE 2: Retrieval (Query Time)
+Step 2.1: Query Routing
+When user asks "How to design a concrete beam?", the router classifies the query:
+
+query = "How to design a concrete beam?"
+
+# Router detects:
+route = {
+    "type": "comprehensive_design",      # Not a simple lookup
+    "elements": ["beam", "concrete"],
+    "actions": ["design"],
+    "strategy": "hierarchical_graph"     # Use full pipeline
+}
+
+Step 2.2: Hierarchical Search (Two-Stage)
+Stage 1: Find Relevant Sections
+
+# Search Section Index first (broad context)
+section_results = section_index.search(
+    query="concrete beam design",
+    filter={"content_type": "section_overview"}
+)
+
+# Returns: Section 6 (Ultimate Limit State)
+relevant_clauses = ["6.1", "6.2", "6.3"]
+
+Stage 2: Find Specific Rules Within Sections
+
+# Search Rule Index with hierarchical filter
+rule_results = rule_index.search(
+    query="beam flexure shear design",
+    filter={"clause_id": {"starts_with": ["6.1", "6.2", "6.3"]}}
+)
+
+# Returns:
+# - Clause 6.1.2 (Flexural Design)
+# - Clause 6.2.1 (Shear Requirements)
+# - Clause 6.3.1 (Deflection Limits)
+
+Step 2.3: Graph Expansion (Fetch Dependencies)
+This is the critical step that ensures completeness without losing citations.
+
+# For each retrieved rule chunk, fetch its references
+for chunk in rule_results:
+    for ref_id in chunk.metadata["dependencies"]["references"]:
+        # Fetch the ORIGINAL reference chunk
+        ref_chunk = rule_index.get_by_id(ref_id)
+        
+        # Add to context WITH ITS OWN METADATA
+        expanded_context.append({
+            "content": ref_chunk.text,
+            "source": ref_chunk.metadata["canonical_source"],  # ← Original location!
+            "role": "reference",
+            "referenced_from": chunk.metadata["clause_id"]
+        })
+
+Visual Flow:
+
+Query: "How to design a concrete beam?"
+       ↓
+Retrieved: Clause 6.1.2 (Flexure)
+       ↓
+Graph Expansion sees: references ["Table_6.1", "6.2.1"]
+       ↓
+Fetches: Table 6.1 (from Clause 6.1.1) ← Keeps original source!
+         Clause 6.2.1 (from Section 6.2) ← Keeps original source!
+       ↓
+Final Context: 3 chunks, each with correct canonical_source
+
+Step 2.4: Citation-Aware Assembly
+Format the retrieved content so the LLM knows exactly what to cite:
+
+context = """
+## Retrieved Design Information
+
+### [6.1.2] Flexural Design of Beams (Page 38) [ROLE: PRIMARY]
+Beams shall be designed such that M_u ≤ φ * M_n [Eq. 6.1]
+
+### [6.1.1] Strength Reduction Factors (Page 37) [ROLE: REFERENCE]
+> Referenced from Clause 6.1.2
+Table 6.1:
+| Condition | φ value |
+|-----------|---------|
+| Tension-controlled | 0.90 |
+
+### [6.2.1] Shear Design Requirements (Page 42) [ROLE: REFERENCE]
+> Referenced from Clause 6.1.2
+Shear reinforcement shall be provided when V_u > φ*V_c...
+"""
+
+🤖 PHASE 3: Generation (LLM Output)
+Step 3.1: Prompt with Citation Instructions
+
+prompt = f"""
+{context}
+
+## Citation Instructions
+1. When stating a design rule, cite the clause where it appears: [Clause X.Y.Z]
+2. When using a table value, cite the table's ORIGINAL clause, not where it was referenced
+3. Include page numbers for PDF verification: (p. XX)
+4. If information came from a [ROLE: REFERENCE] block, cite that block's source clause
+
+## Example Correct Citation
+- ✅ "The strength reduction factor φ is 0.90 for tension-controlled sections [Table 6.1, Clause 6.1.1, p. 37]"
+- ❌ "The strength reduction factor φ is 0.90 [Clause 6.1.2]" (Wrong! Table is in 6.1.1)
+
+## Generate Answer
+"""
+
+Step 3.2: LLM Generates Answer with Verified Citations
+
+## Design Procedure for Concrete Beams
+
+### 1. Flexural Design [Clause 6.1.2, p. 38]
+
+The beam shall be designed such that:
+
+> *M_u ≤ φ × M_n*  [Eq. 6.1, Clause 6.1.2]
+
+Where:
+- *M_u* = Factored bending moment
+- *φ* = Strength reduction factor (see below)
+- *M_n* = Nominal moment capacity
+
+**Strength Reduction Factors** [Table 6.1, Clause 6.1.1, p. 37]:
+
+| Condition | φ value |
+|-----------|---------|
+| Tension-controlled | 0.90 |
+| Compression-controlled | 0.65 |
+
+### 2. Shear Design [Clause 6.2.1, p. 42]
+
+Shear reinforcement shall be provided when V_u > φ*V_c...
+
+### 3. Deflection Check [Clause 6.3.1, p. 45]
+
+...
+
+---
+📋 **All citations can be verified in the original CoP PDF using the clause IDs and page numbers provided.**
+
+🔐 How Citations Are Preserved (The Key Mechanism)
+This is the most important part. Here's exactly how source integrity is maintained:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CITATION PRESERVATION FLOW                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. INDEXING TIME:                                                          │
+│     ┌─────────────────┐    ┌─────────────────┐                              │
+│     │ Table 6.1 Chunk │    │ Clause 6.1.2    │                              │
+│     │ canonical_source│    │ canonical_source│                              │
+│     │ = "6.1.1"       │    │ = "6.1.2"       │                              │
+│     │ page = 37       │    │ page = 38       │                              │
+│     └────────┬────────┘    └────────┬────────┘                              │
+│              │                      │                                      │
+│              │ references           │                                      │
+│              └──────────────────────┘                                      │
+│                                                                             │
+│  2. RETRIEVAL TIME:                                                         │
+│     Query finds Clause 6.1.2 → Graph expansion fetches Table 6.1            │
+│     Each chunk RETAINS its own canonical_source metadata                    │
+│                                                                             │
+│  3. CONTEXT ASSEMBLY:                                                       │
+│     Both chunks sent to LLM with explicit source tags:                      │
+│     - Clause 6.1.2 → [SOURCE: 6.1.2, p. 38]                                 │
+│     - Table 6.1    → [SOURCE: 6.1.1, p. 37] ← Original location preserved!  │
+│                                                                             │
+│  4. LLM GENERATION:                                                         │
+│     Prompt instructions tell LLM to cite each piece by ITS source           │
+│     Result: Table values cite 6.1.1, not 6.1.2                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🧪 Concrete Example Walkthrough
+Let's trace a real query end-to-end:
+User Query
+
+"How to design a concrete beam for flexure?"
+
+Step-by-Step Execution
+
+Step
+Action
+Result
+1
+Query Router classifies
+type: comprehensive_design
+2
+Section Index search
+Returns Section 6 overview
+3
+Rule Index search (filtered by Section 6)
+Returns Clause 6.1.2
+4
+Graph Expansion reads references
+Finds ["Table_6.1", "Eq_6.1", "Clause_1.4.3"]
+5
+Fetch referenced chunks
+Table 6.1 (6.1.1), Eq 6.1 (6.1.2), Definitions (1.4.3)
+6
+Assemble context with source tags
+4 chunks, each with canonical_source
+7
+Send to LLM with citation instructions
+LLM generates answer
+8
+Post-process citations
+Verify each citation matches canonical_source
+Final Output Structure
+
+Answer Text                          │ Citation Metadata
+─────────────────────────────────────┼────────────────────────────
+"φ = 0.90 for tension-controlled"    │ → {clause: "6.1.1", page: 37}
+"M_u ≤ φ * M_n"                      │ → {clause: "6.1.2", page: 38}
+"d = effective depth"                │ → {clause: "1.4.3", page: 12}
+
+🛡️ Why This Prevents Citation Errors
+
+Problem
+Standard RAG
+This System
+Table referenced in Clause A but located in Clause B
+Cites Clause A (wrong)
+Cites Clause B (correct)
+Equation used across multiple clauses
+Cites first retrieved location
+Cites original equation source
+Definition used in design rule
+Cites design rule clause
+Cites glossary clause
+Multiple tables needed
+May miss some tables
+Graph expansion fetches all
+User wants to verify in PDF
+No page numbers
+Page numbers in every citation
+
+📋 Summary: The 5 Key Mechanisms
+
+┌─────────────────────────────────────────────────────────────────┐
+│  1. STRUCTURAL PARSING (Docling)                                │
+│     → Identifies clauses, tables, equations as distinct objects │
+├─────────────────────────────────────────────────────────────────┤
+│  2. LOGICAL CHUNKING (Design Concepts)                          │
+│     → Groups related content by engineering logic, not tokens   │
+├─────────────────────────────────────────────────────────────────┤
+│  3. GRAPH LINKING (Cross-References)                            │
+│     → Stores references as navigable edges, not just text       │
+├─────────────────────────────────────────────────────────────────┤
+│  4. DYNAMIC EXPANSION (Retrieval Time)                          │
+│     → Fetches dependencies while preserving original metadata   │
+├─────────────────────────────────────────────────────────────────┤
+│  5. CITATION INSTRUCTIONS (LLM Prompt)                          │
+│     → Explicitly tells LLM how to cite each piece of content    │
+└─────────────────────────────────────────────────────────────────┘
+
+🎯 Bottom Line
+This system works because:
+Chunks are assembled by engineering logic, not arbitrary text boundaries
+References are graph edges, not just text strings
+Dependencies are fetched dynamically, keeping original source metadata intact
+LLM is explicitly instructed on citation rules
+Every piece of content carries its canonical_source from indexing to output
+The result: Complete design guidance with verifiable, accurate citations — essential for engineering compliance and professional liability.
+Would you like me to provide the actual Python implementation code for any specific component (e.g., the Graph Expander or Citation Validator)? 🛠️
+
+yes, give me for reference for the use in coding agent
+
+Here is a complete, modular Python implementation reference designed for a coding agent. It implements the Hybrid Hierarchical Graph Retrieval system with strict citation preservation.
+
+📂 Project Structure
+
+engineering_rag/
+├── models.py              # Pydantic data models (Chunks, Citations, Metadata)
+├── parser.py              # Docling integration & Logical Chunk Assembly
+├── indexer.py             # Dual Indexing (Section + Rule) & Graph Linking
+├── retriever.py           # Query Router, Hierarchical Search, Graph Expansion
+├── generator.py           # Context Assembly & Citation-Aware Prompting
+└── main.py                # Execution entry point
+
+1. models.py (Data Structures)
+Defines the strict schema for chunks and citations to ensure metadata integrity.
+
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict, Any
+from enum import Enum
+
+class ContentType(str, Enum):
+    SECTION_OVERVIEW = "section_overview"
+    DESIGN_RULE = "design_rule"
+    TABLE = "table"
+    EQUATION = "equation"
+    DEFINITION = "definition"
+
+class CanonicalSource(BaseModel):
+    """Immutable source information for citation integrity"""
+    clause_id: str
+    clause_title: str
+    page_number: int
+    document_id: str = "CoP_SUC2013e"
+
+class ChunkMetadata(BaseModel):
+    chunk_id: str
+    content_type: ContentType
+    canonical_source: CanonicalSource
+    
+    # Graph Links
+    references: List[str] = Field(default_factory=list)  # IDs of referenced chunks
+    referenced_by: List[str] = Field(default_factory=list)
+    
+    # Engineering Specifics
+    regulatory_strength: Optional[str] = None  # "mandatory", "advisory"
+    table_caption: Optional[str] = None
+    equation_id: Optional[str] = None
+
+class DesignChunk(BaseModel):
+    """The fundamental unit of knowledge"""
+    id: str
+    text: str
+    meta ChunkMetadata
+    embedding: Optional[List[float]] = None
+
+class RetrievalResult(BaseModel):
+    chunk: DesignChunk
+    role: str  # "primary" or "reference"
+    relevance_score: float
+
+2. parser.py (Docling & Logical Assembly)
+Handles structure-aware parsing and groups items into logical design concepts.
+
 from docling.document_converter import DocumentConverter
-from docling.datamodel.base_models import InputFormat
-from typing import List, Dict, Any
+from models import DesignChunk, ChunkMetadata, CanonicalSource, ContentType
 import re
+import uuid
 
-class CoPChunker:
+class EngineeringParser:
     def __init__(self):
         self.converter = DocumentConverter()
-        # Regex to capture Clause IDs like "3.1.2" or "6.1.5.7"
+        # Regex for Clause IDs (e.g., "6.1.2", "Table 6.3")
         self.clause_pattern = re.compile(r'^(\d+(?:\.\d+)*)')
-        
-    def parse_and_chunk(self, pdf_path: str) -> List[Dict[str, Any]]:
-        # 1. Convert PDF to DoclingDocument
+        self.table_pattern = re.compile(r'Table\s+(\d+(?:\.\d+)*)', re.I)
+        self.clause_ref_pattern = re.compile(r'Clause\s+(\d+(?:\.\d+)*)', re.I)
+
+    def parse_pdf(self, pdf_path: str) -> List[DesignChunk]:
         result = self.converter.convert(pdf_path)
         doc = result.document
-        
+        return self.assemble_logical_chunks(doc)
+
+    def assemble_logical_chunks(self, doc) -> List[DesignChunk]:
         chunks = []
-        current_chunk_content = []
-        current_metadata = {}
+        current_content = []
+        current_meta = None
         
-        # 2. Iterate through structured items
-        # Docling yields (item, level) where level is heading depth
         for item, level in doc.iterate_items():
-            item_type = item.label.name  # e.g., SECTION_HEADER, TABLE, PARAGRAPH
+            item_type = item.label.name
             
-            # --- HANDLE SECTION HEADERS (Clause Boundaries) ---
+            # 1. Handle Section Headers (Start New Logical Concept)
             if item_type == "SECTION_HEADER":
-                # Save previous chunk before starting new one
-                if current_chunk_content:
-                    chunks.append(self._create_chunk(current_chunk_content, current_metadata))
-                    current_chunk_content = []
+                if current_content:
+                    chunks.append(self._create_chunk(current_content, current_meta))
+                    current_content = []
                 
-                # Extract Clause ID from Header Text (e.g., "6.1.5 Flat Slabs" -> "6.1.5")
-                header_text = item.text
-                clause_id_match = self.clause_pattern.match(header_text)
-                clause_id = clause_id_match.group(1) if clause_id_match else "unknown"
-                
-                # Update Metadata for new context
-                current_metadata = {
+                clause_id = self._extract_clause_id(item.text)
+                current_meta = {
                     "clause_id": clause_id,
-                    "clause_title": header_text,
-                    "hierarchy_level": level,
-                    "content_type": "clause_header",
-                    "page_no": item.page_no
+                    "title": item.text,
+                    "page": item.page_no,
+                    "type": ContentType.DESIGN_RULE
                 }
-                current_chunk_content.append(f"# {header_text}")
-                
-            # --- HANDLE TABLES (Atomic Units) ---
-            elif item_type == "TABLE":
-                # Flush any pending text first
-                if current_chunk_content:
-                    chunks.append(self._create_chunk(current_chunk_content, current_metadata))
-                    current_chunk_content = []
-                
-                # Export table as Markdown (LLM-friendly) or Dict (Data-friendly)
-                table_md = item.export_to_markdown()
-                
-                chunks.append({
-                    "text": table_md,
-                    "metadata": {
-                        **current_metadata,
-                        "content_type": "table",
-                        "table_caption": item.caption.text if hasattr(item, 'caption') and item.caption else "Untitled Table",
-                        "page_no": item.page_no
-                    }
-                })
-                
-            # --- HANDLE PARAGRAPHS & FORMULAS ---
-            elif item_type in ["PARAGRAPH", "FORMULA", "LIST_ITEM"]:
-                # Append to current clause context
-                if item.text.strip():
-                    current_chunk_content.append(item.text)
-        
-        # Flush final chunk
-        if current_chunk_content:
-            chunks.append(self._create_chunk(current_chunk_content, current_metadata))
+                current_content.append(f"# {item.text}")
             
+            # 2. Handle Tables (Atomic Units)
+            elif item_type == "TABLE":
+                if current_content:
+                    chunks.append(self._create_chunk(current_content, current_meta))
+                    current_content = []
+                
+                table_id = self._extract_table_id(item.text)
+                current_content.append(item.export_to_markdown())
+                meta = {
+                    "clause_id": current_meta["clause_id"] if current_meta else "unknown",
+                    "title": item.caption.text if hasattr(item, 'caption') and item.caption else "Untitled Table",
+                    "page": item.page_no,
+                    "type": ContentType.TABLE,
+                    "table_id": table_id
+                }
+                chunks.append(self._create_chunk(current_content, meta))
+                current_content = []
+            
+            # 3. Handle Text/Formulas (Append to Current Concept)
+            elif item_type in ["PARAGRAPH", "FORMULA", "LIST_ITEM"]:
+                if item.text.strip():
+                    current_content.append(item.text)
+        
+        if current_content:
+            chunks.append(self._create_chunk(current_content, current_meta))
+        
         return chunks
 
-    def _create_chunk(self, content_lines: List[str], metadata: Dict) -> Dict:
+    def _create_chunk(self, content_lines: List[str], meta: Dict) -> DesignChunk:
         text = "\n".join(content_lines)
-        # Add Engineering Specific Metadata
-        metadata["regulatory_strength"] = self._detect_regulatory_strength(text)
-        metadata["char_count"] = len(text)
-        return {"text": text, "metadata": metadata}
+        chunk_id = f"{meta['clause_id']}_{uuid.uuid4().hex[:8]}"
+        
+        # Extract Cross-References for Graph
+        references = []
+        refs = self.clause_ref_pattern.findall(text)
+        refs += self.table_pattern.findall(text)
+        references = [f"clause_{r}" if not r.startswith("Table") else f"table_{r}" for r in refs]
+        
+        metadata = ChunkMetadata(
+            chunk_id=chunk_id,
+            content_type=meta['type'],
+            canonical_source=CanonicalSource(
+                clause_id=meta['clause_id'],
+                clause_title=meta['title'],
+                page_number=meta['page']
+            ),
+            references=references,
+            table_caption=meta.get('table_id')
+        )
+        
+        return DesignChunk(id=chunk_id, text=text, metadata=metadata)
 
-    def _detect_regulatory_strength(self, text: str) -> str:
-        text_lower = text.lower()
-        if "shall" in text_lower or "must" in text_lower:
-            return "mandatory"
-        elif "should" in text_lower:
-            return "advisory"
-        else:
-            return "informative"
+    def _extract_clause_id(self, text: str) -> str:
+        match = self.clause_pattern.match(text)
+        return match.group(1) if match else "unknown"
 
-# Usage
-chunker = CoPChunker()
-chunks = chunker.parse_and_chunk("CoP_SUC2013e.pdf")
+    def _extract_table_id(self, text: str) -> str:
+        match = self.table_pattern.search(text)
+        return match.group(1) if match else "unknown"
 
-4. Engineering-Specific Enhancements
-A. Clause ID Normalization
-Docling sees "6.1.5" as text. We must normalize it for filtering.
-Action: The regex ^\d+(?:\.\d+)* in the code above extracts the ID.
-Benefit: Allows queries like filter: clause_id STARTS WITH "6.1.5" to find all flat slab rules.
-B. Table Integrity
-CoP tables (e.g., Concrete Cover Requirements) are critical.
-Action: Docling exports tables as Markdown.
-Improvement: For complex tables, also store a JSON representation in metadata for precise data lookup.
-python
+3. indexer.py (Dual Indexing & Graph)
+Manages the two indexes (Section vs. Rule) and stores graph edges.
 
-# Inside TABLE handling block
-table_json = item.export_to_dict() # Structured data
-metadata["table_struct"] = table_json # Store in DB if supported
+from models import DesignChunk, ContentType
+from typing import List, Dict
+# Use your preferred Vector Store here (e.g., Qdrant, Chroma, LangChain)
+# For reference, we define an interface
+class VectorStoreInterface:
+    def add_chunks(self, chunks: List[DesignChunk]): pass
+    def search(self, query: str, filter: Dict, k: int) -> List[DesignChunk]: pass
+    def get_by_id(self, chunk_id: str) -> DesignChunk: pass
 
-C. Formula Handling
-Docling attempts to recognize formulas as LaTeX.
-Action: If item_type == "FORMULA", preserve the LaTeX string.
-Benefit: LLMs can render or calculate based on LaTeX better than OCR text.
-python
-# If Docling identifies it as a formula
-metadata["formula_latex"] = item.text 
+class EngineeringIndexer:
+    def __init__(self, section_store: VectorStoreInterface, rule_store: VectorStoreInterface):
+        self.section_store = section_store
+        self.rule_store = rule_store
+        self.graph_index = {}  # chunk_id -> List[referenced_chunk_ids]
 
-D. Cross-Reference Linking
-CoP frequently says "See Clause 5.2".
-Action: Post-process chunks to extract these references
+    def index_chunks(self, chunks: List[DesignChunk]):
+        section_chunks = []
+        rule_chunks = []
+        
+        for chunk in chunks:
+            # 1. Build Graph Edges
+            self.graph_index[chunk.id] = chunk.metadata.references
+            
+            # 2. Route to Appropriate Index
+            if chunk.metadata.content_type == ContentType.SECTION_OVERVIEW:
+                section_chunks.append(chunk)
+            else:
+                rule_chunks.append(chunk)
+                
+                # 3. Create Section Overview Chunks dynamically if needed
+                # (Logic to aggregate rules into section summaries omitted for brevity)
+        
+        # 3. Embed and Store
+        # self.section_store.add_chunks(section_chunks) # Implement embedding logic
+        self.rule_store.add_chunks(rule_chunks)
 
-refs = re.findall(r'Clause\s+(\d+(?:\.\d+)+)', text)
-metadata["cross_references"] = refs
-Benefit: Enables graph-based retrieval (jump from Clause 6.1 to referenced Clause 5.2).
+    def get_references(self, chunk_id: str) -> List[str]:
+        return self.graph_index.get(chunk_id, [])
 
-5. Metadata Schema for Vector Store
-Ensure your vector database (e.g., Qdrant, Pinecone) supports these fields:
+4. retriever.py (Hierarchical Graph Retrieval)
+The core logic that preserves citations during expansion.
 
-Field Name
-Type
-Source
-Usage
-clause_id
-Keyword
-Regex on Header
-Filtering (clause_id: "6.1.5")
-hierarchy_level
-Integer
-Docling level
-Sorting/Granularity
-content_type
-Keyword
-Docling label
-Routing (Table vs. Text)
-regulatory_strength
-Keyword
-NLP Detection
-Compliance Checks
-page_no
-Integer
-Docling page_no
-Citation
-cross_references
-List
-Regex Extraction
-Graph Traversal
-text
-Text
-Docling item.text
-Embedding
+from models import DesignChunk, RetrievalResult
+from typing import List, Dict
+from indexer import EngineeringIndexer
 
-6. Validation & Quality Control
-Before deploying, run these Docling-Specific Checks:
-Header Continuity:
-Test: Search for "6.1.5".
-Pass: All text under 6.1.5 is in chunks with clause_id: "6.1.5".
-Fail: Text bleeds into 6.1.6 without a header break.
-Table Row Integrity:
-Test: Retrieve Table 4.2.
-Pass: Markdown table renders correctly with aligned columns.
-Fail: Rows are split across different chunks.
-Formula Readability:
-Test: Search for shear stress formula.
-Pass: Variables (e.g., v_c) are readable, not garbled symbols.
-Fail: Formula is an image with no text alternative.
-Page Accuracy:
-Test: Click a retrieval result.
-Pass: Opens PDF to the exact page listed in page_no.
-7. Configuration Summary
+class EngineeringRetriever:
+    def __init__(self, indexer: EngineeringIndexer):
+        self.indexer = indexer
 
-# docling_cop_config.yaml
-parser:
-  engine: docling
-  ocr: true  # Enable for scanned equations
-  artifacts: true # Load model artifacts for better layout recognition
+    def retrieve(self, query: str, k: int = 5) -> List[RetrievalResult]:
+        # 1. Query Routing (Simplified)
+        # In production, use an LLM to classify query type
+        is_design_query = any(term in query.lower() for term in ["design", "calculate", "how to"])
+        
+        # 2. Hierarchical Search
+        # Step A: Find Relevant Sections (Filter Rule Index by Clause Prefix)
+        # For this example, we search Rule Index directly with metadata filtering
+        primary_chunks = self.indexer.rule_store.search(
+            query=query, 
+            filter={},  # Add clause filters here if sections identified
+            k=k
+        )
+        
+        # 3. Graph Expansion (CRITICAL FOR CITATIONS)
+        expanded_results = []
+        seen_ids = set()
+        
+        for chunk in primary_chunks:
+            # Add Primary Result
+            expanded_results.append(RetrievalResult(
+                chunk=chunk,
+                role="primary",
+                relevance_score=1.0
+            ))
+            seen_ids.add(chunk.id)
+            
+            # Fetch References Dynamically
+            if is_design_query:
+                ref_ids = self.indexer.get_references(chunk.id)
+                for ref_id in ref_ids:
+                    if ref_id not in seen_ids:
+                        ref_chunk = self.indexer.rule_store.get_by_id(ref_id)
+                        if ref_chunk:
+                            # CRITICAL: Keep ref_chunk's original metadata (canonical_source)
+                            expanded_results.append(RetrievalResult(
+                                chunk=ref_chunk,
+                                role="reference",
+                                relevance_score=0.8
+                            ))
+                            seen_ids.add(ref_id)
+        
+        return expanded_results
 
-chunking:
-  strategy: structure_assembly
-  boundaries:
-    - SECTION_HEADER  # Primary break
-    - TABLE           # Atomic break
-  merge_paragraphs: true # Combine adjacent paragraphs within same clause
-  max_chunk_chars: 1500 # Safety limit, though structure is primary
+5. generator.py (Citation-Aware Context Assembly)
+Formats the context for the LLM with explicit source tags.
 
-metadata:
-  extract_clause_id: true
-  extract_regulatory_strength: true
-  extract_cross_refs: true
-  store_page_number: true
+from models import RetrievalResult
+from typing import List
 
-retrieval:
-  hybrid_search: true # Keyword (for clause IDs) + Vector (for semantics)
-  filter_enabled: true
-  reranking: true
+class ContextAssembler:
+    def assemble(self, results: List[RetrievalResult], query: str) -> str:
+        context = f"User Query: {query}\n\n"
+        context += "## Retrieved Engineering Knowledge\n\n"
+        
+        # Group by Canonical Source for organized output
+        by_source = {}
+        for result in results:
+            source = result.chunk.metadata.canonical_source
+            key = f"{source.clause_id}"
+            
+            if key not in by_source:
+                by_source[key] = {
+                    "title": source.clause_title,
+                    "page": source.page_number,
+                    "items": []
+                }
+            
+            by_source[key]["items"].append(result)
+        
+        # Format Context
+        for clause_id, group in by_source.items():
+            context += f"### [{clause_id}] {group['title']} (Page {group['page']})\n"
+            
+            for item in group["items"]:
+                role_tag = "[PRIMARY]" if item.role == "primary" else "[REFERENCED]"
+                context += f"{role_tag}:\n{item.chunk.text}\n\n"
+        
+        # Add Citation Instructions
+        context += self._get_citation_instructions()
+        return context
+
+    def _get_citation_instructions(self) -> str:
+        return """
+## Citation Rules (STRICT)
+1. **Primary Source:** If information comes from a [PRIMARY] block, cite: [Clause X.Y.Z, p. XX]
+2. **Referenced Source:** If information comes from a [REFERENCED] block, cite the **Source Clause** listed in the header, NOT the clause that referenced it.
+   - Example: If Table 6.1 is in Clause 6.1.1 but referenced by 6.1.2, cite [Table 6.1, Clause 6.1.1, p. 37].
+3. **Equations:** Include Equation ID if available.
+4. **Verification:** All claims must be traceable to the provided Clause IDs and Page Numbers.
+"""
+
+6. main.py (Execution Flow)
+
+from parser import EngineeringParser
+from indexer import EngineeringIndexer
+from retriever import EngineeringRetriever
+from generator import ContextAssembler
+# from vector_store import MyVectorStore # Implement your own
+
+def run_engineering_rag(query: str):
+    # 1. Parse
+    parser = EngineeringParser()
+    # chunks = parser.parse_pdf("CoP_SUC2013e.pdf") # Uncomment for real run
+    chunks = [] # Mock for reference
+    
+    # 2. Index
+    # section_store = MyVectorStore()
+    # rule_store = MyVectorStore()
+    # indexer = EngineeringIndexer(section_store, rule_store)
+    # indexer.index_chunks(chunks)
+    indexer = None # Mock for reference
+    
+    # 3. Retrieve
+    retriever = EngineeringRetriever(indexer)
+    results = retriever.retrieve(query, k=3)
+    
+    # 4. Assemble Context
+    assembler = ContextAssembler()
+    context = assembler.assemble(results, query)
+    
+    # 5. Send to LLM
+    # response = llm.generate(context)
+    print(context)
+
+if __name__ == "__main__":
+    run_engineering_rag("How to design a concrete beam for flexure?")
+
+🛡️ Critical Implementation Notes for the Coding Agent
+Metadata Immutability:
+Rule: In retriever.py, when fetching referenced chunks, NEVER modify result.chunk.metadata.canonical_source.
+Why: This ensures that if Table 6.1 (located in 6.1.1) is fetched because Clause 6.1.2 referenced it, the citation remains 6.1.1.
+Graph Edge Storage:
+Store references as Chunk IDs, not just text strings.
+Why: Text matching ("Clause 6.1.2") is ambiguous. ID matching (chunk_6.1.2_v1) is precise.
+Vector Store Filtering:
+Ensure your vector store supports metadata filtering (e.g., filter={"clause_id": {"$startswith": "6.1"}}).
+Why: This enables the hierarchical search step (finding all rules within Section 6).
+Prompt Engineering:
+The _get_citation_instructions in generator.py is as important as the retrieval logic.
+Why: LLMs tend to cite the context they are reading now (the primary chunk) rather than the source of the data. Explicit instructions counteract this bias.
+Docling Version:
+Ensure docling is updated (pip install -U docling). The iterate_items() API may change between versions.
+This codebase provides the structural backbone for a citation-accurate engineering RAG system. The agent should implement the VectorStoreInterface using a tool like Qdrant or Chroma and fill in the embedding logic.

@@ -42,5 +42,9 @@ google-generativeai>=0.8.0
 # Visualization
 matplotlib>=3.8.0
 
+# API Server
+fastapi>=0.115.0
+uvicorn>=0.30.0
+
 # Re-ranking (optional, for enhanced search)
 # Install separately: pip install sentence-transformers (already included)
