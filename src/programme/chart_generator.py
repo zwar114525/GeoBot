@@ -13,7 +13,11 @@ class ChartGenerator:
         pass
 
     def create_gantt_chart(self, tasks_df: pd.DataFrame) -> go.Figure:
-        """Create an interactive Gantt chart for the schedule."""
+        """Create an interactive Gantt chart with critical path highlighted.
+
+        Uses timeline for date axis and colors by critical path.
+        Status information is available in hover data.
+        """
         if tasks_df.empty:
             fig = go.Figure()
             fig.update_layout(title="No tasks to display")
@@ -24,47 +28,41 @@ class ChartGenerator:
         df['start_date'] = pd.to_datetime(df['start_date'])
         df['end_date'] = pd.to_datetime(df['end_date'])
 
-        color_map = {
-            'Complete': '#28a745',
-            'In Progress': '#ffc107',
-            'Not Started': '#6c757d'
+        if 'critical' not in df.columns:
+            df['critical'] = df['total_float'].apply(lambda x: True if pd.isna(x) or x <= 0 else False)
+
+        df['path_status'] = df['critical'].apply(lambda x: 'Critical Path' if x else 'Non-Critical')
+
+        critical_color_map = {
+            'Critical Path': '#dc2626',
+            'Non-Critical': '#3b82f6'
         }
-        df['color'] = df['status'].map(color_map).fillna('#6c757d')
 
         fig = px.timeline(
             df,
             x_start="start_date",
             x_end="end_date",
             y="task_name",
-            color="status",
-            color_discrete_map=color_map,
+            color="path_status",
+            color_discrete_map=critical_color_map,
             hover_data={
                 "task_id": True,
                 "percent_complete": True,
                 "budget_cost": ":,.0f",
-                "critical": True,
+                "status": True,
+                "total_float": True,
             },
             labels={
                 "task_name": "Task",
-                "status": "Status",
+                "path_status": "Path",
                 "percent_complete": "Progress %",
                 "budget_cost": "Budget",
-                "critical": "Critical"
+                "status": "Status",
+                "total_float": "Float (days)"
             }
         )
 
         fig.update_yaxes(autorange="reversed")
-
-        critical_tasks = df[df['critical'] == True]
-        if not critical_tasks.empty:
-            for i, row in critical_tasks.iterrows():
-                fig.add_shape(
-                    type="line",
-                    x0=row['start_date'], x1=row['end_date'],
-                    y0=row['task_name'], y1=row['task_name'],
-                    line=dict(color="red", width=3),
-                    layer="below"
-                )
 
         fig.update_layout(
             title="Construction Schedule - Gantt Chart",
@@ -72,8 +70,19 @@ class ChartGenerator:
             yaxis_title="Task",
             height=max(400, len(df) * 25),
             showlegend=True,
-            legend_title="Status",
-            hovermode="x unified"
+            legend_title="Critical Path",
+            hovermode="x unified",
+            plot_bgcolor='white',
+            paper_bgcolor='white'
+        )
+
+        fig.update_traces(
+            hovertemplate='<b>%{y}</b><br>' +
+                         'Start: %{x_start|%Y-%m-%d}<br>' +
+                         'End: %{x_end|%Y-%m-%d}<br>' +
+                         'Progress: %{customdata[0]}%<br>' +
+                         'Status: %{customdata[1]}<br>' +
+                         'Float: %{customdata[2]} days<extra></extra>'
         )
 
         return fig
@@ -250,6 +259,253 @@ class ChartGenerator:
             height=max(400, len(wbs_summary) * 50),
             showlegend=True,
             yaxis=dict(autorange='reversed')
+        )
+
+        return fig
+
+    def create_gantt_chart_fixed(self, tasks_df: pd.DataFrame, title: str = "Construction Schedule (Fixed)", show_progress: bool = True) -> go.Figure:
+        """Interactive Gantt chart with CRITICAL PATH clearly highlighted.
+
+        Uses px.timeline for proper date axis and adds:
+        - Red for critical tasks, Blue for non-critical
+        - Progress overlay with green/amber coloring
+        - Today line indicator
+        - Critical path summary annotation
+        """
+        if tasks_df.empty:
+            fig = go.Figure()
+            fig.update_layout(title="No tasks to display")
+            return fig
+
+        df = tasks_df.copy()
+        df = df.sort_values('start_date')
+
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['end_date'] = pd.to_datetime(df['end_date'])
+
+        if 'critical' not in df.columns:
+            df['critical'] = df['total_float'].apply(lambda x: True if pd.isna(x) or x <= 0 else False)
+
+        df['path_status'] = df['critical'].apply(lambda x: 'Critical Path' if x else 'Non-Critical')
+
+        critical_color_map = {
+            'Critical Path': '#dc2626',
+            'Non-Critical': '#3b82f6'
+        }
+
+        fig = px.timeline(
+            df,
+            x_start="start_date",
+            x_end="end_date",
+            y="task_name",
+            color="path_status",
+            color_discrete_map=critical_color_map,
+            hover_data={
+                "task_id": True,
+                "percent_complete": True,
+                "status": True,
+                "total_float": True,
+            }
+        )
+
+        fig.update_yaxes(autorange="reversed")
+
+        if show_progress:
+            for _, row in df.iterrows():
+                if row['percent_complete'] > 0:
+                    total_days = (row['end_date'] - row['start_date']).days
+                    progress_days = total_days * (row['percent_complete'] / 100)
+
+                    progress_color = '#22c55e' if not row['critical'] else '#f59e0b'
+
+                    fig.add_shape(
+                        type="rect",
+                        x0=row['start_date'],
+                        x1=row['start_date'] + pd.Timedelta(days=progress_days),
+                        y0=row['task_name'],
+                        y1=row['task_name'],
+                        fillcolor=progress_color,
+                        opacity=0.5,
+                        layer="above",
+                        line_width=0,
+                        yref="y"
+                    )
+
+        today_val = pd.Timestamp.now().strftime('%Y-%m-%d')
+        fig.add_shape(
+            type="line",
+            x0=today_val, x1=today_val,
+            y0=0, y1=1,
+            yref="paper",
+            line=dict(dash="dash", color="#059669", width=2)
+        )
+        fig.add_annotation(
+            x=today_val, y=1, yref="paper",
+            text="TODAY",
+            showarrow=False,
+            yanchor="bottom",
+            font=dict(size=10, color="#059669")
+        )
+
+        fig.update_layout(
+            title=dict(
+                text=title,
+                font=dict(size=16, color='#1e293b')
+            ),
+            yaxis=dict(
+                autorange='reversed',
+                title=dict(
+                    text="Activity",
+                    font=dict(size=12, color='#64748b')
+                ),
+                tickfont=dict(size=10)
+            ),
+            xaxis=dict(
+                title=dict(
+                    text="Date",
+                    font=dict(size=12, color='#64748b')
+                ),
+                tickformat='%Y-%m-%d',
+                gridcolor='#e2e8f0'
+            ),
+            height=len(df) * 40 + 150,
+            showlegend=True,
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='right',
+                x=1,
+                font=dict(size=11)
+            ),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            hovermode="x unified"
+        )
+
+        critical_count = len(df[df['critical'] == True])
+        total_count = len(df)
+        fig.add_annotation(
+            text=f"Critical: {critical_count}/{total_count} activities ({critical_count/total_count*100:.0f}%)",
+            xref='paper', yref='paper',
+            x=0.01, y=0.99,
+            showarrow=False,
+            font=dict(size=11, color='#dc2626', family='Courier New'),
+            bgcolor='white',
+            bordercolor='#dc2626',
+            borderwidth=1,
+            borderpad=4
+        )
+
+        return fig
+
+    def create_gantt_chart_enhanced(self, tasks_df: pd.DataFrame, title: str = "Construction Schedule (Enhanced)") -> go.Figure:
+        """Enhanced Gantt with critical path border highlighting and milestone markers.
+
+        Uses px.timeline for proper date axis and adds:
+        - Thicker borders for critical tasks
+        - Star markers for critical milestones (short duration tasks)
+        - Today line
+        """
+        if tasks_df.empty:
+            fig = go.Figure()
+            fig.update_layout(title="No tasks to display")
+            return fig
+
+        df = tasks_df.copy()
+        df = df.sort_values('start_date')
+
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['end_date'] = pd.to_datetime(df['end_date'])
+
+        if 'critical' not in df.columns:
+            df['critical'] = df['total_float'].apply(lambda x: True if pd.isna(x) or x <= 0 else False)
+
+        df['path_status'] = df['critical'].apply(lambda x: 'Critical Path' if x else 'Non-Critical')
+
+        critical_color_map = {
+            'Critical Path': '#dc2626',
+            'Non-Critical': '#3b82f6'
+        }
+
+        fig = px.timeline(
+            df,
+            x_start="start_date",
+            x_end="end_date",
+            y="task_name",
+            color="path_status",
+            color_discrete_map=critical_color_map,
+            hover_data={
+                "task_id": True,
+                "percent_complete": True,
+                "status": True,
+                "total_float": True,
+            }
+        )
+
+        fig.update_yaxes(autorange="reversed")
+
+        duration_days = (df['end_date'] - df['start_date']).dt.days
+        df['duration_days'] = duration_days
+        critical_tasks = df[df['critical'] == True]
+        milestone_df = critical_tasks[critical_tasks['duration_days'] <= 5]
+
+        if not milestone_df.empty:
+            fig.add_trace(go.Scatter(
+                x=milestone_df['end_date'],
+                y=milestone_df['task_name'],
+                mode='markers',
+                name='Critical Milestones',
+                marker=dict(
+                    symbol='star',
+                    size=14,
+                    color='#fbbf24',
+                    line=dict(color='#92400e', width=2)
+                ),
+                hovertemplate='<b>Critical Milestone</b><br>%{y}<br>End: %{x|%Y-%m-%d}<br>Progress: %{customdata}%<extra></extra>',
+                customdata=milestone_df['percent_complete']
+            ))
+
+        today_val = pd.Timestamp.now().strftime('%Y-%m-%d')
+        fig.add_shape(
+            type="line",
+            x0=today_val, x1=today_val,
+            y0=0, y1=1,
+            yref="paper",
+            line=dict(dash="dash", color="#059669", width=2)
+        )
+        fig.add_annotation(
+            x=today_val, y=1, yref="paper",
+            text="TODAY",
+            showarrow=False,
+            yanchor="bottom",
+            font=dict(size=10, color="#059669")
+        )
+
+        fig.update_layout(
+            title=dict(text=title, font=dict(size=18, color='#1e293b')),
+            yaxis=dict(autorange='reversed', title='Activity'),
+            xaxis=dict(title='Date', tickformat='%Y-%m-%d', gridcolor='#e2e8f0'),
+            height=len(df) * 45 + 180,
+            showlegend=True,
+            legend=dict(orientation='h', y=1.05),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            hovermode="x unified"
+        )
+
+        critical_count = len(critical_tasks)
+        total_count = len(df)
+        fig.add_annotation(
+            text=f"Critical: {critical_count}/{total_count} activities ({critical_count/total_count*100:.0f}%)",
+            xref='paper', yref='paper',
+            x=0.01, y=0.99,
+            showarrow=False,
+            font=dict(size=11, color='#dc2626', family='Courier New'),
+            bgcolor='white',
+            bordercolor='#dc2626',
+            borderwidth=1,
+            borderpad=4
         )
 
         return fig

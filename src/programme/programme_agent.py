@@ -170,3 +170,145 @@ Provide a clear, concise answer based on the schedule data."""
         delayed_behind = delayed[delayed['percent_complete'] < delayed['planned_progress'] * 0.8]
 
         return delayed_behind[['task_id', 'task_name', 'percent_complete', 'planned_progress', 'status']].to_dict('records')
+
+    def generate_lookahead_report(self, weeks: int = 4) -> str:
+        """Generate 4-week look-ahead report for weekly coordination meetings.
+
+        Args:
+            weeks: Number of weeks to look ahead (default 4)
+
+        Returns:
+            Formatted lookahead report string
+        """
+        if self.tasks is None or self.tasks.empty:
+            return "No schedule data loaded."
+
+        from datetime import timedelta
+
+        df = self.tasks.copy()
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['end_date'] = pd.to_datetime(df['end_date'])
+
+        today = pd.Timestamp.now()
+        lookahead_end = today + timedelta(weeks=weeks)
+
+        lookahead = df[
+            ((df['start_date'] >= today) & (df['start_date'] <= lookahead_end)) |
+            ((df['end_date'] >= today) & (df['end_date'] <= lookahead_end)) |
+            ((df['start_date'] <= today) & (df['end_date'] >= today))
+        ].copy()
+
+        lookahead = lookahead.sort_values('start_date')
+
+        output = f"{weeks}-WEEK LOOK-AHEAD REPORT\n"
+        output += f"Generated: {today.strftime('%Y-%m-%d')} | Period: {today.strftime('%Y-%m-%d')} to {lookahead_end.strftime('%Y-%m-%d')}\n"
+        output += "=" * 70 + "\n\n"
+
+        this_week_end = today + timedelta(days=7)
+        this_week = lookahead[
+            (lookahead['start_date'] <= this_week_end) &
+            (lookahead['end_date'] >= today)
+        ]
+
+        output += f"THIS WEEK ({today.strftime('%Y-%m-%d')} to {this_week_end.strftime('%Y-%m-%d')}):\n"
+        output += "-" * 70 + "\n"
+
+        if this_week.empty:
+            output += "  No activities scheduled this week.\n"
+        else:
+            for _, act in this_week.iterrows():
+                critical_marker = "[CRITICAL]" if act['critical'] else ""
+                output += f"  {critical_marker} [{act['task_id']}] {act['task_name']}\n"
+                output += f"      Crew: {act.get('resource_crew', 'N/A')} | Progress: {act['percent_complete']}%\n"
+                output += f"      {act['start_date'].strftime('%Y-%m-%d')} to {act['end_date'].strftime('%Y-%m-%d')}\n\n"
+
+        next_weeks = lookahead[
+            (lookahead['start_date'] > this_week_end) &
+            (lookahead['start_date'] <= lookahead_end)
+        ]
+
+        if not next_weeks.empty:
+            output += f"\nUPCOMING (Next {weeks-1} Weeks):\n"
+            output += "-" * 70 + "\n"
+            for _, act in next_weeks.iterrows():
+                critical_marker = "[CRITICAL]" if act['critical'] else ""
+                output += f"  {critical_marker} [{act['task_id']}] {act['task_name']}\n"
+                output += f"      Starts: {act['start_date'].strftime('%Y-%m-%d')} | Crew: {act.get('resource_crew', 'N/A')}\n"
+
+        output += "\nREQUIRED RESOURCES:\n"
+        output += "-" * 70 + "\n"
+        resource_needs = lookahead.groupby('resource_crew')['task_name'].count()
+        for crew, count in resource_needs.items():
+            output += f"  {crew}: {count} activities\n"
+
+        return output
+
+    def generate_subcontractor_coordination_report(self) -> str:
+        """Generate handoff report between subcontractors.
+
+        Identifies dependencies and coordination points between different crews.
+
+        Returns:
+            Formatted subcontractor coordination report
+        """
+        if self.tasks is None or self.tasks.empty:
+            return "No schedule data loaded."
+
+        df = self.tasks.copy()
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['end_date'] = pd.to_datetime(df['end_date'])
+
+        subcontractors = df.groupby('resource_crew').agg({
+            'task_name': list,
+            'start_date': 'min',
+            'end_date': 'max',
+            'percent_complete': 'mean',
+            'critical': 'sum'
+        }).reset_index()
+
+        output = "SUBCONTRACTOR COORDINATION REPORT\n"
+        output += "=" * 60 + "\n\n"
+
+        output += "CREW SCHEDULE SUMMARY:\n"
+        output += "-" * 60 + "\n"
+
+        for _, row in subcontractors.iterrows():
+            crew = row['resource_crew'] if pd.notna(row['resource_crew']) else 'Unassigned'
+            output += f"\n{crew}:\n"
+            output += f"  Tasks: {len(row['task_name'])} | Avg Progress: {row['percent_complete']:.1f}%\n"
+            output += f"  Period: {row['start_date'].strftime('%Y-%m-%d')} to {row['end_date'].strftime('%Y-%m-%d')}\n"
+
+        handoffs = []
+        for i, (crew1, row1) in enumerate(subcontractors.iterrows()):
+            for crew2, row2 in list(subcontractors.iterrows())[i+1:]:
+                if abs((row1['end_date'] - row2['start_date']).days) <= 7:
+                    handoffs.append({
+                        'from_crew': crew1 if pd.notna(crew1) else 'Unassigned',
+                        'to_crew': crew2 if pd.notna(crew2) else 'Unassigned',
+                        'handoff_date': row1['end_date'],
+                        'from_tasks': row1['task_name'][:2] if isinstance(row1['task_name'], list) else [],
+                        'to_tasks': row2['task_name'][:2] if isinstance(row2['task_name'], list) else []
+                    })
+
+        output += f"\n\nUPCOMING HANDOFFS ({len(handoffs)} identified):\n"
+        output += "-" * 60 + "\n"
+
+        if not handoffs:
+            output += "  No significant handoffs identified in the next 7 days.\n"
+        else:
+            for h in handoffs[:10]:
+                output += f"\n  {h['handoff_date'].strftime('%Y-%m-%d')}: "
+                output += f"{h['from_crew']} -> {h['to_crew']}\n"
+                if h['from_tasks']:
+                    output += f"    From: {', '.join(str(t) for t in h['from_tasks'])}\n"
+                if h['to_tasks']:
+                    output += f"    To: {', '.join(str(t) for t in h['to_tasks'])}\n"
+
+        output += "\nCOORDINATION ACTIONS:\n"
+        output += "-" * 60 + "\n"
+        output += "  1. Schedule pre-handoff meetings 1 week before each date\n"
+        output += "  2. Verify work completion certificates before handoff\n"
+        output += "  3. Document site conditions with photos at transfer\n"
+        output += "  4. Review interface details between trades\n"
+
+        return output

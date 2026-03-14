@@ -58,6 +58,7 @@ def _ensure_ready():
 _ensure_ready()
 
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as go
 from src.agents.qa_agent import QAAgent
 from src.agents.designer_agent import DesignerAgent
@@ -66,6 +67,7 @@ from src.ingestion.ingest import ingest_document_dual_index
 from src.programme.xer_parser import XERParser
 from src.programme.chart_generator import ChartGenerator
 from src.programme.programme_agent import ProgrammeAgent
+from src.programme.evm_calculator import EVMCalculator
 from src.utils.llm_client import (
     set_runtime_llm_config,
     get_runtime_llm_config,
@@ -430,11 +432,24 @@ elif mode == "📅 Programme Manager":
         col4.metric("Critical Tasks", summary.get("critical_tasks", 0))
         col5.metric("Budget", f"${summary.get('total_budget', 0):,.0f}")
 
-        tab1, tab2, tab3, tab4 = st.tabs(["📊 Gantt Chart", "👷 Resources", "💰 Budget", "💬 Q&A"])
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Gantt Chart", "👷 Resources", "💰 Budget", "📈 EVM", "📋 Reports", "💬 Q&A"])
 
         with tab1:
             chart_gen = ChartGenerator()
-            gantt_fig = chart_gen.create_gantt_chart(st.session_state.programme_data.tasks)
+
+            gantt_options = st.radio(
+                "Gantt Chart Style",
+                ["Fixed (Critical Path)", "Enhanced (with Milestones)", "Standard"],
+                horizontal=True
+            )
+
+            if gantt_options == "Fixed (Critical Path)":
+                gantt_fig = chart_gen.create_gantt_chart_fixed(st.session_state.programme_data.tasks)
+            elif gantt_options == "Enhanced (with Milestones)":
+                gantt_fig = chart_gen.create_gantt_chart_enhanced(st.session_state.programme_data.tasks)
+            else:
+                gantt_fig = chart_gen.create_gantt_chart(st.session_state.programme_data.tasks)
+
             st.plotly_chart(gantt_fig, use_container_width=True)
 
         with tab2:
@@ -448,6 +463,73 @@ elif mode == "📅 Programme Manager":
             st.plotly_chart(budget_fig, use_container_width=True)
 
         with tab4:
+            st.subheader("Earned Value Management Dashboard")
+
+            evm_calc = EVMCalculator(st.session_state.programme_data.tasks)
+
+            st.markdown(evm_calc.get_evm_summary_html(), unsafe_allow_html=True)
+
+            evm_fig = evm_calc.create_evm_dashboard()
+            st.plotly_chart(evm_fig, use_container_width=True)
+
+            evm_trend_fig = evm_calc.create_evm_trend_chart()
+            st.plotly_chart(evm_trend_fig, use_container_width=True)
+
+        with tab5:
+            st.subheader("Reports")
+
+            report_type = st.selectbox(
+                "Select Report Type",
+                ["4-Week Look-Ahead", "Subcontractor Coordination", "Weather Risk Analysis", "Delay Claim Analysis", "Delay Risk Prediction"]
+            )
+
+            if st.button("Generate Report"):
+                with st.spinner("Generating report..."):
+                    if report_type == "4-Week Look-Ahead":
+                        report = st.session_state.programme_agent.generate_lookahead_report(weeks=4)
+                    elif report_type == "Subcontractor Coordination":
+                        report = st.session_state.programme_agent.generate_subcontractor_coordination_report()
+                    elif report_type == "Weather Risk Analysis":
+                        from src.programme.weather_risk import WeatherRiskAnalyzer
+                        weather = WeatherRiskAnalyzer(st.session_state.programme_data.tasks)
+                        report = weather.generate_risk_report(days_ahead=60)
+                    elif report_type == "Delay Risk Prediction":
+                        from src.programme.delay_predictor import DelayPredictor
+                        predictor = DelayPredictor(st.session_state.programme_data.tasks)
+                        report = predictor.generate_risk_report(top_n=15)
+                    elif report_type == "Delay Claim Analysis":
+                        st.info("Enter delay event details below:")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            event_name = st.text_input("Event Name", "Owner Change Order #1")
+                            cause = st.selectbox("Cause", ["Owner-initiated design change", "Force Majeure - Weather", "Contractor delay", "Permit delay", "Utility delay"])
+                        with col2:
+                            start_date = st.date_input("Start Date", pd.Timestamp.now())
+                            end_date = st.date_input("End Date", pd.Timestamp.now() + pd.Timedelta(days=5))
+
+                        task_ids = st.session_state.programme_data.tasks['task_id'].tolist()[:10]
+                        selected_tasks = st.multiselect("Affected Activities", task_ids, default=task_ids[:3])
+
+                        if st.button("Analyze Delay Claim"):
+                            from src.programme.delay_claim import DelayClaimAnalyzer
+                            analyzer = DelayClaimAnalyzer(st.session_state.programme_data.tasks)
+                            delay_event = {
+                                'event_name': event_name,
+                                'cause': cause,
+                                'start_date': str(start_date),
+                                'end_date': str(end_date),
+                                'affected_activities': selected_tasks
+                            }
+                            report = analyzer.create_delay_claim_report(delay_event)
+                            st.text_area("Delay Claim Report", report, height=400)
+                        else:
+                            report = "Fill in delay event details and click 'Analyze Delay Claim'"
+                    else:
+                        report = "Select a report type."
+                    if report_type != "Delay Claim Analysis":
+                        st.text_area("Report Output", report, height=400)
+
+        with tab6:
             st.subheader("Ask about your construction schedule")
 
             for msg in st.session_state.programme_chat_history:

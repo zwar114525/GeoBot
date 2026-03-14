@@ -1,0 +1,658 @@
+ Fixed Gantt Chart with Proper Critical Path Highlighting
+Updated chart_generator.py - Gantt Function
+python
+
+def create_gantt_chart(self, title: str = "Construction Schedule", show_progress: bool = True):
+    """
+    Interactive Gantt chart with CRITICAL PATH clearly highlighted
+    Fixed version with proper color coding and progress overlay
+    """
+    df = self.tasks.copy()
+    df = df.sort_values('start_date')
+    
+    # Ensure critical column exists and is boolean
+    if 'critical' not in df.columns:
+        df['critical'] = df['total_float'].apply(lambda x: True if pd.isna(x) or x <= 0 else False)
+    
+    # Create color column for explicit control
+    df['bar_color'] = df['critical'].apply(lambda x: '#dc2626' if x else '#3b82f6')  # Red for critical, Blue for non-critical
+    
+    # Create the Gantt chart using go.Figure for better control
+    fig = go.Figure()
+    
+    # Add non-critical activities first (so they appear behind)
+    non_critical = df[df['critical'] == False]
+    if not non_critical.empty:
+        fig.add_trace(go.Bar(
+            name='Non-Critical',
+            y=non_critical['task_name'],
+            x=(non_critical['end_date'] - non_critical['start_date']).dt.days,
+            base=non_critical['start_date'],
+            orientation='h',
+            marker_color='#3b82f6',
+            opacity=0.7,
+            hovertemplate='<b>%{y}</b><br>' +
+                         'Start: %{base|%Y-%m-%d}<br>' +
+                         'End: %{x|%Y-%m-%d}<br>' +
+                         'Progress: %{customdata[0]}%<br>' +
+                         'Float: %{customdata[1]} days<br>' +
+                         'Status: %{customdata[2]}<extra></extra>',
+            customdata=non_critical[['percent_complete', 'total_float', 'status']].values,
+            legendgroup='Non-Critical'
+        ))
+    
+    # Add critical activities on top (more prominent)
+    critical = df[df['critical'] == True]
+    if not critical.empty:
+        fig.add_trace(go.Bar(
+            name='🔴 Critical Path',
+            y=critical['task_name'],
+            x=(critical['end_date'] - critical['start_date']).dt.days,
+            base=critical['start_date'],
+            orientation='h',
+            marker_color='#dc2626',  # Bright red for critical
+            opacity=0.9,
+            hovertemplate='<b>%{y}</b><br>' +
+                         'Start: %{base|%Y-%m-%d}<br>' +
+                         'End: %{x|%Y-%m-%d}<br>' +
+                         'Progress: %{customdata[0]}%<br>' +
+                         'Float: %{customdata[1]} days<br>' +
+                         'Status: %{customdata[2]}<br>' +
+                         '⚠️ CRITICAL PATH<extra></extra>',
+            customdata=critical[['percent_complete', 'total_float', 'status']].values,
+            legendgroup='Critical'
+        ))
+    
+    # Add progress overlay for ALL activities
+    if show_progress:
+        for _, row in df.iterrows():
+            if row['percent_complete'] > 0:
+                total_days = (row['end_date'] - row['start_date']).days
+                progress_days = total_days * (row['percent_complete'] / 100)
+                
+                # Progress bar color - green for on-track, amber for critical behind
+                progress_color = '#22c55e' if not row['critical'] else '#f59e0b'
+                
+                fig.add_shape(
+                    type="rect",
+                    x0=row['start_date'],
+                    x1=row['start_date'] + pd.Timedelta(days=progress_days),
+                    y0=row['task_name'],
+                    y1=row['task_name'],
+                    fillcolor=progress_color,
+                    opacity=0.5,
+                    layer="above",
+                    line_width=0
+                )
+    
+    # Update layout for better visibility
+    fig.update_layout(
+        title=dict(
+            text=title,
+            font=dict(size=16, color='#1e293b')
+        ),
+        yaxis=dict(
+            autorange='reversed',  # Top-to-bottom task order
+            title=dict(
+                text="Activity",
+                font=dict(size=12, color='#64748b')
+            ),
+            tickfont=dict(size=10)
+        ),
+        xaxis=dict(
+            title=dict(
+                text="Date",
+                font=dict(size=12, color='#64748b')
+            ),
+            tickformat='%Y-%m-%d',
+            gridcolor='#e2e8f0'
+        ),
+        height=len(df) * 40 + 150,  # Dynamic height based on activity count
+        showlegend=True,
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1,
+            font=dict(size=11)
+        ),
+        barmode='overlay',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        hovermode='y unified'
+    )
+    
+    # Add critical path summary annotation
+    critical_count = len(critical)
+    total_count = len(df)
+    fig.add_annotation(
+        text=f"🔴 Critical: {critical_count}/{total_count} activities ({critical_count/total_count*100:.0f}%)",
+        xref='paper', yref='paper',
+        x=0.01, y=0.99,
+        showarrow=False,
+        font=dict(size=11, color='#dc2626', family='Courier New'),
+        bgcolor='white',
+        bordercolor='#dc2626',
+        borderwidth=1,
+        borderpad=4
+    )
+    
+    return fig
+
+🎨 Alternative: Enhanced Gantt with Critical Path Border
+For even clearer critical path visualization, add this alternative function:
+
+def create_gantt_chart_enhanced(self, title: str = "Construction Schedule"):
+    """
+    Enhanced Gantt with critical path border highlighting and milestone markers
+    """
+    df = self.tasks.copy()
+    df = df.sort_values('start_date')
+    
+    # Ensure critical column exists
+    if 'critical' not in df.columns:
+        df['critical'] = df['total_float'].apply(lambda x: True if pd.isna(x) or x <= 0 else False)
+    
+    fig = go.Figure()
+    
+    # Non-critical activities
+    non_critical = df[df['critical'] == False]
+    if not non_critical.empty:
+        fig.add_trace(go.Bar(
+            name='Non-Critical',
+            y=non_critical['task_name'],
+            x=(non_critical['end_date'] - non_critical['start_date']).dt.days,
+            base=non_critical['start_date'],
+            orientation='h',
+            marker=dict(
+                color='#3b82f6',
+                line=dict(color='#1e40af', width=1)
+            ),
+            opacity=0.6,
+            hoverinfo='text',
+            text=non_critical.apply(lambda r: f"{r['task_name']}<br>{r['percent_complete']}% Complete", axis=1)
+        ))
+    
+    # Critical activities with THICKER border
+    critical = df[df['critical'] == True]
+    if not critical.empty:
+        fig.add_trace(go.Bar(
+            name='🔴 CRITICAL PATH',
+            y=critical['task_name'],
+            x=(critical['end_date'] - critical['start_date']).dt.days,
+            base=critical['start_date'],
+            orientation='h',
+            marker=dict(
+                color='#dc2626',
+                line=dict(color='#991b1b', width=3)  # Thicker border for critical
+            ),
+            opacity=0.85,
+            hoverinfo='text',
+            text=critical.apply(lambda r: f"⚠️ {r['task_name']}<br>{r['percent_complete']}% Complete<br>Float: {r['total_float']}d", axis=1)
+        ))
+    
+    # Add milestone markers for critical activities
+    milestone_df = critical[critical['duration'] <= 5]  # Short duration = milestone
+    if not milestone_df.empty:
+        fig.add_trace(go.Scatter(
+            x=milestone_df['end_date'],
+            y=milestone_df['task_name'],
+            mode='markers',
+            name='Critical Milestones',
+            marker=dict(
+                symbol='star',
+                size=12,
+                color='#fbbf24',
+                line=dict(color='#92400e', width=2)
+            ),
+            hovertemplate='<b>Critical Milestone</b><br>%{y}<br>Complete: %{customdata}%<extra></extra>',
+            customdata=milestone_df['percent_complete']
+        ))
+    
+    # Add today line
+    today = pd.Timestamp.now()
+    fig.add_vline(
+        x=today,
+        line_dash="dash",
+        line_color="#059669",
+        line_width=2,
+        annotation_text="TODAY",
+        annotation_position="top"
+    )
+    
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=18, color='#1e293b')),
+        yaxis=dict(autorange='reversed', title='Activity'),
+        xaxis=dict(title='Date', tickformat='%Y-%m-%d'),
+        height=len(df) * 45 + 180,
+        showlegend=True,
+        legend=dict(orientation='h', y=1.05),
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
+    
+    return fig
+
+📊 Visual Comparison
+
+Feature
+Original (Broken)
+Fixed Version
+Critical Path Color
+❌ Not visible
+✅ Bright Red (#dc2626)
+Non-Critical Color
+❌ Same as critical
+✅ Blue (#3b82f6)
+Progress Overlay
+❌ Syntax error
+✅ Green/Amber bars
+Legend
+❌ Missing
+✅ Clear legend with icons
+Hover Details
+❌ Basic
+✅ Float, status, progress
+Critical Count
+❌ Not shown
+✅ Annotation showing % critical
+Today Line
+❌ Missing
+✅ Green dashed line
+Milestone Markers
+❌ Missing
+✅ Star icons for key dates
+🧪 Test the Fix
+python
+
+# Quick test script
+from chart_generator import ChartGenerator
+from xer_parser import XERParser
+
+# Load data
+parser = XERParser(use_simulated=True)
+generator = ChartGenerator(parser.tasks, parser.relationships)
+
+# Generate fixed Gantt
+fig = generator.create_gantt_chart(title="Fixed Critical Path Gantt")
+fig.write_html("fixed_gantt.html")
+fig.show()
+
+# Generate enhanced version
+fig_enhanced = generator.create_gantt_chart_enhanced()
+fig_enhanced.write_html("enhanced_gantt.html")
+fig_enhanced.show()
+
+print("✅ Gantt charts generated with proper critical path highlighting!")
+
+🎯 Expected Visual Output
+
+┌─────────────────────────────────────────────────────────────────┐
+│  Construction Schedule                              🔴 Critical │
+│                                                                 │
+│  Final Inspection          [██████████] 🔴 CRITICAL            │
+│  System Commissioning      [████████░░] 🔴 CRITICAL            │
+│  Flooring Installation     [████░░░░░░] 🔴 CRITICAL            │
+│  Drywall Installation      [██░░░░░░░░] 🔴 CRITICAL            │
+│  HVAC Ductwork             [░░░░░░░░░░] 🔴 CRITICAL            │
+│  Exterior Wall Panels      [░░░░░░░░░░] 🔴 CRITICAL            │
+│  Steel Beams - Level 1     [█████░░░░░] 🔴 CRITICAL            │
+│  Steel Columns - Zone B    [██████░░░░] (Non-Critical)         │
+│  Steel Columns - Zone A    [████████░░] 🔴 CRITICAL            │
+│  Foundation Walls - Zone B [██████████] (Non-Critical)         │
+│  Foundation Walls - Zone A [██████████] 🔴 CRITICAL            │
+│                                                                 │
+│  ─────────────────────────────────────────────────────────────  │
+│  🔴 Critical: 15/35 activities (43%)                            │
+│  ━━━ TODAY (Green dashed line)                                  │
+│  ⭐ Critical Milestones (Star markers)                          │
+└─────────────────────────────────────────────────────────────────┘
+
+⚠️ Common Issues & Fixes
+Issue
+Cause
+Solution
+All bars same color
+critical column missing
+Add df['critical'] = df['total_float'] <= 0
+Progress not showing
+percent_complete is string
+Convert: df['percent_complete'] = pd.to_numeric()
+Dates not rendering
+Date format incorrect
+Convert: df['start_date'] = pd.to_datetime()
+Chart too tall
+Too many activities
+Filter: df = df.head(50) or group by WBS
+Legend not showing
+showlegend=False
+Set showlegend=True in layout
+
+🚀 Recommended Improvements & Additional Functions for Your Construction AI Agent
+Here is a comprehensive list of high-value enhancements categorized by priority and implementation complexity.
+🏆 Priority 1: High Impact, Low Effort
+1. Earned Value Management (EVM) Dashboard
+Why: Essential for contract compliance and client reporting on most construction projects.
+Metric
+Formula
+Use Case
+SPI (Schedule Performance Index)
+EV / PV
+Are we ahead/behind schedule?
+CPI (Cost Performance Index)
+EV / AC
+Are we over/under budget?
+EAC (Estimate at Completion)
+BAC / CPI
+Forecasted final cost
+VAC (Variance at Completion)
+BAC - EAC
+Expected budget overrun/underrun
+TCPI (To-Complete Performance Index)
+(BAC - EV) / (BAC - AC)
+Required efficiency to meet budget
+Implementation:
+python
+
+def calculate_evm_metrics(self) -> dict:
+    """Calculate Earned Value Management metrics"""
+    df = self.tasks
+    
+    # Planned Value (PV) = Budgeted cost of work scheduled
+    pv = df[df['start_date'] <= pd.Timestamp.now()]['budget_cost'].sum()
+    
+    # Earned Value (EV) = Budgeted cost of work performed
+    ev = (df['budget_cost'] * df['percent_complete'] / 100).sum()
+    
+    # Actual Cost (AC) = Actual cost of work performed
+    ac = df['actual_cost'].sum()
+    
+    # Budget at Completion (BAC)
+    bac = df['budget_cost'].sum()
+    
+    # Calculate indices
+    spi = ev / pv if pv > 0 else 1.0
+    cpi = ev / ac if ac > 0 else 1.0
+    eac = bac / cpi if cpi > 0 else bac
+    vac = bac - eac
+    tcpi = (bac - ev) / (bac - ac) if (bac - ac) > 0 else 1.0
+    
+    return {
+        'PV': pv, 'EV': ev, 'AC': ac, 'BAC': bac,
+        'SPI': spi, 'CPI': cpi, 'EAC': eac, 'VAC': vac, 'TCPI': tcpi,
+        'schedule_status': 'Ahead' if spi > 1 else ('On Track' if spi > 0.95 else 'Behind'),
+        'cost_status': 'Under' if cpi > 1 else ('On Budget' if cpi > 0.95 else 'Over')
+    }
+
+2. Weather Risk Integration
+Why: Weather is the #1 cause of construction delays. Quantify risk proactively.
+Implementation:
+python
+
+def add_weather_risk_analysis(self, location: str, api_key: str = None) -> str:
+    """
+    Analyze weather risk for upcoming critical activities
+    Uses historical weather data or API (OpenWeatherMap)
+    """
+    import requests
+    from datetime import timedelta
+    
+    # Get upcoming critical activities (next 60 days)
+    critical = self.tasks[self.tasks['critical'] == True]
+    upcoming = critical[
+        (critical['start_date'] >= pd.Timestamp.now()) & 
+        (critical['start_date'] <= pd.Timestamp.now() + timedelta(days=60))
+    ]
+    
+    # Historical weather risk by month (simplified lookup table)
+    weather_risk = {
+        1: {'rain_days': 8, 'temp_low': -5, 'temp_high': 5},
+        2: {'rain_days': 7, 'temp_low': -3, 'temp_high': 8},
+        3: {'rain_days': 9, 'temp_low': 2, 'temp_high': 12},
+        # ... add all months
+    }
+    
+    output = "🌦️ WEATHER RISK ANALYSIS (Next 60 Days):\n" + "="*60 + "\n"
+    
+    for _, act in upcoming.iterrows():
+        month = act['start_date'].month
+        risk = weather_risk.get(month, {'rain_days': 5})
+        
+        # Outdoor activities at higher risk
+        outdoor_keywords = ['excavation', 'concrete', 'steel', 'roofing', 'exterior', 'paving']
+        is_outdoor = any(kw in act['task_name'].lower() for kw in outdoor_keywords)
+        
+        if is_outdoor and risk['rain_days'] > 7:
+            output += f"⚠️ HIGH RISK: {act['task_name']} ({act['start_date'].strftime('%Y-%m-%d')})\n"
+            output += f"   Expected rain days: {risk['rain_days']} | Activity type: Outdoor\n"
+            output += f"   💡 Recommendation: Plan indoor work or add weather contingency\n\n"
+    
+    return output
+
+3. Subcontractor Coordination Report
+Why: Most delays come from subcontractor coordination failures.
+Implementation:
+
+def generate_subcontractor_coordination_report(self) -> str:
+    """
+    Generate handoff report between subcontractors
+    Identifies dependencies and coordination points
+    """
+    df = self.tasks
+    
+    # Group by resource crew (subcontractor)
+    subcontractors = df.groupby('resource_crew').agg({
+        'task_name': list,
+        'start_date': 'min',
+        'end_date': 'max',
+        'percent_complete': 'mean',
+        'critical': 'sum'
+    }).round(1)
+    
+    output = "🤝 SUBCONTRACTOR COORDINATION REPORT\n" + "="*60 + "\n\n"
+    
+    # Identify handoff points (where one crew ends, another begins)
+    handoffs = []
+    for i, (crew1, row1) in enumerate(subcontractors.iterrows()):
+        for crew2, row2 in list(subcontractors.iterrows())[i+1:]:
+            # Check if dates overlap or are adjacent
+            if abs((row1['end_date'] - row2['start_date']).days) <= 7:
+                handoffs.append({
+                    'from_crew': crew1,
+                    'to_crew': crew2,
+                    'handoff_date': row1['end_date'],
+                    'from_tasks': row1['task_name'][:2],
+                    'to_tasks': row2['task_name'][:2]
+                })
+    
+    output += f"📅 Upcoming Handoffs ({len(handoffs)} identified):\n\n"
+    for h in handoffs[:10]:  # Top 10
+        output += f"  • {h['handoff_date'].strftime('%Y-%m-%d')}: "
+        output += f"{h['from_crew']} → {h['to_crew']}\n"
+        output += f"    From: {', '.join(h['from_tasks'])}\n"
+        output += f"    To: {', '.join(h['to_tasks'])}\n\n"
+    
+    output += "💡 Coordination Actions:\n"
+    output += "  • Schedule pre-handoff meetings 1 week before each date\n"
+    output += "  • Verify work completion certificates before handoff\n"
+    output += "  • Document site conditions with photos at transfer\n"
+    
+    return output
+
+🥈 Priority 2: Medium Impact, Medium Effort
+4. 4-Week Look-Ahead Report (Auto-Generated)
+Why: Standard industry practice for weekly coordination meetings.
+python
+
+def generate_lookahead_report(self, weeks: int = 4) -> str:
+    """
+    Generate 4-week look-ahead report for weekly meetings
+    """
+    from datetime import timedelta
+    
+    today = pd.Timestamp.now()
+    lookahead_end = today + timedelta(weeks=weeks)
+    
+    # Activities starting or in-progress in lookahead window
+    lookahead = self.tasks[
+        ((self.tasks['start_date'] >= today) & (self.tasks['start_date'] <= lookahead_end)) |
+        ((self.tasks['end_date'] >= today) & (self.tasks['end_date'] <= lookahead_end)) |
+        ((self.tasks['start_date'] <= today) & (self.tasks['end_date'] >= today))
+    ].copy()
+    
+    lookahead = lookahead.sort_values('start_date')
+    
+    output = f"📋 {weeks}-WEEK LOOK-AHEAD REPORT\n"
+    output += f"Generated: {today.strftime('%Y-%m-%d')} | Period: {today.strftime('%Y-%m-%d')} to {lookahead_end.strftime('%Y-%m-%d')}\n"
+    output += "="*70 + "\n\n"
+    
+    # This Week
+    this_week_end = today + timedelta(days=7)
+    this_week = lookahead[
+        (lookahead['start_date'] <= this_week_end) & 
+        (lookahead['end_date'] >= today)
+    ]
+    
+    output += f"📅 THIS WEEK ({today.strftime('%Y-%m-%d')} to {this_week_end.strftime('%Y-%m-%d')}):\n"
+    output += "-"*70 + "\n"
+    for _, act in this_week.iterrows():
+        critical_marker = "🔴" if act['critical'] else "⚪"
+        output += f"  {critical_marker} [{act['task_id']}] {act['task_name']}\n"
+        output += f"      Crew: {act['resource_crew']} | Progress: {act['percent_complete']}%\n"
+    output += "\n"
+    
+    # Next 3 Weeks
+    next_weeks = lookahead[
+        (lookahead['start_date'] > this_week_end) & 
+        (lookahead['start_date'] <= lookahead_end)
+    ]
+    
+    if not next_weeks.empty:
+        output += f"📅 UPCOMING (Next {weeks-1} Weeks):\n"
+        output += "-"*70 + "\n"
+        for _, act in next_weeks.iterrows():
+            output += f"  • [{act['task_id']}] {act['task_name']} | Starts: {act['start_date'].strftime('%Y-%m-%d')}\n"
+    
+    # Materials/Equipment Needed
+    output += "\n📦 REQUIRED RESOURCES:\n"
+    output += "-"*70 + "\n"
+    resource_needs = lookahead.groupby('resource_crew')['task_name'].count()
+    for crew, count in resource_needs.items():
+        output += f"  • {crew}: {count} activities\n"
+    
+    return output
+
+5. Delay Claim Support Module
+Why: Critical for protecting your company in dispute situations.
+python
+
+def generate_delay_claim_analysis(self, delay_event: dict) -> dict:
+    """
+    Analyze impact of a delay event for potential claims
+    delay_event = {
+        'event_name': 'Owner Change Order #5',
+        'start_date': '2024-03-15',
+        'end_date': '2024-03-25',
+        'affected_activities': ['2020', '3000'],
+        'cause': 'Owner-initiated design change'
+    }
+    """
+    affected = self.tasks[self.tasks['task_id'].isin(delay_event['affected_activities'])]
+    
+    # Calculate impacted days
+    event_duration = (pd.Timestamp(delay_event['end_date']) - pd.Timestamp(delay_event['start_date'])).days
+    
+    # Check if activities are critical
+    critical_affected = affected[affected['critical'] == True]
+    
+    # Calculate cost impact (if cost data available)
+    cost_impact = affected['budget_cost'].sum() * (event_duration / affected['duration'].mean())
+    
+    return {
+        'event': delay_event['event_name'],
+        'duration_days': event_duration,
+        'affected_activities': len(affected),
+        'critical_activities_affected': len(critical_affected),
+        'schedule_impact_days': event_duration if len(critical_affected) > 0 else 0,
+        'cost_impact_estimate': cost_impact,
+        'claim_strength': 'Strong' if len(critical_affected) > 0 and delay_event['cause'] == 'Owner-initiated design change' else 'Moderate',
+        'recommended_action': 'Submit time extension request with CPM analysis' if len(critical_affected) > 0 else 'Monitor for cumulative impact'
+    }
+
+6. Progress Photo Integration
+Why: Link field photos to schedule activities for progress verification.
+
+def link_photos_to_activities(self, photo_folder: str) -> str:
+    """
+    Match site photos to schedule activities using AI image recognition
+    Requires: PIL, tensorflow/PyTorch for image classification
+    """
+    import os
+    from datetime import datetime
+    
+    # Activity-to-image keyword mapping
+    activity_keywords = {
+        '1000': ['mobilization', 'site office', 'fence'],
+        '2000': ['excavation', 'digging', 'earthwork'],
+        '2020': ['foundation', 'footing', 'concrete'],
+        '3000': ['steel', 'column', 'beam'],
+        '4000': ['wall', 'panel', 'enclosure'],
+        # ... add all activities
+    }
+    
+    matched_photos = {}
+    
+    for filename in os.listdir(photo_folder):
+        if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+            # Extract date from filename or EXIF
+            # Simple keyword matching (replace with AI image recognition for production)
+            for task_id, keywords in activity_keywords.items():
+                if any(kw in filename.lower() for kw in keywords):
+                    if task_id not in matched_photos:
+                        matched_photos[task_id] = []
+                    matched_photos[task_id].append(filename)
+    
+    output = "📸 PROGRESS PHOTO MAPPING\n" + "="*60 + "\n\n"
+    for task_id, photos in matched_photos.items():
+        task = self.tasks[self.tasks['task_id'] == task_id]
+        if not task.empty:
+            output += f"[{task_id}] {task.iloc[0]['task_name']} ({task.iloc[0]['percent_complete']}%)\n"
+            output += f"   📷 Photos: {len(photos)} | Latest: {photos[-1]}\n\n"
+    
+    return output
+
+🥉 Priority 3: Advanced Features
+7. Machine Learning Delay Prediction
+Why: Predict delays before they happen using historical patterns.
+
+def predict_delay_risk(self, historical_data: pd.DataFrame = None) -> pd.DataFrame:
+    """
+    Predict delay risk for upcoming activities using ML
+    Can use: scikit-learn, XGBoost, or simple heuristic model
+    """
+    from sklearn.ensemble import RandomForestClassifier
+    
+    df = self.tasks.copy()
+    
+    # Features for prediction
+    df['days_until_start'] = (df['start_date'] - pd.Timestamp.now()).dt.days
+    df['duration_days'] = (df['end_date'] - df['start_date']).dt.days
+    df['is_outdoor'] = df['task_name'].apply(lambda x: any(kw in x.lower() 
+        for kw in ['excavation', 'concrete', 'steel', 'roofing', 'exterior']))
+    df['has_predecessors'] = df['task_id'].apply(lambda x: 1 if x in self.relationships['succ_task_id'].values else 0)
+    
+    # Simple risk scoring (replace with trained ML model)
+    df['delay_risk_score'] = (
+        (df['critical'].astype(int) * 30) +
+        (df['is_outdoor'].astype(int) * 20) +
+        (df['days_until_start'].apply(lambda x: 10 if x < 7 else (5 if x < 14 else 0))) +
+        (df['has_predecessors'] * 15) +
+        (df['percent_complete'].apply(lambda x: 25 if x == 0 else 0))
+    )
+    
+    df['risk_level'] = df['delay_risk_score'].apply(
+        lambda x: '🔴 HIGH' if x >= 50 else ('🟡 MEDIUM' if x >= 30 else '🟢 LOW')
+    )
+    
+    return df[df['percent_complete'] < 100][['task_id', 'task_name', 'start_date', 'delay_risk_score', 'risk_level']].sort_values('delay_risk_score', ascending=False)
