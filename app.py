@@ -136,11 +136,19 @@ with st.sidebar:
         index=0,
     )
 
-# Lazy-load heavy agents (embedding model) with visible feedback
-if "qa_agent" not in st.session_state or "validator_agent" not in st.session_state:
-    with st.spinner("Loading AI agents (embedding model)... First run may take 1–2 minutes."):
-        st.session_state.qa_agent = QAAgent(use_local_db=True)
-        st.session_state.validator_agent = ValidatorAgent(use_local_db=True)
+def _get_qa_agent():
+    """Lazy-load QAAgent only when needed (avoids Qdrant lock when using Programme Manager)."""
+    if "qa_agent" not in st.session_state or st.session_state.qa_agent is None:
+        with st.spinner("Loading AI agents (embedding model)... First run may take 1–2 minutes."):
+            st.session_state.qa_agent = QAAgent(use_local_db=True)
+    return st.session_state.qa_agent
+
+def _get_validator_agent():
+    """Lazy-load ValidatorAgent only when needed."""
+    if "validator_agent" not in st.session_state or st.session_state.validator_agent is None:
+        with st.spinner("Loading Validator agent..."):
+            st.session_state.validator_agent = ValidatorAgent(use_local_db=True)
+    return st.session_state.validator_agent
 
 if mode == "📚 Knowledge Q&A":
     col_title, col_clear = st.columns([1, 0.15])
@@ -390,16 +398,30 @@ elif mode == "📅 Programme Manager":
     with col2:
         st.write("")
         st.write("")
-        if st.button("Load Demo Data", use_container_width=True):
-            st.session_state.programme_data = XERParser(use_simulated=True)
-            st.session_state.programme_agent = ProgrammeAgent()
-            st.session_state.programme_agent.load_schedule(
-                st.session_state.programme_data.tasks,
-                st.session_state.programme_data.resources,
-                st.session_state.programme_data.relationships
-            )
-            st.session_state.programme_chat_history = []
-            st.rerun()
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            if st.button("Load Demo", use_container_width=True, key="load_demo"):
+                st.session_state.programme_data = XERParser(use_simulated=True)
+                st.session_state.programme_agent = ProgrammeAgent()
+                st.session_state.programme_agent.load_schedule(
+                    st.session_state.programme_data.tasks,
+                    st.session_state.programme_data.resources,
+                    st.session_state.programme_data.relationships
+                )
+                st.session_state.programme_chat_history = []
+                st.rerun()
+        with col_btn2:
+            if st.button("Refresh", use_container_width=True, key="refresh_data"):
+                if st.session_state.programme_data is not None:
+                    st.session_state.programme_data = XERParser(use_simulated=True)
+                    st.session_state.programme_agent = ProgrammeAgent()
+                    st.session_state.programme_agent.load_schedule(
+                        st.session_state.programme_data.tasks,
+                        st.session_state.programme_data.resources,
+                        st.session_state.programme_data.relationships
+                    )
+                    st.session_state.programme_chat_history = []
+                    st.rerun()
 
     if xer_file:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".xer") as tmp:
@@ -432,23 +454,19 @@ elif mode == "📅 Programme Manager":
         col4.metric("Critical Tasks", summary.get("critical_tasks", 0))
         col5.metric("Budget", f"${summary.get('total_budget', 0):,.0f}")
 
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Gantt Chart", "👷 Resources", "💰 Budget", "📈 EVM", "📋 Reports", "💬 Q&A"])
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+            "📊 Gantt Chart", "👷 Resources", "💰 Budget", "📈 EVM",
+            "📉 S-Curve", "📋 Activity Table", "📑 Reports", "💬 Q&A"
+        ])
 
         with tab1:
             chart_gen = ChartGenerator()
 
-            gantt_options = st.radio(
-                "Gantt Chart Style",
-                ["Fixed (Critical Path)", "Enhanced (with Milestones)", "Standard"],
-                horizontal=True
+            # P6 Professional Gantt Chart - Table + Timeline layout
+            gantt_fig = chart_gen.create_gantt_chart_professional(
+                st.session_state.programme_data.tasks,
+                relationships_df=st.session_state.programme_data.relationships
             )
-
-            if gantt_options == "Fixed (Critical Path)":
-                gantt_fig = chart_gen.create_gantt_chart_fixed(st.session_state.programme_data.tasks)
-            elif gantt_options == "Enhanced (with Milestones)":
-                gantt_fig = chart_gen.create_gantt_chart_enhanced(st.session_state.programme_data.tasks)
-            else:
-                gantt_fig = chart_gen.create_gantt_chart(st.session_state.programme_data.tasks)
 
             st.plotly_chart(gantt_fig, use_container_width=True)
 
@@ -476,6 +494,46 @@ elif mode == "📅 Programme Manager":
             st.plotly_chart(evm_trend_fig, use_container_width=True)
 
         with tab5:
+            st.subheader("S-Curve: Planned Value vs Earned Value")
+
+            s_curve_fig = chart_gen.create_s_curve(st.session_state.programme_data.tasks)
+            st.plotly_chart(s_curve_fig, use_container_width=True)
+
+        with tab6:
+            st.subheader("Activity Table")
+
+            tasks_df = st.session_state.programme_data.tasks.copy()
+            tasks_df['start_date'] = pd.to_datetime(tasks_df['start_date']).dt.strftime('%Y-%m-%d')
+            tasks_df['end_date'] = pd.to_datetime(tasks_df['end_date']).dt.strftime('%Y-%m-%d')
+            tasks_df['duration'] = (pd.to_datetime(tasks_df['end_date']) - pd.to_datetime(tasks_df['start_date'])).dt.days
+            tasks_df['critical'] = tasks_df['critical'].apply(lambda x: 'Yes' if x else 'No')
+
+            display_cols = ['task_id', 'task_name', 'start_date', 'end_date', 'duration',
+                            'percent_complete', 'total_float', 'critical']
+            display_df = tasks_df[display_cols].copy()
+            display_df.columns = ['Task ID', 'Task Name', 'Start', 'Finish', 'Duration',
+                                  '% Complete', 'Total Float', 'Critical']
+
+            def highlight_critical(row):
+                return ['background-color: #fee2e2' if row['Critical'] == 'Yes' else '' for _ in row]
+
+            st.dataframe(
+                display_df.style.apply(highlight_critical, axis=1),
+                use_container_width=True,
+                hide_index=True,
+                height=500
+            )
+
+            csv = display_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Export to CSV",
+                data=csv,
+                file_name="programme_activities.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+
+        with tab7:
             st.subheader("Reports")
 
             report_type = st.selectbox(

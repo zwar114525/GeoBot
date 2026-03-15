@@ -1,0 +1,473 @@
+🚀 Quick Start: Standalone Professional Dashboard
+Here's a minimal, drop-in dashboard that works with your existing agent:
+File: professional_dashboard.py
+python
+
+"""
+Professional Dashboard for Construction AI Agent
+Drop-in replacement - just import your existing agent!
+"""
+
+import dash
+from dash import dcc, html, dash_table, Input, Output, State, ctx
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
+from datetime import datetime, timedelta
+import os
+
+# ============================================
+# IMPORT YOUR EXISTING AGENT HERE
+# ============================================
+# Example: from your_existing_module import ConstructionAIAgent, XERParser, ChartGenerator
+
+# For demo, we'll create mock functions - REPLACE THESE with your actual imports
+class MockAgent:
+    def __init__(self):
+        self.tasks = self._load_mock_data()
+    
+    def _load_mock_data(self):
+        """Load your actual XER data here"""
+        # REPLACE THIS with your actual data loading
+        base_date = datetime(2024, 6, 3)
+        data = {
+            'task_id': ['PB1000', 'PB1010', 'PB1020', 'PB1030', 'PB1040', 
+                       'PB1050', 'PB1140', 'PB1110', 'PB1150', 'PB1210'],
+            'task_name': ['Notice to Proceed', 'Project Start', 'Project Management', 
+                         'Project Complete', 'Permits', 'Submit Excavation Plan',
+                         'Safety Management', 'First Working Day', 'Backhoe Excavation',
+                         'Install Tee Fitting'],
+            'start_date': [base_date + timedelta(days=i*3) for i in range(10)],
+            'end_date': [base_date + timedelta(days=i*3+2) for i in range(10)],
+            'duration': [0, 0, 43, 0, 5, 5, 33, 0, 4, 2],
+            'percent_complete': [100, 100, 45, 0, 80, 60, 30, 100, 25, 0],
+            'total_float': [5, 0, 0, 0, 5, 9, 0, 0, 0, 0],
+            'critical': [False, True, True, True, False, False, True, True, True, True],
+            'budget_cost': [0, 0, 50000, 0, 5000, 8000, 45000, 0, 35000, 28000],
+            'resource_crew': ['Management', 'Management', 'Management', 'Management', 
+                             'Submittals', 'Submittals', 'Construction', 'Site Prep',
+                             'Excavation', 'Installation']
+        }
+        return pd.DataFrame(data)
+    
+    def ask_agent(self, question: str) -> str:
+        """Call your existing AI agent"""
+        # REPLACE THIS with your actual agent call
+        # Example: return self.agent.run(question)
+        return f"🤖 AI Response to: '{question}'\n\n(Integrate your agent here)"
+    
+    def get_critical_path(self) -> pd.DataFrame:
+        """Get critical path activities"""
+        return self.tasks[self.tasks['critical'] == True]
+    
+    def get_schedule_summary(self) -> dict:
+        """Get schedule metrics"""
+        return {
+            'total_activities': len(self.tasks),
+            'critical_activities': len(self.get_critical_path()),
+            'overall_progress': self.tasks['percent_complete'].mean(),
+            'total_budget': self.tasks['budget_cost'].sum(),
+            'start_date': self.tasks['start_date'].min(),
+            'end_date': self.tasks['end_date'].max()
+        }
+
+# ============================================
+# DASHBOARD APP
+# ============================================
+
+# Initialize Dash app
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
+app.title = "Construction Programme Dashboard"
+server = app.server  # For production deployment
+
+# Initialize agent
+agent = MockAgent()  # REPLACE with: agent = YourExistingAgent()
+
+# ============================================
+# PROFESSIONAL LAYOUT
+# ============================================
+app.layout = html.Div([
+    # Header
+    html.Div([
+        html.Div([
+            html.H1("🏗️ Construction Programme Dashboard", 
+                   style={'margin': 0, 'color': '#1e40af'}),
+            html.P("Professional Project Management with AI Insights", 
+                   style={'margin': '5px 0 0 0', 'color': '#64748b'})
+        ], style={'display': 'inline-block', 'verticalAlign': 'middle'}),
+        
+        html.Div([
+            html.Button('🔄 Refresh Data', id='refresh-btn', 
+                       style={'padding': '10px 20px', 'marginRight': '10px'}),
+            html.Button('📥 Export Report', id='export-btn',
+                       style={'padding': '10px 20px', 'backgroundColor': '#22c55e', 
+                              'color': 'white', 'border': 'none'})
+        ], style={'display': 'inline-block', 'verticalAlign': 'middle', 'float': 'right'})
+    ], style={'padding': '20px', 'backgroundColor': 'white', 'borderBottom': '2px solid #e2e8f0'}),
+    
+    # Summary Metrics
+    html.Div(id='summary-metrics', style={'padding': '20px'}),
+    
+    # Main Content Tabs
+    html.Div([
+        dcc.Tabs(id='main-tabs', value='gantt', children=[
+            dcc.Tab(label='📊 Gantt Chart', value='gantt', 
+                   style={'padding': '15px 30px'}),
+            dcc.Tab(label='📈 S-Curve', value='scurve',
+                   style={'padding': '15px 30px'}),
+            dcc.Tab(label='👷 Resources', value='resources',
+                   style={'padding': '15px 30px'}),
+            dcc.Tab(label='📋 Activity Table', value='table',
+                   style={'padding': '15px 30px'}),
+            dcc.Tab(label='🤖 AI Assistant', value='ai',
+                   style={'padding': '15px 30px'}),
+        ], style={'marginBottom': '0'})
+    ]),
+    
+    # Tab Content
+    html.Div(id='tab-content', style={'padding': '20px', 'backgroundColor': '#f8fafc', 
+                                     'minHeight': '600px'}),
+    
+    # Hidden div for storing data
+    dcc.Store(id='project-data')
+    
+], style={'fontFamily': 'Arial, sans-serif', 'backgroundColor': '#f1f5f9'})
+
+# ============================================
+# CALLBACKS
+# ============================================
+
+@app.callback(
+    [Output('summary-metrics', 'children'),
+     Output('tab-content', 'children')],
+    [Input('main-tabs', 'value'),
+     Input('refresh-btn', 'n_clicks')]
+)
+def update_dashboard(tab, refresh_clicks):
+    """Update dashboard based on selected tab"""
+    
+    # Get fresh data
+    summary = agent.get_schedule_summary()
+    
+    # Summary metrics cards
+    metrics = html.Div([
+        html.Div([
+            html.H3(f"{summary['total_activities']}", 
+                   style={'margin': 0, 'color': '#3b82f6', 'fontSize': '32px'}),
+            html.P("Total Activities", style={'margin': 0, 'color': '#64748b'})
+        ], style={'display': 'inline-block', 'width': '23%', 'padding': '20px', 
+                 'backgroundColor': 'white', 'borderRadius': '8px', 
+                 'boxShadow': '0 1px 3px rgba(0,0,0,0.1)', 'textAlign': 'center'}),
+        
+        html.Div([
+            html.H3(f"{summary['critical_activities']}", 
+                   style={'margin': 0, 'color': '#dc2626', 'fontSize': '32px'}),
+            html.P("Critical Path", style={'margin': 0, 'color': '#64748b'})
+        ], style={'display': 'inline-block', 'width': '23%', 'padding': '20px', 
+                 'backgroundColor': 'white', 'borderRadius': '8px',
+                 'boxShadow': '0 1px 3px rgba(0,0,0,0.1)', 'textAlign': 'center'}),
+        
+        html.Div([
+            html.H3(f"{summary['overall_progress']:.1f}%", 
+                   style={'margin': 0, 'color': '#22c55e', 'fontSize': '32px'}),
+            html.P("Overall Progress", style={'margin': 0, 'color': '#64748b'})
+        ], style={'display': 'inline-block', 'width': '23%', 'padding': '20px', 
+                 'backgroundColor': 'white', 'borderRadius': '8px',
+                 'boxShadow': '0 1px 3px rgba(0,0,0,0.1)', 'textAlign': 'center'}),
+        
+        html.Div([
+            html.H3(f"${summary['total_budget']/1000:.1f}K", 
+                   style={'margin': 0, 'color': '#f59e0b', 'fontSize': '32px'}),
+            html.P("Total Budget", style={'margin': 0, 'color': '#64748b'})
+        ], style={'display': 'inline-block', 'width': '23%', 'padding': '20px', 
+                 'backgroundColor': 'white', 'borderRadius': '8px',
+                 'boxShadow': '0 1px 3px rgba(0,0,0,0.1)', 'textAlign': 'center'})
+    ])
+    
+    # Tab content
+    if tab == 'gantt':
+        content = create_professional_gantt(agent.tasks)
+    elif tab == 'scurve':
+        content = create_s_curve(agent.tasks)
+    elif tab == 'resources':
+        content = create_resource_chart(agent.tasks)
+    elif tab == 'table':
+        content = create_activity_table(agent.tasks)
+    elif tab == 'ai':
+        content = create_ai_interface()
+    else:
+        content = html.P("Select a tab")
+    
+    return metrics, content
+
+def create_professional_gantt(df):
+    """Create professional Gantt chart matching your image"""
+    
+    # Sort by start date
+    df = df.sort_values('start_date').copy()
+    
+    # Create figure
+    fig = go.Figure()
+    
+    # Non-critical activities (green)
+    non_critical = df[df['critical'] == False]
+    if not non_critical.empty:
+        fig.add_trace(go.Bar(
+            name='Non-Critical',
+            y=non_critical['task_name'],
+            x=(non_critical['end_date'] - non_critical['start_date']).dt.days,
+            base=non_critical['start_date'],
+            orientation='h',
+            marker_color='#22c55e',
+            opacity=0.7
+        ))
+    
+    # Critical activities (red)
+    critical = df[df['critical'] == True]
+    if not critical.empty:
+        fig.add_trace(go.Bar(
+            name='🔴 Critical Path',
+            y=critical['task_name'],
+            x=(critical['end_date'] - critical['start_date']).dt.days,
+            base=critical['start_date'],
+            orientation='h',
+            marker_color='#dc2626',
+            opacity=0.85
+        ))
+    
+    # Progress overlay
+    for _, row in df.iterrows():
+        if row['percent_complete'] > 0:
+            total_days = (row['end_date'] - row['start_date']).days
+            progress_days = total_days * (row['percent_complete'] / 100)
+            fig.add_shape(
+                type="rect",
+                x0=row['start_date'],
+                x1=row['start_date'] + timedelta(days=progress_days),
+                y0=row['task_name'],
+                y1=row['task_name'],
+                fillcolor="#fbbf24",
+                opacity=0.5,
+                layer="above",
+                line_width=0
+            )
+    
+    fig.update_layout(
+        title='Professional Gantt Chart',
+        yaxis=dict(autorange='reversed', title='Activity'),
+        xaxis=dict(title='Date', tickformat='%d-%b'),
+        height=len(df) * 35 + 150,
+        barmode='overlay',
+        showlegend=True,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        hovermode='y unified'
+    )
+    
+    return dcc.Graph(figure=fig, style={'backgroundColor': 'white', 'borderRadius': '8px', 
+                                        'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'})
+
+def create_s_curve(df):
+    """Create S-Curve for progress tracking"""
+    
+    df_sorted = df.sort_values('start_date').copy()
+    df_sorted['cumulative_budget'] = df_sorted['budget_cost'].cumsum()
+    df_sorted['earned_value'] = df_sorted['budget_cost'] * (df_sorted['percent_complete']/100)
+    df_sorted['cumulative_ev'] = df_sorted['earned_value'].cumsum()
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(
+        x=df_sorted['start_date'],
+        y=df_sorted['cumulative_budget'],
+        mode='lines+markers',
+        name='Planned Value (PV)',
+        line=dict(color='#3b82f6', width=3)
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=df_sorted['start_date'],
+        y=df_sorted['cumulative_ev'],
+        mode='lines+markers',
+        name='Earned Value (EV)',
+        line=dict(color='#22c55e', width=3, dash='dot')
+    ))
+    
+    fig.update_layout(
+        title='S-Curve: Planned vs Earned Value',
+        xaxis_title='Date',
+        yaxis_title='Cumulative Cost ($)',
+        height=500,
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
+    
+    return dcc.Graph(figure=fig, style={'backgroundColor': 'white', 'borderRadius': '8px',
+                                        'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'})
+
+def create_resource_chart(df):
+    """Create resource allocation chart"""
+    
+    resource_summary = df.groupby('resource_crew').agg({
+        'task_name': 'count',
+        'budget_cost': 'sum',
+        'percent_complete': 'mean'
+    }).round(1).reset_index()
+    
+    fig = px.bar(
+        resource_summary,
+        x='resource_crew',
+        y='budget_cost',
+        color='percent_complete',
+        title='Resource Allocation by Crew',
+        labels={'resource_crew': 'Crew', 'budget_cost': 'Budget ($)', 
+                'percent_complete': 'Avg Progress (%)'},
+        color_continuous_scale='RdYlGn'
+    )
+    
+    fig.update_layout(
+        height=500,
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
+    
+    return dcc.Graph(figure=fig, style={'backgroundColor': 'white', 'borderRadius': '8px',
+                                        'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'})
+
+def create_activity_table(df):
+    """Create professional activity table"""
+    
+    return dash_table.DataTable(
+        data=df.to_dict('records'),
+        columns=[
+            {'name': 'Activity ID', 'id': 'task_id'},
+            {'name': 'Activity Name', 'id': 'task_name'},
+            {'name': 'Start', 'id': 'start_date', 'type': 'datetime'},
+            {'name': 'Finish', 'id': 'end_date', 'type': 'datetime'},
+            {'name': 'Duration', 'id': 'duration'},
+            {'name': '% Complete', 'id': 'percent_complete'},
+            {'name': 'Total Float', 'id': 'total_float'},
+            {'name': 'Critical', 'id': 'critical'}
+        ],
+        filter_action='native',
+        sort_action='native',
+        page_size=20,
+        style_header={
+            'backgroundColor': '#1e40af',
+            'color': 'white',
+            'fontWeight': 'bold',
+            'textAlign': 'left',
+            'padding': '10px'
+        },
+        style_cell={
+            'textAlign': 'left',
+            'padding': '10px',
+            'fontFamily': 'Arial'
+        },
+        style_data_conditional=[
+            {
+                'if': {'filter_query': '{critical} = True'},
+                'backgroundColor': '#fee2e2',
+                'color': '#991b1b',
+                'fontWeight': 'bold'
+            }
+        ],
+        style_data={'backgroundColor': 'white'}
+    )
+
+def create_ai_interface():
+    """Create AI chat interface"""
+    
+    return html.Div([
+        html.H3("🤖 AI Schedule Assistant", style={'marginBottom': '20px'}),
+        
+        html.Div([
+            dcc.Textarea(
+                id='ai-question-input',
+                placeholder="Ask about your schedule... (e.g., 'What activities are critical?')",
+                style={'width': '100%', 'height': '100px', 'padding': '15px', 
+                       'fontSize': '14px', 'borderRadius': '8px', 'border': '1px solid #cbd5e1'}
+            ),
+            html.Button('Ask AI', id='ai-ask-button', n_clicks=0,
+                       style={'marginTop': '10px', 'padding': '12px 30px', 
+                              'backgroundColor': '#3b82f6', 'color': 'white',
+                              'border': 'none', 'borderRadius': '6px', 
+                              'fontSize': '16px', 'cursor': 'pointer'}),
+            html.Div(id='ai-response-output', 
+                    style={'marginTop': '20px', 'padding': '20px', 
+                           'backgroundColor': '#f8fafc', 'borderRadius': '8px',
+                           'border': '1px solid #e2e8f0', 'minHeight': '100px'})
+        ], style={'maxWidth': '900px', 'margin': '0 auto'})
+    ])
+
+@app.callback(
+    Output('ai-response-output', 'children'),
+    [Input('ai-ask-button', 'n_clicks')],
+    [State('ai-question-input', 'value')]
+)
+def ask_ai_agent(n_clicks, question):
+    """Handle AI agent questions"""
+    if n_clicks == 0 or not question:
+        return ""
+    
+    # Call your existing AI agent
+    response = agent.ask_agent(question)
+    
+    return html.Div([
+        html.P(f"❓ Question: {question}", 
+              style={'fontWeight': 'bold', 'marginBottom': '10px'}),
+        html.P(f"🤖 Response: {response}",
+              style={'whiteSpace': 'pre-wrap', 'lineHeight': '1.6'})
+    ])
+
+# ============================================
+# RUN APP
+# ============================================
+if __name__ == '__main__':
+    print("\n" + "="*70)
+    print("🏗️  Construction Programme Dashboard")
+    print("="*70)
+    print("📊 Access the dashboard at: http://localhost:8050")
+    print("🔄 Press CTRL+C to stop the server")
+    print("="*70 + "\n")
+    
+    app.run_server(debug=True, host='0.0.0.0', port=8050)
+
+📦 Installation & Run
+
+# Install dependencies
+pip install dash plotly pandas
+
+# Run the dashboard
+python professional_dashboard.py
+
+# Access at: http://localhost:8050
+
+🔌 Integration Points - What to Replace
+Look for these comments in the code:
+
+# 1. Import your agent
+from your_existing_module import ConstructionAIAgent
+
+# 2. Initialize your agent
+agent = ConstructionAIAgent(xer_file="your_project.xer")
+
+# 3. Connect your data loading
+def _load_mock_data(self):
+    # Replace with: return agent.get_activities_dataframe()
+    pass
+
+# 4. Connect your AI
+def ask_agent(self, question):
+    # Replace with: return agent.run(question)
+    pass
+
+🎯 What You Get
+✅ Professional Gantt chart with critical path highlighting
+✅ S-Curve for progress tracking
+✅ Resource allocation charts
+✅ Interactive activity table with filtering
+✅ AI chat interface connected to your agent
+✅ Summary metrics cards
+✅ Modern, clean UI matching your P6 image
+✅ Responsive design that works on tablets

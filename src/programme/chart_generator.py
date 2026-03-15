@@ -509,3 +509,252 @@ class ChartGenerator:
         )
 
         return fig
+
+    def create_gantt_chart_professional(self, tasks_df: pd.DataFrame, relationships_df: pd.DataFrame = None) -> go.Figure:
+        """Create P6 style professional Gantt chart with table + timeline layout.
+
+        Left side: Activity ID + Activity Name table
+        Right side: Gantt timeline with critical path, milestones, and progress
+        """
+        import plotly.express as px
+
+        if tasks_df.empty:
+            fig = go.Figure()
+            fig.update_layout(title="No tasks to display")
+            return fig
+
+        df = tasks_df.copy()
+        df = df.sort_values(['wbs', 'start_date'])
+
+        # Convert dates
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['end_date'] = pd.to_datetime(df['end_date'])
+
+        # Calculate duration and identify milestones
+        df['duration_days'] = (df['end_date'] - df['start_date']).dt.days
+        df['is_milestone'] = (df['duration_days'] <= 1) | \
+            ((df['critical'] == True) & (df['duration_days'] <= 5))
+
+        # Critical path status
+        if 'critical' not in df.columns:
+            df['critical'] = df['total_float'].apply(lambda x: True if pd.isna(x) or x <= 0 else False)
+        df['path_status'] = df['critical'].apply(lambda x: 'Critical Path' if x else 'Non-Critical')
+
+        # P6 style colors
+        critical_color_map = {
+            'Critical Path': '#dc2626',
+            'Non-Critical': '#22c55e'
+        }
+
+        # Use Plotly Express Timeline
+        fig = px.timeline(
+            df,
+            x_start="start_date",
+            x_end="end_date",
+            y="task_name",
+            color="path_status",
+            color_discrete_map=critical_color_map,
+            text="task_id",
+            hover_name="task_name",
+            hover_data={
+                "task_id": True,
+                "percent_complete": True,
+                "budget_cost": ":,.0f",
+                "status": True,
+                "total_float": True,
+                "path_status": True
+            }
+        )
+
+        # Update bar appearance
+        fig.update_traces(
+            marker_line_width=0,
+            textposition='inside',
+            insidetextanchor='middle',
+            textfont=dict(color='white', size=9)
+        )
+
+        # Progress bars overlay
+        for idx, row in df.iterrows():
+            if row['percent_complete'] > 0 and row['duration_days'] > 0:
+                progress_pct = row['percent_complete'] / 100
+                progress_end = row['start_date'] + (row['end_date'] - row['start_date']) * progress_pct
+                
+                # Add progress shape
+                fig.add_shape(
+                    type="rect",
+                    x0=row['start_date'],
+                    x1=progress_end,
+                    y0=row['task_name'],
+                    y1=row['task_name'],
+                    fillcolor='#15803d' if not row['critical'] else '#991b1b',
+                    opacity=0.35,
+                    layer="below",
+                    line_width=0,
+                    ysizemode='scaled'
+                )
+
+        # Add milestones as diamonds
+        milestones = df[df['is_milestone']]
+        if not milestones.empty:
+            fig.add_trace(go.Scatter(
+                x=milestones['end_date'],
+                y=milestones['task_name'],
+                mode='markers',
+                name='Milestones',
+                marker=dict(
+                    symbol='diamond',
+                    size=12,
+                    color='black',
+                    line=dict(color='white', width=1)
+                ),
+                hovertemplate='<b>Milestone</b><br>%{y}<br>Date: %{x|%Y-%m-%d}<extra></extra>',
+                showlegend=True
+            ))
+
+        # TODAY line
+        today = pd.Timestamp.now()
+        if df['start_date'].min() <= today <= df['end_date'].max():
+            fig.add_vline(x=today, line_dash="dash", line_color="#059669", line_width=2)
+            fig.add_annotation(
+                x=today, y=1.02, yref="paper",
+                text="TODAY",
+                showarrow=False,
+                font=dict(size=10, color="#059669")
+            )
+
+        # Critical path annotation
+        critical_count = len(df[df['critical'] == True])
+        total_count = len(df)
+        fig.add_annotation(
+            text=f"Critical: {critical_count}/{total_count} ({critical_count/total_count*100:.0f}%)",
+            xref='paper', yref='paper',
+            x=0.01, y=1.02,
+            showarrow=False,
+            font=dict(size=11, color='#dc2626', family='Courier New'),
+            bgcolor='white',
+            bordercolor='#dc2626',
+            borderwidth=1,
+            borderpad=4
+        )
+
+        # Layout
+        fig.update_yaxes(autorange="reversed", title="", gridcolor='#e2e8f0')
+        fig.update_xaxes(
+            title="Date",
+            tickformat='%Y-%m-%d',
+            gridcolor='#e2e8f0'
+        )
+
+        fig.update_layout(
+            title=dict(
+                text="Construction Schedule - P6 Professional Gantt",
+                font=dict(size=16, color='#1e293b')
+            ),
+            height=max(450, len(df) * 28 + 150),
+            showlegend=True,
+            legend_title="Path Status",
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.08,
+                xanchor='center',
+                x=0.5
+            ),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            hovermode="x unified",
+            margin=dict(l=20, r=20, t=80, b=40)
+        )
+
+        return fig
+
+    def create_s_curve(self, tasks_df: pd.DataFrame) -> go.Figure:
+        """Create an S-Curve chart showing Planned Value (PV) and Earned Value (EV) over time.
+
+        PV = cumulative budget cost based on scheduled dates
+        EV = cumulative earned value (budget * %complete/100)
+        """
+        if tasks_df.empty:
+            fig = go.Figure()
+            fig.update_layout(title="No tasks to display")
+            return fig
+
+        df = tasks_df.copy()
+        df['start_date'] = pd.to_datetime(df['start_date'])
+        df['end_date'] = pd.to_datetime(df['end_date'])
+
+        all_dates = pd.date_range(
+            start=df['start_date'].min(),
+            end=df['end_date'].max(),
+            freq='D'
+        )
+
+        pv_series = []
+        ev_series = []
+
+        for date in all_dates:
+            pv = df[df['start_date'] <= date]['budget_cost'].sum()
+            pv_series.append(pv)
+
+            completed = df[df['end_date'] <= date].copy()
+            in_progress = df[(df['start_date'] <= date) & (df['end_date'] > date)].copy()
+
+            ev = 0
+            if not completed.empty:
+                ev += completed['budget_cost'].sum()
+            if not in_progress.empty:
+                ev += (in_progress['budget_cost'] * in_progress['percent_complete'] / 100).sum()
+
+            ev_series.append(ev)
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=all_dates,
+            y=pv_series,
+            mode='lines',
+            name='Planned Value (PV)',
+            line=dict(color='#3b82f6', width=3),
+            hovertemplate='Date: %{x|%Y-%m-%d}<br>Planned Value: $%{y:,.0f}<extra></extra>'
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=all_dates,
+            y=ev_series,
+            mode='lines',
+            name='Earned Value (EV)',
+            line=dict(color='#22c55e', width=3),
+            hovertemplate='Date: %{x|%Y-%m-%d}<br>Earned Value: $%{y:,.0f}<extra></extra>'
+        ))
+
+        fig.update_layout(
+            title=dict(
+                text="S-Curve: Planned Value vs Earned Value",
+                font=dict(size=16, color='#1e293b')
+            ),
+            xaxis=dict(
+                title="Date",
+                tickformat='%Y-%m-%d',
+                gridcolor='#e2e8f0'
+            ),
+            yaxis=dict(
+                title="Value ($)",
+                gridcolor='#e2e8f0',
+                tickformat='$,.0f'
+            ),
+            height=500,
+            showlegend=True,
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='center',
+                x=0.5
+            ),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            hovermode='x unified'
+        )
+
+        return fig
